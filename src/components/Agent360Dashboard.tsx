@@ -900,20 +900,30 @@ const Agent360Dashboard = () => {
                 <div className="mb-4 h-4"></div>
               </div>
               
-              <div className="grid grid-cols-3 gap-3 mb-4">
+              <div className="grid grid-cols-2 gap-3 mb-4">
                 <div className="text-left">
                   <div className="text-xs text-gray-500 mb-1">전월 동기 대비</div>
-                  <div className="font-semibold text-lg text-green-600">
-                    ▲ {Math.abs(myKPI.goalAchievement.vsLastMonth)}%p
+                  <div className={`font-semibold text-lg ${myKPI.goalAchievement.vsLastMonth > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {myKPI.goalAchievement.vsLastMonth > 0 ? '▲ ' : '▼ '}{Math.abs(myKPI.goalAchievement.vsLastMonth)}%p
+                  </div>
+                  <div className={`text-xs ${myKPI.goalAchievement.vsLastMonth > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {myKPI.goalAchievement.vsLastMonth > 0 ? '+' : ''}{formatCurrency((myKPI.goalAchievement.actual * myKPI.goalAchievement.vsLastMonth / 100) * 10000)}
                   </div>
                 </div>
-                <div className="text-center">
-                  <div className="text-xs text-gray-500 mb-1">강남본부 평균</div>
-                  <div className="font-semibold text-lg text-yellow-600">{myKPI.goalAchievement.hqAvg}%</div>
-                </div>
                 <div className="text-right">
-                  <div className="text-xs text-gray-500 mb-1">남은 금액</div>
+                  <div className="text-xs text-gray-500 mb-1">목표까지</div>
                   <div className="font-semibold text-lg text-gray-900">{formatCurrency(myKPI.goalAchievement.gap * 10000)}</div>
+                  <div className="text-xs text-gray-500">
+                    {myKPI.goalAchievement.actual >= myKPI.goalAchievement.target ? '목표 달성!' : '남은 금액'}
+                  </div>
+                </div>
+              </div>
+
+              {/* 강남본부 평균 별도 표시 */}
+              <div className="bg-yellow-50 rounded-lg p-3 mb-4 border border-yellow-100">
+                <div className="text-center">
+                  <div className="text-xs text-yellow-600 font-medium mb-1">강남본부 평균</div>
+                  <div className="text-lg font-bold text-yellow-700">{myKPI.goalAchievement.hqAvg}%</div>
                 </div>
               </div>
 

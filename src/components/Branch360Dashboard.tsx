@@ -1027,10 +1027,16 @@ const Branch360Dashboard = () => {
                   <div className={`font-semibold text-lg ${corePerformance.achievementVsLastMonth > 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {corePerformance.achievementVsLastMonth > 0 ? '▲ ' : '▼ '}{Math.abs(corePerformance.achievementVsLastMonth)}%p
                   </div>
+                  <div className={`text-xs ${corePerformance.achievementVsLastMonth > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {corePerformance.achievementVsLastMonth > 0 ? '+' : ''}{formatCurrency((corePerformance.currentApe * corePerformance.achievementVsLastMonth / 100) * 10000)}
+                  </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-xs text-gray-500 mb-1">남은 금액</div>
+                  <div className="text-xs text-gray-500 mb-1">목표까지</div>
                   <div className="font-semibold text-lg text-gray-900">{formatCurrency(Math.abs(corePerformance.targetApe - corePerformance.currentApe) * 10000)}</div>
+                  <div className="text-xs text-gray-500">
+                    {corePerformance.currentApe >= corePerformance.targetApe ? '목표 달성!' : '남은 금액'}
+                  </div>
                 </div>
               </div>
 
