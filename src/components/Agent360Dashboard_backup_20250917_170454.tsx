@@ -385,7 +385,6 @@ const Agent360Dashboard = () => {
   const [showAllBranchesModal, setShowAllBranchesModal] = useState(false);
   const [modalSortBy, setModalSortBy] = useState('achievement');
   const [modalSortOrder, setModalSortOrder] = useState<'desc' | 'asc'>('desc');
-  const [selectedMonth, setSelectedMonth] = useState('2025-09');
   
   // 지점 순위 데이터
   const getBranchRankings = (getAllData = false) => {
@@ -820,25 +819,9 @@ const Agent360Dashboard = () => {
       <div className="bg-white border-b sticky top-0 z-10">
         <div className="px-6 py-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">통합 인사이트 뷰</h1>
-                <p className="text-xs text-gray-500">강남본부 김영수 지점장 | 2025.09.20(금) - 9/19 마감 데이터 반영 | 9월 영업일: {businessDays.elapsed}일/{businessDays.total}일 (잔여 {businessDays.remaining}일)</p>
-              </div>
-              <div className="ml-4">
-                <select
-                  value={selectedMonth}
-                  onChange={(e) => setSelectedMonth(e.target.value)}
-                  className="px-3 py-1.5 text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="2025-09">2025년 9월</option>
-                  <option value="2025-08">2025년 8월</option>
-                  <option value="2025-07">2025년 7월</option>
-                  <option value="2025-06">2025년 6월</option>
-                  <option value="2025-05">2025년 5월</option>
-                  <option value="2025-04">2025년 4월</option>
-                </select>
-              </div>
+            <div>
+              <h1 className="text-xl font-bold text-gray-900">통합 인사이트 뷰</h1>
+              <p className="text-xs text-gray-500">강남본부 김영수 지점장 | 2025.09.20(금) - 9/19 마감 데이터 반영 | 9월 영업일: {businessDays.elapsed}일/{businessDays.total}일 (잔여 {businessDays.remaining}일)</p>
             </div>
             <button className="flex items-center gap-2 px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700">
               <Download className="w-4 h-4" />

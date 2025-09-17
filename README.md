@@ -1,46 +1,139 @@
-# Getting Started with Create React App
+# Korean Insurance Dashboard
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A comprehensive Korean insurance dashboard built with React and TypeScript, featuring real-time KPI tracking, branch performance analytics, and interactive data visualization.
 
-## Available Scripts
+## 🏢 Features
 
-In the project directory, you can run:
+### Main Dashboard (통합 인사이트 뷰)
+- **KPI Tracking**: Real-time monitoring of goal achievement rates, designer activity, and mobile contract rates
+- **Branch Rankings**: Interactive "우수지점 TOP 5" with detailed modal view
+- **Progress Indicators**: Visual progress bars with expected progress lines
+- **Responsive Design**: Optimized for desktop and mobile viewing
 
-### `npm start`
+### Branch Detail View (지점 360° 상세 뷰)
+- **Detailed Analytics**: Comprehensive branch performance metrics
+- **Goal Achievement**: Progress tracking with expected vs actual performance
+- **Interactive Charts**: Visual representation of performance data
+- **Manager Contribution**: Detailed breakdown of manager and branch contributions
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+### Interactive Features
+- **Sortable Tables**: Click column headers to sort by different criteria
+- **Modal Dialogs**: Detailed view of all 160 branches with filtering
+- **Navigation**: Seamless routing between main dashboard and branch details
+- **Real-time Updates**: Dynamic data calculations and formatting
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## 🚀 Quick Start
 
-### `npm test`
+### Prerequisites
+- Node.js (v14 or higher)
+- npm or yarn
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Installation & Setup
 
-### `npm run build`
+1. **Quick Setup (Recommended)**
+   ```bash
+   ./quick-dashboard-setup.sh
+   ```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+2. **Manual Setup**
+   ```bash
+   npm install
+   npm start
+   ```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+3. **Access the Dashboard**
+   - Main Dashboard: http://localhost:3000
+   - Branch Detail: http://localhost:3000/branch/[branch-name]
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 📋 Available Routes
 
-### `npm run eject`
+| Route | Description | Korean Name |
+|-------|-------------|-------------|
+| `/` | Main Dashboard | 통합 인사이트 뷰 |
+| `/branch/:branchName` | Branch Detail View | 지점 360° 상세 뷰 |
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## 🛠 Technology Stack
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- **Frontend**: React 18, TypeScript
+- **Styling**: Tailwind CSS
+- **Icons**: Lucide React
+- **Routing**: React Router DOM
+- **Charts**: Recharts
+- **Build Tool**: Create React App
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+## 📊 Dashboard Components
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+### Main Dashboard Features
+- **Goal Achievement Tracking** (목표달성률)
+- **Designer Activity Monitoring** (설계사 가동률)
+- **Mobile Contract Rates** (모바일 청약률)
+- **Branch Performance Rankings** (우수지점 TOP 5)
+- **Comprehensive Branch Modal** (전체 지점 현황)
 
-## Learn More
+### Branch Detail Features
+- **Performance Metrics** (실적 현황)
+- **Goal Progress Visualization** (목표 달성 진도)
+- **Manager Contribution Analysis** (지점장 기여도)
+- **Design & Contract Analytics** (설계 & 청약 분석)
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 🎨 UI/UX Features
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- **Clean Design**: Modern, professional interface
+- **Korean Typography**: Optimized for Korean text display
+- **Color Coding**: Intuitive color schemes for different data types
+- **Responsive Layout**: Grid-based responsive design
+- **Interactive Elements**: Hover effects and smooth transitions
+
+## 📈 Data Features
+
+- **Real-time Calculations**: Dynamic percentage and currency formatting
+- **Sorting Capabilities**: Multi-column sorting with visual indicators
+- **Progress Tracking**: Expected vs actual progress visualization
+- **Currency Formatting**: Intelligent Korean currency display (만원, 억원)
+
+## 🔧 Development
+
+### Available Scripts
+
+- `npm start` - Runs the development server at http://localhost:3000
+- `npm test` - Launches the test runner
+- `npm run build` - Builds the app for production
+- `npm run eject` - Ejects from Create React App (one-way operation)
+
+### Project Structure
+```
+src/
+├── components/
+│   ├── Agent360Dashboard.tsx    # Main dashboard component
+│   └── Branch360Dashboard.tsx   # Branch detail component
+├── App.tsx                      # Main app with routing
+└── index.css                    # Global styles with Tailwind
+```
+
+### Key Components
+- **Agent360Dashboard**: Main dashboard with KPI cards and branch rankings
+- **Branch360Dashboard**: Detailed branch view with comprehensive analytics
+- **Interactive Modals**: Full-screen branch data exploration
+- **Progress Bars**: Custom progress indicators with expected progress lines
+
+## 📱 Responsive Design
+
+The dashboard is fully responsive and optimized for:
+- **Desktop**: Full-featured experience with all interactive elements
+- **Tablet**: Adapted layouts with touch-friendly interfaces
+- **Mobile**: Streamlined views with essential information
+
+## 🌟 Key Highlights
+
+- **Korean Business Logic**: Designed specifically for Korean insurance industry
+- **Performance Optimized**: Efficient rendering and state management
+- **User-Friendly**: Intuitive navigation and clear data presentation
+- **Extensible**: Modular component architecture for easy expansion
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## 🤖 Generated with [Claude Code](https://claude.ai/code)
+
+This dashboard was developed with assistance from Claude Code, Anthropic's AI coding assistant.

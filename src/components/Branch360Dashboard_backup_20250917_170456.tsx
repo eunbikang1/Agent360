@@ -158,7 +158,7 @@ const Branch360Dashboard = () => {
   const [selectedMetric, setSelectedMetric] = useState<string>('월 APE');
   const [selectedProductType, setSelectedProductType] = useState<string>('전체');
   const [selectedProduct, setSelectedProduct] = useState<'전체' | '건강' | '종신/정기'>('건강');
-  const [productSortBy, setProductSortBy] = useState<'amount' | 'count'>('amount');
+  const [productSortBy, setProductSortBy] = useState<'ape' | 'contracts'>('ape');
   const [productSortOrder, setProductSortOrder] = useState<'asc' | 'desc'>('desc');
   const [metricsFilter, setMetricsFilter] = useState<'current' | 'average'>('average'); // 고객/계약 특성 필터
   const [dailyMetric, setDailyMetric] = useState<'일 APE' | '청약 건수'>('일 APE'); // 일별 차트 지표
@@ -460,54 +460,10 @@ const Branch360Dashboard = () => {
     setSelectedAgentCategory(category);
     setAgentListModal(true);
   };
-
+  
   const handleAgentClick = (agent: any) => {
     setSelectedAgent(agent);
     setAgentDetailModal(true);
-  };
-
-  // Top 3 상품 목록 가져오기
-  const getTopProducts = () => {
-    const productData = {
-      '전체': {
-        byAmount: [
-          { rank: 1, name: 'THE건강해지는종신보험(기본형)', amount: '42.5억', count: '285건' },
-          { rank: 2, name: '암치료비걱정없는암보험(갱신형)', amount: '28.3억', count: '412건' },
-          { rank: 3, name: 'THE건강해지는건강정기보험', amount: '21.7억', count: '198건' }
-        ],
-        byCount: [
-          { rank: 1, name: '암치료비걱정없는암보험(갱신형)', amount: '28.3억', count: '412건' },
-          { rank: 2, name: 'THE건강해지는종신보험(기본형)', amount: '42.5억', count: '285건' },
-          { rank: 3, name: 'THE건강한치아보험V(갱신형)', amount: '15.2억', count: '256건' }
-        ]
-      },
-      '건강': {
-        byAmount: [
-          { rank: 1, name: '암치료비걱정없는암보험(갱신형)', amount: '28.3억', count: '412건' },
-          { rank: 2, name: 'THE건강한치아보험V(갱신형)', amount: '18.5억', count: '198건' },
-          { rank: 3, name: '골라담간편건강보험Ⅱ(갱신형)', amount: '12.7억', count: '156건' }
-        ],
-        byCount: [
-          { rank: 1, name: '암치료비걱정없는암보험(갱신형)', amount: '28.3억', count: '412건' },
-          { rank: 2, name: 'THE건강한치아보험V(갱신형)', amount: '18.5억', count: '198건' },
-          { rank: 3, name: '선심속치매보험(해약환급금미지급형)', amount: '8.2억', count: '186건' }
-        ]
-      },
-      '종신/정기': {
-        byAmount: [
-          { rank: 1, name: 'THE건강해지는종신보험(기본형)', amount: '42.5억', count: '285건' },
-          { rank: 2, name: 'THE건강해지는건강정기보험', amount: '21.7억', count: '198건' },
-          { rank: 3, name: 'THE채우는종신보험(해약환급금일부지급형)', amount: '15.8억', count: '142건' }
-        ],
-        byCount: [
-          { rank: 1, name: 'THE건강해지는종신보험(기본형)', amount: '42.5억', count: '285건' },
-          { rank: 2, name: 'THE간편고지종신보험(해약환급금미지급형)', amount: '12.3억', count: '215건' },
-          { rank: 3, name: 'THE건강해지는건강정기보험', amount: '21.7억', count: '198건' }
-        ]
-      }
-    };
-
-    return (productData as any)[selectedProduct][productSortBy === 'amount' ? 'byAmount' : 'byCount'];
   };
   
   const handleShowAllAgents = () => {
@@ -582,7 +538,7 @@ const Branch360Dashboard = () => {
     const sorted = [...productsWithData].sort((a, b) => {
       let aValue, bValue;
       
-      if (productSortBy === 'amount') {
+      if (productSortBy === 'ape') {
         aValue = a.ape;
         bValue = b.ape;
       } else {
@@ -1457,9 +1413,37 @@ const Branch360Dashboard = () => {
               </div>
             </div>
 
-            {/* 상품 판매 현황 */}
+            {/* 계약 특성 */}
             <div className="bg-white rounded-lg shadow-sm border p-4">
-              <h3 className="text-sm font-semibold text-gray-700 mb-3">상품 판매 현황</h3>
+              {/* 계약 요약 정보 */}
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-semibold text-gray-700">상품 판매 특성</h3>
+                  <div className="text-xs text-gray-500">*직전 3개월 평균 기준</div>
+                </div>
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="text-center p-4 bg-white rounded-lg shadow-sm border group relative">
+                    <div className="text-2xl font-bold text-blue-600 mb-2">170건</div>
+                    <div className="text-sm text-gray-600">청약 월 건수</div>
+
+                    {/* 툴팁 */}
+                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-black text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                      신규 계약 건수 (월평균)
+                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-black"></div>
+                    </div>
+                  </div>
+                  <div className="text-center p-4 bg-white rounded-lg shadow-sm border group relative">
+                    <div className="text-2xl font-bold text-blue-600 mb-2">3.5만원</div>
+                    <div className="text-sm text-gray-600">평균 월납보험료</div>
+
+                    {/* 툴팁 */}
+                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-black text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                      월납보험료 기준 평균 매출액
+                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-black"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               {/* 주력 상품 */}
               <div className="border-t pt-4">
@@ -1549,65 +1533,102 @@ const Branch360Dashboard = () => {
 
                   <div className="bg-gray-50 rounded-lg p-3">
                     {/* 테이블 헤더 */}
-                    <div className="grid gap-3 pb-2 border-b border-gray-200 mb-3" style={{gridTemplateColumns: '30px 1fr 70px 60px'}}>
-                      <div className="text-xs font-medium text-gray-500">순위</div>
-                      <div className="text-xs font-medium text-gray-500">상품명</div>
-                      <button
-                        onClick={() => setProductSortBy(productSortBy === 'amount' ? 'count' : 'amount')}
-                        className={`text-xs font-medium hover:text-blue-600 transition-colors text-right flex items-center justify-end gap-1 ${
-                          productSortBy === 'amount' ? 'text-blue-600 font-bold' : 'text-gray-900'
-                        }`}
-                      >
-                        APE
-                        {productSortBy === 'amount' && (
-                          <ArrowDown className="w-3 h-3" />
-                        )}
-                      </button>
-                      <button
-                        onClick={() => setProductSortBy(productSortBy === 'count' ? 'amount' : 'count')}
-                        className={`text-xs font-medium hover:text-blue-600 transition-colors text-right flex items-center justify-end gap-1 ${
-                          productSortBy === 'count' ? 'text-blue-600 font-bold' : 'text-gray-900'
-                        }`}
-                      >
-                        건수
-                        {productSortBy === 'count' && (
-                          <ArrowDown className="w-3 h-3" />
-                        )}
-                      </button>
+                    <div className="grid gap-2 text-xs font-medium text-gray-700 pb-2 border-b border-gray-200" style={{gridTemplateColumns: '30px 1fr 80px'}}>
+                      <div>순위</div>
+                      <div>상품명</div>
+                      <div className="text-right group relative cursor-help">
+                        3개월평균 APE
+                        <div className="absolute bottom-full right-0 mb-1 px-2 py-1 bg-black text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                          3개월 평균 연환산보험료
+                        </div>
+                      </div>
                     </div>
 
                     {/* 테이블 내용 */}
-                    <div className="space-y-1">
-                      {getTopProducts().map((product: any, idx: number) => (
-                        <div
-                          key={product.rank}
-                          className="grid gap-3 p-2 hover:bg-blue-50 rounded-lg cursor-pointer transition-all"
-                          style={{gridTemplateColumns: '30px 1fr 70px 60px'}}
-                        >
-                          <div className="flex items-center">
-                            <div className={`w-4 h-4 rounded-full flex items-center justify-center text-xs font-bold ${
-                              idx < 3 ? 'bg-yellow-400 text-yellow-900' : 'bg-gray-200 text-gray-600'
-                            }`}>
-                              {product.rank}
+                    <div className="space-y-1 pt-2">
+                      {selectedProduct === '전체' && (
+                        <>
+                          <div className="grid gap-2 text-xs items-center py-1" style={{gridTemplateColumns: '30px 1fr 80px'}}>
+                            <div className="flex items-center">
+                              <div className="w-5 h-5 bg-yellow-400 text-yellow-900 rounded-full flex items-center justify-center text-xs font-bold">1</div>
                             </div>
+                            <div className="text-gray-700">무배당THE건강한치아보험 V (갱신형)</div>
+                            <div className="text-right text-blue-600 font-medium">42.5억</div>
                           </div>
-                          <div className="flex items-start min-w-0 py-1">
-                            <div className="text-xs font-medium text-gray-900 leading-tight">
-                              {product.name}
+
+                          <div className="grid gap-2 text-xs items-center py-1" style={{gridTemplateColumns: '30px 1fr 80px'}}>
+                            <div className="flex items-center">
+                              <div className="w-5 h-5 bg-yellow-400 text-yellow-900 rounded-full flex items-center justify-center text-xs font-bold">2</div>
                             </div>
+                            <div className="text-gray-700">무배당간고지암치료비걱정없는암보험(갱신형)</div>
+                            <div className="text-right text-blue-600 font-medium">28.3억</div>
                           </div>
-                          <div className="flex items-center justify-end">
-                            <div className={`text-xs ${
-                              productSortBy === 'amount' ? 'text-blue-600 font-bold' : 'text-gray-900'
-                            }`}>{product.amount}</div>
+
+                          <div className="grid gap-2 text-xs items-center py-1" style={{gridTemplateColumns: '30px 1fr 80px'}}>
+                            <div className="flex items-center">
+                              <div className="w-5 h-5 bg-yellow-400 text-yellow-900 rounded-full flex items-center justify-center text-xs font-bold">3</div>
+                            </div>
+                            <div className="text-gray-700">무배당THE건강해지는종신보험(해약환급금미지급형)</div>
+                            <div className="text-right text-blue-600 font-medium">21.7억</div>
                           </div>
-                          <div className="flex items-center justify-end">
-                            <div className={`text-xs ${
-                              productSortBy === 'count' ? 'text-blue-600 font-bold' : 'text-gray-900'
-                            }`}>{product.count}</div>
+                        </>
+                      )}
+
+                      {selectedProduct === '건강' && (
+                        <>
+                          <div className="grid gap-2 text-xs items-center py-1" style={{gridTemplateColumns: '30px 1fr 80px'}}>
+                            <div className="flex items-center">
+                              <div className="w-5 h-5 bg-yellow-400 text-yellow-900 rounded-full flex items-center justify-center text-xs font-bold">1</div>
+                            </div>
+                            <div className="text-gray-700">무배당THE건강한치아보험 V (갱신형)</div>
+                            <div className="text-right text-blue-600 font-medium">28.3억</div>
                           </div>
-                        </div>
-                      ))}
+
+                          <div className="grid gap-2 text-xs items-center py-1" style={{gridTemplateColumns: '30px 1fr 80px'}}>
+                            <div className="flex items-center">
+                              <div className="w-5 h-5 bg-yellow-400 text-yellow-900 rounded-full flex items-center justify-center text-xs font-bold">2</div>
+                            </div>
+                            <div className="text-gray-700">무배당간고지암치료비걱정없는암보험(갱신형)</div>
+                            <div className="text-right text-blue-600 font-medium">18.7억</div>
+                          </div>
+
+                          <div className="grid gap-2 text-xs items-center py-1" style={{gridTemplateColumns: '30px 1fr 80px'}}>
+                            <div className="flex items-center">
+                              <div className="w-5 h-5 bg-yellow-400 text-yellow-900 rounded-full flex items-center justify-center text-xs font-bold">3</div>
+                            </div>
+                            <div className="text-gray-700">무배당골라담간편건강보험Ⅱ(갱신형)</div>
+                            <div className="text-right text-blue-600 font-medium">15.2억</div>
+                          </div>
+                        </>
+                      )}
+
+                      {selectedProduct === '종신/정기' && (
+                        <>
+                          <div className="grid gap-2 text-xs items-center py-1" style={{gridTemplateColumns: '30px 1fr 80px'}}>
+                            <div className="flex items-center">
+                              <div className="w-5 h-5 bg-yellow-400 text-yellow-900 rounded-full flex items-center justify-center text-xs font-bold">1</div>
+                            </div>
+                            <div className="text-gray-700">무배당THE건강해지는종신보험(해약환급금미지급형)</div>
+                            <div className="text-right text-blue-600 font-medium">42.5억</div>
+                          </div>
+
+                          <div className="grid gap-2 text-xs items-center py-1" style={{gridTemplateColumns: '30px 1fr 80px'}}>
+                            <div className="flex items-center">
+                              <div className="w-5 h-5 bg-yellow-400 text-yellow-900 rounded-full flex items-center justify-center text-xs font-bold">2</div>
+                            </div>
+                            <div className="text-gray-700">무배당가족사랑플랜정기보험(갱신형)</div>
+                            <div className="text-right text-blue-600 font-medium">21.7억</div>
+                          </div>
+
+                          <div className="grid gap-2 text-xs items-center py-1" style={{gridTemplateColumns: '30px 1fr 80px'}}>
+                            <div className="flex items-center">
+                              <div className="w-5 h-5 bg-yellow-400 text-yellow-900 rounded-full flex items-center justify-center text-xs font-bold">3</div>
+                            </div>
+                            <div className="text-gray-700">무배당THE간편고지종신보험(해약환급금미지급형)</div>
+                            <div className="text-right text-blue-600 font-medium">16.8억</div>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
