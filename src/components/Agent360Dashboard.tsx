@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, TrendingDown, Users, Trophy, Download, Building, ChevronRight, Target, ArrowUp, ArrowDown, Activity, Award, AlertTriangle, FileSpreadsheet, HelpCircle, X } from 'lucide-react';
+import { Trophy, Download, Building, ChevronRight, ArrowUp, ArrowDown, Activity, AlertTriangle, HelpCircle, X } from 'lucide-react';
 
 const Agent360Dashboard = () => {
   const navigate = useNavigate();
@@ -192,66 +192,8 @@ const Agent360Dashboard = () => {
     }
   };
 
-  // 관리 지점 현황 데이터
-  const organizationMetrics = {
-    activeBranches: {
-      current: 148,
-      total: 150,
-      rate: 98.7,
-      newYesterday: 1,
-      vsLastMonth: 2
-    },
-    activeDesigners: {
-      current: 850,
-      total: 1200,
-      rate: 70.8,
-      newYesterday: 5,
-      vsLastMonth: 20
-    },
-    proposals: {
-      count: 1500,
-      newYesterday: 120
-    },
-    conversionRate: 83.3,
-    contracts: {
-      count: 1250,
-      newYesterday: 80
-    }
-  };
 
-  // 상품 판매 현황
-  const productSales = {
-    portfolio: [
-      { group: '종신보험', name: '저해지 간편고지체', value: 18, color: '#3b82f6' },
-      { group: '종신보험', name: '저해지 표준체', value: 15, color: '#60a5fa' },
-      { group: '종신보험', name: '무해지 간편고지체', value: 22, color: '#93c5fd' },
-      { group: '종신보험', name: '무해지 표준체', value: 20, color: '#bfdbfe' },
-      { group: '정기보험', name: '정기보험', value: 8, color: '#10b981' },
-      { group: '건강보험', name: '치아', value: 5, color: '#f59e0b' },
-      { group: '건강보험', name: '암', value: 7, color: '#fbbf24' },
-      { group: '건강보험', name: '골담', value: 3, color: '#fde68a' },
-      { group: '건강보험', name: '치매', value: 2, color: '#fef3c7' }
-    ],
-    topProducts: {
-      byAmount: [
-        { rank: 1, name: '(무)프리미엄종신보험', amount: '42.5억', count: '285건' },
-        { rank: 2, name: '(무)100세암보험Plus', amount: '28.3억', count: '412건' },
-        { rank: 3, name: '(무)든든한정기보험', amount: '21.7억', count: '198건' }
-      ],
-      byCount: [
-        { rank: 1, name: '(무)100세암보험Plus', amount: '28.3억', count: '412건' },
-        { rank: 2, name: '(무)프리미엄종신보험', amount: '42.5억', count: '285건' },
-        { rank: 3, name: '(무)실손의료비보험', amount: '15.2억', count: '256건' }
-      ]
-    }
-  };
 
-  // 성과 우수 지점
-  const topPerformers = [
-    { rank: 1, branch: '글로벌화이브스타', achievement: 115.2, trend: 'up' },
-    { rank: 2, branch: '하나돔', achievement: 112.8, trend: 'up' },
-    { rank: 3, branch: '리더스에프엔', achievement: 108.5, trend: 'stable' }
-  ];
 
   // 관리 포커스 지점 (위험 신호 & 기회 신호)
   const managementFocus = {
@@ -373,7 +315,6 @@ const Agent360Dashboard = () => {
   };
   
   const [hoveredData, setHoveredData] = useState<any>(null);
-  const [showHqAvgTooltip, setShowHqAvgTooltip] = useState(false);
   const [showExpectedProgressTooltip, setShowExpectedProgressTooltip] = useState(false);
   const [hoveredDayData, setHoveredDayData] = useState<any>(null);
   const [branchSortBy, setBranchSortBy] = useState('achievement');
@@ -381,7 +322,6 @@ const Agent360Dashboard = () => {
   const [showCriteriaTooltip, setShowCriteriaTooltip] = useState(false);
   const [branchPeriod, setBranchPeriod] = useState<'current' | 'previous'>('current');
   const [expandedRecommendations, setExpandedRecommendations] = useState(false);
-  const [expandedBranches, setExpandedBranches] = useState(false);
   const [showAllBranchesModal, setShowAllBranchesModal] = useState(false);
   const [modalSortBy, setModalSortBy] = useState('achievement');
   const [modalSortOrder, setModalSortOrder] = useState<'desc' | 'asc'>('desc');

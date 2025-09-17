@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Building, Users, Phone, MapPin, Calendar, TrendingUp, Activity, ChevronDown, User, Star, Clock, ArrowUp, ArrowDown, Target, Download, UserCheck, AlertCircle, TrendingDown, CheckCircle, XCircle, Award, Gift, DollarSign, Hash, UserMinus, UserPlus, Sparkles, FileText, CalendarDays, Briefcase, Home } from 'lucide-react';
+import { Building, Users, Phone, MapPin, Calendar, TrendingUp, ChevronDown, User, ArrowDown, Download, Briefcase } from 'lucide-react';
 
 const Branch360Dashboard = () => {
   const { agency, branchName } = useParams<{ agency?: string; branchName: string }>();
@@ -68,14 +68,6 @@ const Branch360Dashboard = () => {
     }
   };
 
-  // 현재 날짜 정보 (전일 마감 기준)
-  const currentDate = {
-    date: '2025년 9월 20일 (금)',
-    businessDay: 15,
-    totalBusinessDays: 22,
-    remainingDays: 7,
-    closingDate: '9/19 마감'
-  };
 
   // 핵심 성과 지표 (전일 마감 기준)
   const corePerformance = {
@@ -135,37 +127,18 @@ const Branch360Dashboard = () => {
     { day: 19, apeAmount: 39, contractCount: 3, isWeekend: false, healthRatio: 76, lifeRatio: 24 }
   ];
 
-  // 월별 실적 추이 (최근 12개월) - 툴팁용 상세 데이터 포함
-  const monthlyPerformance = [
-    { month: '9월(24)', ape: 920, dailyAverage: 42, dailyContracts: 2.8 },
-    { month: '10월', ape: 880, dailyAverage: 40, dailyContracts: 2.5 },
-    { month: '11월', ape: 950, dailyAverage: 43, dailyContracts: 3.1 },
-    { month: '12월', ape: 1020, dailyAverage: 46, dailyContracts: 3.4 },
-    { month: '1월(25)', ape: 850, dailyAverage: 39, dailyContracts: 2.6 },
-    { month: '2월', ape: 920, dailyAverage: 42, dailyContracts: 2.9 },
-    { month: '3월', ape: 980, dailyAverage: 45, dailyContracts: 3.2 },
-    { month: '4월', ape: 1050, dailyAverage: 48, dailyContracts: 3.5 },
-    { month: '5월', ape: 1120, dailyAverage: 51, dailyContracts: 3.8 },
-    { month: '6월', ape: 1180, dailyAverage: 54, dailyContracts: 4.1 },
-    { month: '7월', ape: 1250, dailyAverage: 57, dailyContracts: 4.4 },
-    { month: '8월', ape: 1300, dailyAverage: 59, dailyContracts: 4.7 }
-  ].slice(0, -0); // 현재 9월이므로 8월까지만 표시
 
   // 상태 변수들
   const [hoveredMonthData, setHoveredMonthData] = useState<any>(null);
   const [hoveredDayData, setHoveredDayData] = useState<any>(null);
   const [selectedYear, setSelectedYear] = useState<string>('2025');
   const [selectedMetric, setSelectedMetric] = useState<string>('월 APE');
-  const [selectedProductType, setSelectedProductType] = useState<string>('전체');
   const [selectedProduct, setSelectedProduct] = useState<'전체' | '건강' | '종신/정기'>('건강');
   const [productSortBy, setProductSortBy] = useState<'amount' | 'count'>('amount');
-  const [productSortOrder, setProductSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [metricsFilter, setMetricsFilter] = useState<'current' | 'average'>('average'); // 고객/계약 특성 필터
+  const [productSortOrder] = useState<'asc' | 'desc'>('desc');
   const [dailyMetric, setDailyMetric] = useState<'일 APE' | '청약 건수'>('일 APE'); // 일별 차트 지표
   const [hoveredAverage, setHoveredAverage] = useState<{type: 'daily' | 'monthly', value: number} | null>(null); // 평균선 호버
   const [showExpectedProgressTooltip, setShowExpectedProgressTooltip] = useState(false); // 기대진도 툴팁
-  const [expandedHealthCategories, setExpandedHealthCategories] = useState<boolean>(false); // 건강보험 세부 카테고리 펼치기
-  const [expandedLifeCategories, setExpandedLifeCategories] = useState<boolean>(false); // 종신/정기보험 세부 카테고리 펼치기
 
   // 관리 활동 이력 (최근 5개월, 마지막 활동일 포함)
   const managementHistory = [
@@ -620,10 +593,6 @@ const Branch360Dashboard = () => {
     setAgentListModal(true);
   };
 
-  const handleAgentClick = (agent: any) => {
-    setSelectedAgent(agent);
-    setAgentDetailModal(true);
-  };
 
   // Top 3 상품 목록 가져오기
   const getTopProducts = () => {
@@ -699,91 +668,7 @@ const Branch360Dashboard = () => {
     }
   };
 
-  // TOP 3 상품 데이터
-  const getTop3ProductsData = () => {
-    const portfolioData = getPortfolioData();
-    let products: string[] = [];
 
-    if (selectedProduct === '전체') {
-      products = [
-        '무배당THE건강한치아보험 V (갱신형)',
-        '무배당간고지암치료비걱정없는암보험(갱신형)',
-        '무배당THE건강해지는종신보험(해약환급금미지급형)_가입금액형'
-      ];
-    } else if (selectedProduct === '건강') {
-      products = [
-        '무배당THE건강한치아보험 V (갱신형)',
-        '무배당간고지암치료비걱정없는암보험(갱신형)',
-        '무배당골라담간편건강보험Ⅱ(갱신형)'
-      ];
-    } else {
-      products = [
-        '무배당THE건강해지는종신보험(해약환급금미지급형)_가입금액형',
-        '무배당가족사랑플랜정기보험(갱신형)',
-        '무배당THE간편고지종신보험(해약환급금미지급형)_가입금액형'
-      ];
-    }
-
-    // 각 상품에 APE와 건수 데이터 추가
-    const productsWithData = products.map((product, idx) => {
-      const apeAmount = (8500 * (portfolioData[Math.min(idx, portfolioData.length - 1)]?.value || 0) / 100);
-      const contractCount = Math.floor(apeAmount * 10 + Math.random() * 50 + 150);
-      
-      return {
-        name: product,
-        ape: apeAmount,
-        contracts: contractCount,
-        originalIndex: idx
-      };
-    });
-
-    // 정렬 적용
-    const sorted = [...productsWithData].sort((a, b) => {
-      let aValue, bValue;
-      
-      if (productSortBy === 'amount') {
-        aValue = a.ape;
-        bValue = b.ape;
-      } else {
-        aValue = a.contracts;
-        bValue = b.contracts;
-      }
-      
-      if (productSortOrder === 'desc') {
-        return bValue - aValue;
-      } else {
-        return aValue - bValue;
-      }
-    });
-
-    return sorted;
-  };
-
-  // 체결률 데이터 - 상품군 필터에 따라 다른 데이터 반환
-  const getApprovalRateData = () => {
-    if (selectedProduct === '전체') {
-      return {
-        totalApplications: 162, // 전체 청약 건수
-        approved: 95,          // 체결 건수
-        rejected: 67,          // 거절 건수
-        approvalRate: 58.6     // 체결률 (95/162 * 100)
-      };
-    } else if (selectedProduct === '건강') {
-      return {
-        totalApplications: 105, // 건강 상품군 청약 건수 (전체의 65%)
-        approved: 65,          // 체결 건수
-        rejected: 40,          // 거절 건수
-        approvalRate: 61.9     // 체결률 (65/105 * 100)
-      };
-    } else {
-      return {
-        totalApplications: 57,  // 종신/정기 상품군 청약 건수 (전체의 35%)
-        approved: 30,          // 체결 건수
-        rejected: 27,          // 거절 건수
-        approvalRate: 52.6     // 체결률 (30/57 * 100)
-      };
-    }
-  };
 
   // 지점 특성
   const branchProfile = {
@@ -830,47 +715,6 @@ const Branch360Dashboard = () => {
     }
   };
 
-  // 상품별 데이터
-  const productData = {
-    전체: {
-      portfolio: [
-        { name: '건강보험', value: 65, color: '#3b82f6' },
-        { name: '종신/정기', value: 35, color: '#10b981' }
-      ],
-      topProducts: [
-        '라이나생명 다이렉트 건강보험(무배당)',
-        '라이나생명 종신보험Ultra(무배당)',
-        '라이나생명 치아보험V3.0(무배당)'
-      ]
-    },
-    건강: {
-      portfolio: [
-        { name: '치아', value: 45, color: '#3b82f6' },
-        { name: '암', value: 30, color: '#60a5fa' },
-        { name: '골담보', value: 15, color: '#93c5fd' },
-        { name: '치매', value: 10, color: '#bfdbfe' }
-      ],
-      topProducts: [
-        '라이나생명 치아보험V3.0(무배당)',
-        '라이나생명 암보험S(무배당)',
-        '라이나생명 골담보증보험(무배당)'
-      ]
-    },
-    '종신/정기': {
-      portfolio: [
-        { name: '저해지 간편고지체', value: 25, color: '#10b981' },
-        { name: '저해지 표준체', value: 22, color: '#34d399' },
-        { name: '무해지 간편고지체', value: 20, color: '#6ee7b7' },
-        { name: '무해지 표준체', value: 18, color: '#a7f3d0' },
-        { name: '정기보험', value: 15, color: '#d1fae5' }
-      ],
-      topProducts: [
-        '라이나생명 종신보험Ultra(무배당)',
-        '라이나생명 변액종신보험Plus(무배당)',
-        '라이나생명 간편종신보험(무배당)'
-      ]
-    }
-  };
 
   const handleExcelDownload = () => {
     alert('엑셀 다운로드 기능이 실행됩니다.');
