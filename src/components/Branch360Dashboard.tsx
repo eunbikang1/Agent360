@@ -135,7 +135,6 @@ const Branch360Dashboard = () => {
   const [selectedMetric, setSelectedMetric] = useState<string>('월 APE');
   const [selectedProduct, setSelectedProduct] = useState<'전체' | '건강' | '종신/정기'>('건강');
   const [productSortBy, setProductSortBy] = useState<'amount' | 'count'>('amount');
-  const [productSortOrder] = useState<'asc' | 'desc'>('desc');
   const [dailyMetric, setDailyMetric] = useState<'일 APE' | '청약 건수'>('일 APE'); // 일별 차트 지표
   const [hoveredAverage, setHoveredAverage] = useState<{type: 'daily' | 'monthly', value: number} | null>(null); // 평균선 호버
   const [showExpectedProgressTooltip, setShowExpectedProgressTooltip] = useState(false); // 기대진도 툴팁
@@ -182,7 +181,7 @@ const Branch360Dashboard = () => {
   // 설계사 현황 - 당월 가동 현황
   const [selectedAgentCategory, setSelectedAgentCategory] = useState<string | null>(null);
   const [agentListModal, setAgentListModal] = useState(false);
-  const [selectedAgent, setSelectedAgent] = useState<any>(null);
+  const [selectedAgent] = useState<any>(null);
   const [agentDetailModal, setAgentDetailModal] = useState(false);
   const [agentSortBy, setAgentSortBy] = useState('mmp');
   const [agentSortOrder, setAgentSortOrder] = useState<'desc' | 'asc'>('desc');
@@ -643,30 +642,6 @@ const Branch360Dashboard = () => {
     setAgentListModal(true);
   };
 
-  // 동적 상품별 포트폴리오 데이터
-  const getPortfolioData = () => {
-    if (selectedProduct === '전체') {
-      return [
-        { name: '건강보험', value: 65, color: '#3b82f6' },
-        { name: '종신/정기', value: 35, color: '#10b981' }
-      ];
-    } else if (selectedProduct === '건강') {
-      return [
-        { name: '치아', value: 45, color: '#3b82f6' },
-        { name: '암', value: 30, color: '#60a5fa' },
-        { name: '골담보', value: 15, color: '#93c5fd' },
-        { name: '치매', value: 10, color: '#bfdbfe' }
-      ];
-    } else {
-      return [
-        { name: '저해지 간편고지체', value: 25, color: '#10b981' },
-        { name: '저해지 표준체', value: 22, color: '#34d399' },
-        { name: '무해지 간편고지체', value: 20, color: '#6ee7b7' },
-        { name: '무해지 표준체', value: 18, color: '#a7f3d0' },
-        { name: '정기보험', value: 15, color: '#d1fae5' }
-      ];
-    }
-  };
 
 
 
