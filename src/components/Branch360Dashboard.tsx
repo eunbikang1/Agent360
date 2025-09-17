@@ -219,54 +219,21 @@ const Branch360Dashboard = () => {
   const currentAgentStatus = {
     total: 47, // 총 소속 설계사
     active: 35, // 당월 가동 설계사
-    newThisMonth: 3, // 당월 신규 위촉
+    newThisMonth: 2, // 당월 신규 위촉 (새로 입사한 설계사)
     resignedThisMonth: 1, // 당월 해촉
-    netChange: 2, // 순증감
+    netChange: 1, // 순증감 (신규위촉2 - 해촉1)
     continuous6Months: 12, // 6개월 연속 가동
     continuous3Months: 8, // 3개월 연속 가동
     continuous2Months: 5, // 2개월 연속 가동
-    newActive: 6, // 당월 신규 가동
+    newActive: 4, // 당월 신규 가동 (처음 실적 낸 설계사)
     previousActiveNowInactive: 4 // 가동이었는데 지금 무실적
   };
 
-  // TOP 5 설계사 데이터 (당월 기준)
-  const topAgents = [
-    { 
-      name: '김준영', 
-      currentMonth: { premium: 186, contracts: 12, rank: 1 },
-      previousMonth: { premium: 172, contracts: 10, rank: 2 },
-      productMix: { health: 65, life: 35 }
-    },
-    { 
-      name: '이하늘', 
-      currentMonth: { premium: 172, contracts: 9, rank: 2 },
-      previousMonth: { premium: 158, contracts: 8, rank: 3 },
-      productMix: { health: 40, life: 60 }
-    },
-    { 
-      name: '박상호', 
-      currentMonth: { premium: 158, contracts: 11, rank: 3 },
-      previousMonth: { premium: 186, contracts: 13, rank: 1 },
-      productMix: { health: 80, life: 20 }
-    },
-    { 
-      name: '정미선', 
-      currentMonth: { premium: 145, contracts: 8, rank: 4 },
-      previousMonth: { premium: 89, contracts: 5, rank: 7 },
-      productMix: { health: 55, life: 45 }
-    },
-    { 
-      name: '조영수', 
-      currentMonth: { premium: 132, contracts: 10, rank: 5 },
-      previousMonth: { premium: 142, contracts: 9, rank: 4 },
-      productMix: { health: 30, life: 70 }
-    }
-  ];
 
   // 에이전트 리스트 데이터
   const baseAgentLists = {
     continuous6Months: [
-      '김준영', '이하늘', '박상호', '정미선', '조영수', '차서영', '손민준', '김선호', '이지은', '박지수', '정동현', '차민정'
+      '이지은', '김선호', '김준영', '이하늘', '박상호', '정미선', '조영수', '차서영', '손민준', '박지수', '정동현', '차민정'
     ],
     continuous3Months: [
       '김영희', '이수진', '박지영', '정예린', '조은경', '손지원', '김동현', '이민지'
@@ -275,7 +242,10 @@ const Branch360Dashboard = () => {
       '박형준', '김나영', '이성민', '정주영', '조민석'
     ],
     newActive: [
-      '최지후', '김대우', '이예진', '박시원', '정민준', '조상원'
+      '최지후', '김대우', '이예진', '박시원' // 당월 신규 가동 (처음 실적 낸 설계사)
+    ],
+    newCommissioned: [
+      '정민준', '조상원' // 당월 신규 위촉 (새로 입사한 설계사)
     ],
     previousActiveNowInactive: [
       '김영수', '이동희', '박승현', '정대영'
@@ -285,100 +255,288 @@ const Branch360Dashboard = () => {
     ]
   };
 
-  // 전체 47명 설계사 데이터 생성
+  // 전체 47명 설계사 데이터 생성 (완전 고정 데이터)
   const generateAllAgentsData = () => {
-    const allAgents: any[] = [];
-    
-    // 모든 카테고리의 이름들을 수집 (TOP5 제외하고 42명만)
-    const allNames = [
-      ...baseAgentLists.continuous6Months.slice(0, 10), // 10명 - 연속 가동 (TOP5 중 2명 제외)
-      ...baseAgentLists.continuous3Months, // 8명 - 연속 가동  
-      ...baseAgentLists.continuous2Months, // 5명 - 연속 가동
-      ...baseAgentLists.newActive,         // 6명 - 신규 가동 (전월 실적 없음)
-      ...baseAgentLists.previousActiveNowInactive, // 4명 - 전월 가동 → 무실적
-      ...baseAgentLists.inactive.slice(0, 9) // 9명 - 미가동 (12명 중 9명만)
-    ];
-    
-    // TOP5 설계사들 (연속 가동)
-    const enhancedTopAgents = topAgents.map((agent, index) => ({
-      ...agent,
-      agentCode: `AG${String(index + 1).padStart(3, '0')}`, // TOP5용 설계사 코드
-      threeMonthAverage: {
-        premium: Math.floor((agent.currentMonth.premium + agent.previousMonth.premium) * 0.9),
-        contracts: Math.floor((agent.currentMonth.contracts + agent.previousMonth.contracts) / 2)
+    return [
+      // TOP 5 우수 설계사
+      {
+        name: '이지은', agentCode: 'AG001',
+        currentMonth: { premium: 208, contracts: 13, rank: 1 },
+        previousMonth: { premium: 186, contracts: 11, rank: 2 },
+        threeMonthAverage: { premium: 195, contracts: 12 },
+        productMix: { health: 70, life: 30 }, isActive: true
       },
-      isActive: true
-    }));
-    
-    // baseAgentLists의 각 설계사에 대해 데이터 생성
-    allNames.forEach((name, index) => {
-      const basePremium = Math.max(50, 200 - (index * 2) + (Math.random() * 20 - 10));
-      const baseContracts = Math.max(1, 12 - Math.floor(index * 0.1) + Math.floor(Math.random() * 4 - 2));
-      const healthRatio = Math.floor(Math.random() * 80) + 20;
-      
-      // 카테고리별 상태 설정
-      let isActive = false;
-      let currentMonthData = { premium: 0, contracts: 0, rank: null };
-      let previousMonthData = { premium: 0, contracts: 0, rank: null };
-      
-      if (baseAgentLists.continuous6Months.includes(name) || 
-          baseAgentLists.continuous3Months.includes(name) || 
-          baseAgentLists.continuous2Months.includes(name)) {
-        // 연속 가동 설계사: 당월과 전월 모두 실적 있음
-        isActive = true;
-        currentMonthData = {
-          premium: Math.floor(basePremium),
-          contracts: baseContracts,
-          rank: index + 6 as any
-        };
-        previousMonthData = {
-          premium: Math.floor(basePremium * (0.8 + Math.random() * 0.4)),
-          contracts: Math.max(1, baseContracts + Math.floor(Math.random() * 4 - 2)),
-          rank: index + 6 as any + Math.floor(Math.random() * 10 - 5)
-        };
-      } else if (baseAgentLists.newActive.includes(name)) {
-        // 신규 가동: 당월만 실적 있음, 전월은 0
-        isActive = true;
-        currentMonthData = {
-          premium: Math.floor(basePremium),
-          contracts: baseContracts,
-          rank: index + 6 as any
-        };
-        previousMonthData = { premium: 0, contracts: 0, rank: null };
-      } else if (baseAgentLists.previousActiveNowInactive.includes(name)) {
-        // 전월 가동 → 무실적: 전월만 실적 있음, 당월은 0
-        isActive = false;
-        currentMonthData = { premium: 0, contracts: 0, rank: null };
-        previousMonthData = {
-          premium: Math.floor(basePremium * (0.8 + Math.random() * 0.4)),
-          contracts: Math.max(1, baseContracts + Math.floor(Math.random() * 4 - 2)),
-          rank: index + 6 as any + Math.floor(Math.random() * 10 - 5)
-        };
-      } else {
-        // 미가동: 당월, 전월 모두 실적 없음
-        isActive = false;
-        currentMonthData = { premium: 0, contracts: 0, rank: null };
-        previousMonthData = { premium: 0, contracts: 0, rank: null };
-      }
-      
-      allAgents.push({
-        name,
-        agentCode: `AG${String(index + 6).padStart(3, '0')}`, // 설계사 코드 추가 (TOP5 다음부터)
-        currentMonth: currentMonthData,
-        previousMonth: previousMonthData,
-        threeMonthAverage: {
-          premium: Math.floor((currentMonthData.premium + previousMonthData.premium) * 0.5),
-          contracts: Math.max(0, Math.floor((currentMonthData.contracts + previousMonthData.contracts) / 2))
-        },
-        productMix: { health: healthRatio, life: 100 - healthRatio },
-        isActive
-      });
-    });
-    
-    return [...enhancedTopAgents, ...allAgents];
+      {
+        name: '김선호', agentCode: 'AG002',
+        currentMonth: { premium: 186, contracts: 12, rank: 2 },
+        previousMonth: { premium: 192, contracts: 13, rank: 1 },
+        threeMonthAverage: { premium: 189, contracts: 12 },
+        productMix: { health: 55, life: 45 }, isActive: true
+      },
+      {
+        name: '김준영', agentCode: 'AG003',
+        currentMonth: { premium: 172, contracts: 11, rank: 3 },
+        previousMonth: { premium: 164, contracts: 10, rank: 3 },
+        threeMonthAverage: { premium: 168, contracts: 10 },
+        productMix: { health: 65, life: 35 }, isActive: true
+      },
+      {
+        name: '이하늘', agentCode: 'AG004',
+        currentMonth: { premium: 158, contracts: 9, rank: 4 },
+        previousMonth: { premium: 152, contracts: 8, rank: 4 },
+        threeMonthAverage: { premium: 155, contracts: 8 },
+        productMix: { health: 40, life: 60 }, isActive: true
+      },
+      {
+        name: '박상호', agentCode: 'AG005',
+        currentMonth: { premium: 145, contracts: 10, rank: 5 },
+        previousMonth: { premium: 139, contracts: 9, rank: 5 },
+        threeMonthAverage: { premium: 142, contracts: 9 },
+        productMix: { health: 80, life: 20 }, isActive: true
+      },
+
+      // 6-12위: 연속 가동 설계사
+      {
+        name: '정미선', agentCode: 'AG006',
+        currentMonth: { premium: 132, contracts: 8, rank: 6 },
+        previousMonth: { premium: 125, contracts: 7, rank: 6 },
+        threeMonthAverage: { premium: 128, contracts: 7 },
+        productMix: { health: 55, life: 45 }, isActive: true
+      },
+      {
+        name: '조영수', agentCode: 'AG007',
+        currentMonth: { premium: 118, contracts: 7, rank: 7 },
+        previousMonth: { premium: 114, contracts: 6, rank: 7 },
+        threeMonthAverage: { premium: 116, contracts: 6 },
+        productMix: { health: 75, life: 25 }, isActive: true
+      },
+      {
+        name: '차서영', agentCode: 'AG008',
+        currentMonth: { premium: 105, contracts: 6, rank: 8 },
+        previousMonth: { premium: 98, contracts: 5, rank: 8 },
+        threeMonthAverage: { premium: 101, contracts: 5 },
+        productMix: { health: 60, life: 40 }, isActive: true
+      },
+      {
+        name: '손민준', agentCode: 'AG009',
+        currentMonth: { premium: 92, contracts: 5, rank: 9 },
+        previousMonth: { premium: 87, contracts: 4, rank: 9 },
+        threeMonthAverage: { premium: 89, contracts: 4 },
+        productMix: { health: 45, life: 55 }, isActive: true
+      },
+      {
+        name: '박지수', agentCode: 'AG010',
+        currentMonth: { premium: 84, contracts: 4, rank: 10 },
+        previousMonth: { premium: 79, contracts: 3, rank: 10 },
+        threeMonthAverage: { premium: 81, contracts: 3 },
+        productMix: { health: 85, life: 15 }, isActive: true
+      },
+      {
+        name: '정동현', agentCode: 'AG011',
+        currentMonth: { premium: 76, contracts: 3, rank: 11 },
+        previousMonth: { premium: 72, contracts: 2, rank: 11 },
+        threeMonthAverage: { premium: 74, contracts: 2 },
+        productMix: { health: 50, life: 50 }, isActive: true
+      },
+      {
+        name: '차민정', agentCode: 'AG012',
+        currentMonth: { premium: 68, contracts: 2, rank: 12 },
+        previousMonth: { premium: 65, contracts: 2, rank: 12 },
+        threeMonthAverage: { premium: 66, contracts: 2 },
+        productMix: { health: 70, life: 30 }, isActive: true
+      },
+
+      // 13-20위: 연속 가동 설계사 (3개월)
+      {
+        name: '김영희', agentCode: 'AG013',
+        currentMonth: { premium: 61, contracts: 2, rank: 13 },
+        previousMonth: { premium: 58, contracts: 1, rank: 13 },
+        threeMonthAverage: { premium: 59, contracts: 1 },
+        productMix: { health: 65, life: 35 }, isActive: true
+      },
+      {
+        name: '이수진', agentCode: 'AG014',
+        currentMonth: { premium: 54, contracts: 1, rank: 14 },
+        previousMonth: { premium: 52, contracts: 1, rank: 14 },
+        threeMonthAverage: { premium: 53, contracts: 1 },
+        productMix: { health: 55, life: 45 }, isActive: true
+      },
+      {
+        name: '박지영', agentCode: 'AG015',
+        currentMonth: { premium: 48, contracts: 1, rank: 15 },
+        previousMonth: { premium: 45, contracts: 1, rank: 15 },
+        threeMonthAverage: { premium: 46, contracts: 1 },
+        productMix: { health: 80, life: 20 }, isActive: true
+      },
+      {
+        name: '정예린', agentCode: 'AG016',
+        currentMonth: { premium: 42, contracts: 1, rank: 16 },
+        previousMonth: { premium: 39, contracts: 1, rank: 16 },
+        threeMonthAverage: { premium: 40, contracts: 1 },
+        productMix: { health: 40, life: 60 }, isActive: true
+      },
+      {
+        name: '조은경', agentCode: 'AG017',
+        currentMonth: { premium: 36, contracts: 1, rank: 17 },
+        previousMonth: { premium: 34, contracts: 1, rank: 17 },
+        threeMonthAverage: { premium: 35, contracts: 1 },
+        productMix: { health: 75, life: 25 }, isActive: true
+      },
+      {
+        name: '손지원', agentCode: 'AG018',
+        currentMonth: { premium: 31, contracts: 1, rank: 18 },
+        previousMonth: { premium: 28, contracts: 1, rank: 18 },
+        threeMonthAverage: { premium: 29, contracts: 1 },
+        productMix: { health: 60, life: 40 }, isActive: true
+      },
+      {
+        name: '김동현', agentCode: 'AG019',
+        currentMonth: { premium: 26, contracts: 1, rank: 19 },
+        previousMonth: { premium: 24, contracts: 1, rank: 19 },
+        threeMonthAverage: { premium: 25, contracts: 1 },
+        productMix: { health: 50, life: 50 }, isActive: true
+      },
+      {
+        name: '이민지', agentCode: 'AG020',
+        currentMonth: { premium: 22, contracts: 1, rank: 20 },
+        previousMonth: { premium: 20, contracts: 1, rank: 20 },
+        threeMonthAverage: { premium: 21, contracts: 1 },
+        productMix: { health: 85, life: 15 }, isActive: true
+      },
+
+      // 21-25위: 연속 가동 설계사 (2개월)
+      {
+        name: '박형준', agentCode: 'AG021',
+        currentMonth: { premium: 18, contracts: 1, rank: 21 },
+        previousMonth: { premium: 16, contracts: 1, rank: 21 },
+        threeMonthAverage: { premium: 17, contracts: 1 },
+        productMix: { health: 45, life: 55 }, isActive: true
+      },
+      {
+        name: '김나영', agentCode: 'AG022',
+        currentMonth: { premium: 15, contracts: 1, rank: 22 },
+        previousMonth: { premium: 13, contracts: 1, rank: 22 },
+        threeMonthAverage: { premium: 14, contracts: 1 },
+        productMix: { health: 70, life: 30 }, isActive: true
+      },
+      {
+        name: '이성민', agentCode: 'AG023',
+        currentMonth: { premium: 12, contracts: 1, rank: 23 },
+        previousMonth: { premium: 10, contracts: 1, rank: 23 },
+        threeMonthAverage: { premium: 11, contracts: 1 },
+        productMix: { health: 55, life: 45 }, isActive: true
+      },
+      {
+        name: '정주영', agentCode: 'AG024',
+        currentMonth: { premium: 9, contracts: 1, rank: 24 },
+        previousMonth: { premium: 8, contracts: 1, rank: 24 },
+        threeMonthAverage: { premium: 8, contracts: 1 },
+        productMix: { health: 80, life: 20 }, isActive: true
+      },
+      {
+        name: '조민석', agentCode: 'AG025',
+        currentMonth: { premium: 7, contracts: 1, rank: 25 },
+        previousMonth: { premium: 6, contracts: 1, rank: 25 },
+        threeMonthAverage: { premium: 6, contracts: 1 },
+        productMix: { health: 65, life: 35 }, isActive: true
+      },
+
+      // 26-29위: 신규 가동 (당월 처음 실적)
+      {
+        name: '최지후', agentCode: 'AG026',
+        currentMonth: { premium: 5, contracts: 1, rank: 26 },
+        previousMonth: { premium: 0, contracts: 0, rank: null },
+        threeMonthAverage: { premium: 2, contracts: 0 },
+        productMix: { health: 40, life: 60 }, isActive: true
+      },
+      {
+        name: '김대우', agentCode: 'AG027',
+        currentMonth: { premium: 4, contracts: 1, rank: 27 },
+        previousMonth: { premium: 0, contracts: 0, rank: null },
+        threeMonthAverage: { premium: 2, contracts: 0 },
+        productMix: { health: 75, life: 25 }, isActive: true
+      },
+      {
+        name: '이예진', agentCode: 'AG028',
+        currentMonth: { premium: 3, contracts: 1, rank: 28 },
+        previousMonth: { premium: 0, contracts: 0, rank: null },
+        threeMonthAverage: { premium: 1, contracts: 0 },
+        productMix: { health: 60, life: 40 }, isActive: true
+      },
+      {
+        name: '박시원', agentCode: 'AG029',
+        currentMonth: { premium: 2, contracts: 1, rank: 29 },
+        previousMonth: { premium: 0, contracts: 0, rank: null },
+        threeMonthAverage: { premium: 1, contracts: 0 },
+        productMix: { health: 50, life: 50 }, isActive: true
+      },
+
+      // 30-31위: 신규 위촉 (당월 입사, 실적 있음)
+      {
+        name: '정민준', agentCode: 'AG030',
+        currentMonth: { premium: 1, contracts: 1, rank: 30 },
+        previousMonth: { premium: 0, contracts: 0, rank: null },
+        threeMonthAverage: { premium: 0, contracts: 0 },
+        productMix: { health: 85, life: 15 }, isActive: true
+      },
+      {
+        name: '조상원', agentCode: 'AG031',
+        currentMonth: { premium: 1, contracts: 1, rank: 31 },
+        previousMonth: { premium: 0, contracts: 0, rank: null },
+        threeMonthAverage: { premium: 0, contracts: 0 },
+        productMix: { health: 45, life: 55 }, isActive: true
+      },
+
+      // 32-35위: 전월 가동 → 무실적
+      {
+        name: '윤서연', agentCode: 'AG032',
+        currentMonth: { premium: 0, contracts: 0, rank: null },
+        previousMonth: { premium: 45, contracts: 2, rank: 15 },
+        threeMonthAverage: { premium: 22, contracts: 1 },
+        productMix: { health: 70, life: 30 }, isActive: false
+      },
+      {
+        name: '장민호', agentCode: 'AG033',
+        currentMonth: { premium: 0, contracts: 0, rank: null },
+        previousMonth: { premium: 38, contracts: 2, rank: 18 },
+        threeMonthAverage: { premium: 19, contracts: 1 },
+        productMix: { health: 55, life: 45 }, isActive: false
+      },
+      {
+        name: '강예슬', agentCode: 'AG034',
+        currentMonth: { premium: 0, contracts: 0, rank: null },
+        previousMonth: { premium: 32, contracts: 1, rank: 20 },
+        threeMonthAverage: { premium: 16, contracts: 0 },
+        productMix: { health: 80, life: 20 }, isActive: false
+      },
+      {
+        name: '오준혁', agentCode: 'AG035',
+        currentMonth: { premium: 0, contracts: 0, rank: null },
+        previousMonth: { premium: 28, contracts: 1, rank: 22 },
+        threeMonthAverage: { premium: 14, contracts: 0 },
+        productMix: { health: 40, life: 60 }, isActive: false
+      },
+
+      // 36-47위: 미가동 설계사
+      { name: '김스우', agentCode: 'AG036', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 75, life: 25 }, isActive: false },
+      { name: '이지인', agentCode: 'AG037', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 60, life: 40 }, isActive: false },
+      { name: '박성민', agentCode: 'AG038', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 50, life: 50 }, isActive: false },
+      { name: '정선영', agentCode: 'AG039', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 85, life: 15 }, isActive: false },
+      { name: '조지우', agentCode: 'AG040', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 45, life: 55 }, isActive: false },
+      { name: '차예린', agentCode: 'AG041', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 70, life: 30 }, isActive: false },
+      { name: '손이상', agentCode: 'AG042', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 55, life: 45 }, isActive: false },
+      { name: '김은영', agentCode: 'AG043', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 80, life: 20 }, isActive: false },
+      { name: '이승찬', agentCode: 'AG044', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 40, life: 60 }, isActive: false },
+      { name: '박서우', agentCode: 'AG045', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 75, life: 25 }, isActive: false },
+      { name: '정민규', agentCode: 'AG046', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 60, life: 40 }, isActive: false },
+      { name: '조예림', agentCode: 'AG047', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 50, life: 50 }, isActive: false }
+    ];
   };
 
   const allAgentsData = generateAllAgentsData();
+
+  // TOP 5 설계사는 allAgentsData에서 상위 5명을 가져옴
+  const topAgents = allAgentsData.slice(0, 5);
 
   // 설계사 정렬 함수
   const getSortedAgents = (useAllData = false) => {
@@ -441,9 +599,10 @@ const Branch360Dashboard = () => {
   
   const allAgentsList: string[] = [
     ...baseAgentLists.continuous6Months,
-    ...baseAgentLists.continuous3Months, 
+    ...baseAgentLists.continuous3Months,
     ...baseAgentLists.continuous2Months,
     ...baseAgentLists.newActive,
+    ...baseAgentLists.newCommissioned,
     '김상훈', '이지연', '박수진', '정민서', '조혜진', '차예진', '손원준', '김동규',
     '이선미', '박재훈', '정수경', '조민준', '차성훈', '손지후', '김예린', '이대하'
   ];
@@ -1395,7 +1554,7 @@ const Branch360Dashboard = () => {
               </h2>
 
               <div className="bg-white rounded-lg shadow-sm border p-4 space-y-3">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">기본정보</h3>
+                <h3 className="text-sm font-semibold text-gray-700 mb-3">기본 정보</h3>
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div className="flex items-center">
                     <MapPin className="w-4 h-4 text-gray-500 mr-2" />
@@ -1459,11 +1618,11 @@ const Branch360Dashboard = () => {
 
             {/* 상품 판매 현황 */}
             <div className="bg-white rounded-lg shadow-sm border p-4">
-              <h3 className="text-sm font-semibold text-gray-700 mb-3">상품 판매 현황</h3>
+              <h3 className="text-sm font-semibold text-gray-700 mb-3">상품 판매 특성</h3>
 
               {/* 주력 상품 */}
               <div className="border-t pt-4">
-                <h4 className="text-xs font-medium text-gray-600 mb-4 uppercase tracking-wide">상품별 매출 비중</h4>
+                <h4 className="text-xs font-medium text-gray-600 mb-4 uppercase tracking-wide">매출 비중</h4>
 
                 {/* 상품 비중 바 차트 */}
                 <div className="mb-6">
@@ -1627,7 +1786,15 @@ const Branch360Dashboard = () => {
 
             {/* 전체 위촉 설계사 */}
             <div className="bg-white rounded-lg shadow-sm border p-4">
-              <h3 className="text-sm font-semibold text-gray-700 mb-4">전체 위촉 설계사</h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-semibold text-gray-700">전체 위촉 설계사</h3>
+                <button
+                  onClick={() => handleShowAllAgents()}
+                  className="text-xs text-gray-500 hover:text-gray-700 font-medium"
+                >
+                  전체보기 {'>'}
+                </button>
+              </div>
               
               <div className="text-center mb-4">
                 <div className="text-3xl font-bold text-blue-600">{currentAgentStatus.total}<span className="text-base text-gray-500">명</span></div>
@@ -1885,63 +2052,184 @@ const Branch360Dashboard = () => {
             <div className="flex-1 overflow-y-auto">
               {/* 테이블 헤더 */}
               <div className="bg-gray-100 rounded-t-lg border-b">
-                <div className="grid grid-cols-4 gap-4 p-3 text-xs font-semibold text-gray-700">
+                <div className="grid grid-cols-5 gap-3 p-3 text-xs font-semibold text-gray-700">
                   <div>설계사 코드</div>
                   <div>이름</div>
-                  <div>당월 MMP</div>
-                  <div>전월 MMP</div>
+                  <button
+                    onClick={() => {
+                      if (agentSortBy === 'commission') {
+                        setAgentSortOrder(agentSortOrder === 'desc' ? 'asc' : 'desc');
+                      } else {
+                        setAgentSortBy('commission');
+                        setAgentSortOrder('desc');
+                      }
+                    }}
+                    className="text-left hover:text-blue-600 transition-colors"
+                  >
+                    위촉 월차 {agentSortBy === 'commission' && (agentSortOrder === 'desc' ? '↓' : '↑')}
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (agentSortBy === 'currentMMP') {
+                        setAgentSortOrder(agentSortOrder === 'desc' ? 'asc' : 'desc');
+                      } else {
+                        setAgentSortBy('currentMMP');
+                        setAgentSortOrder('desc');
+                      }
+                    }}
+                    className="text-left hover:text-blue-600 transition-colors"
+                  >
+                    당월 MMP {agentSortBy === 'currentMMP' && (agentSortOrder === 'desc' ? '↓' : '↑')}
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (agentSortBy === 'previousMMP') {
+                        setAgentSortOrder(agentSortOrder === 'desc' ? 'asc' : 'desc');
+                      } else {
+                        setAgentSortBy('previousMMP');
+                        setAgentSortOrder('desc');
+                      }
+                    }}
+                    className="text-left hover:text-blue-600 transition-colors"
+                  >
+                    전월 MMP {agentSortBy === 'previousMMP' && (agentSortOrder === 'desc' ? '↓' : '↑')}
+                  </button>
                 </div>
               </div>
               
               {/* 테이블 내용 */}
               <div className="space-y-0">
-                {selectedAgentCategory && getAgentList(selectedAgentCategory).map((agentName: string, idx: number) => {
-                  // 임시 데이터 생성 (실제로는 API에서 가져와야 함)
-                  const agentCode = `AG${String(idx + 1).padStart(3, '0')}`;
-                  const currentMMP = selectedAgentCategory === 'previousActiveNowInactive' 
-                    ? 0 // 전월 가동 -> 무실적이면 당월은 0
-                    : Math.floor(Math.random() * 100) + 10; // 10-110 범위
-                  
-                  const previousMMP = selectedAgentCategory === 'newActive' 
-                    ? null // 당월 신규 가동이면 전월 실적 없음
-                    : selectedAgentCategory === 'previousActiveNowInactive'
-                    ? Math.floor(Math.random() * 80) + 20 // 전월에는 실적이 있었음
-                    : Math.floor(Math.random() * 100) + 10; // 10-110 범위
-                  
-                  return (
-                    <div key={idx} className={`border-b hover:bg-gray-50 transition-colors ${
-                      selectedAgentCategory === 'previousActiveNowInactive' 
-                        ? 'bg-red-50' 
-                        : selectedAgentCategory === 'inactive'
-                        ? 'bg-gray-100'
-                        : 'bg-white'
-                    }`}>
-                      <div className="grid grid-cols-4 gap-4 p-3 text-sm">
-                        <div className="font-mono text-gray-600">{agentCode}</div>
-                        <div className="font-medium">{agentName}</div>
-                        <div className="text-right">
-                          {currentMMP === 0 ? (
-                            <span className="text-gray-400">-</span>
-                          ) : (
-                            <span className="font-medium">{currentMMP}만원</span>
-                          )}
-                        </div>
-                        <div className="text-right text-gray-600">
-                          {previousMMP === null ? (
-                            <span className="text-gray-400">-</span>
-                          ) : (
-                            <span>{previousMMP}만원</span>
-                          )}
+                {selectedAgentCategory && (() => {
+                  let agentData;
+
+                  if (selectedAgentCategory === 'allAgents') {
+                    // 전체 설계사인 경우 getSortedAgents(true) 사용
+                    agentData = getSortedAgents(true).map((agent, idx) => {
+                      // 위촉 월차 계산
+                      const commissionMonths = baseAgentLists.newCommissioned.includes(agent.name)
+                        ? 1 // 신규 위촉은 1개월차
+                        : baseAgentLists.newActive.includes(agent.name)
+                        ? Math.floor(Math.random() * 12) + 3 // 신규 가동은 3-14개월차 (기존 설계사가 처음 실적)
+                        : Math.floor(Math.random() * 120) + 1; // 나머지는 1-120개월차
+
+                      return {
+                        name: agent.name,
+                        code: agent.agentCode,
+                        currentMMP: agent.currentMonth.premium,
+                        previousMMP: agent.previousMonth.premium,
+                        commissionMonths,
+                        isActive: agent.isActive,
+                        originalIndex: idx
+                      };
+                    });
+                  } else {
+                    // 특정 카테고리인 경우 기존 로직 사용
+                    agentData = getAgentList(selectedAgentCategory).map((agentName: string, idx: number) => {
+                      const agentCode = `AG${String(idx + 1).padStart(3, '0')}`;
+                      const currentMMP = selectedAgentCategory === 'previousActiveNowInactive'
+                        ? 0
+                        : Math.floor(Math.random() * 100) + 10;
+                      const previousMMP = selectedAgentCategory === 'newActive'
+                        ? 0
+                        : selectedAgentCategory === 'previousActiveNowInactive'
+                        ? Math.floor(Math.random() * 80) + 20
+                        : Math.floor(Math.random() * 100) + 10;
+                      const commissionMonths = baseAgentLists.newCommissioned.includes(agentName)
+                        ? 1 // 신규 위촉은 1개월차
+                        : baseAgentLists.newActive.includes(agentName)
+                        ? Math.floor(Math.random() * 12) + 3 // 신규 가동은 3-14개월차
+                        : Math.floor(Math.random() * 120) + 1;
+
+                      return {
+                        name: agentName,
+                        code: agentCode,
+                        currentMMP,
+                        previousMMP,
+                        commissionMonths,
+                        isActive: selectedAgentCategory !== 'inactive' && selectedAgentCategory !== 'previousActiveNowInactive',
+                        originalIndex: idx
+                      };
+                    });
+                  }
+
+                  // 정렬 적용
+                  const sortedData = [...agentData].sort((a, b) => {
+                    let aValue: number, bValue: number;
+
+                    switch (agentSortBy) {
+                      case 'commission':
+                        aValue = a.commissionMonths;
+                        bValue = b.commissionMonths;
+                        break;
+                      case 'currentMMP':
+                        aValue = a.currentMMP;
+                        bValue = b.currentMMP;
+                        break;
+                      case 'previousMMP':
+                        aValue = a.previousMMP || 0;
+                        bValue = b.previousMMP || 0;
+                        break;
+                      default:
+                        aValue = a.originalIndex;
+                        bValue = b.originalIndex;
+                    }
+
+                    return agentSortOrder === 'desc' ? bValue - aValue : aValue - bValue;
+                  });
+
+                  return sortedData.map((agent, idx) => {
+                    // 상태에 따른 배경색 설정 (전체 47명과 동일한 로직)
+                    let rowBgClass = '';
+                    if (selectedAgentCategory === 'allAgents') {
+                      if (!agent.isActive && agent.previousMMP > 0) {
+                        // 전월 가동 → 무실적
+                        rowBgClass = 'bg-red-50';
+                      } else if (agent.isActive && agent.previousMMP === 0) {
+                        // 당월 신규 가동
+                        rowBgClass = 'bg-green-50';
+                      }
+                    } else {
+                      if (selectedAgentCategory === 'previousActiveNowInactive') {
+                        rowBgClass = 'bg-red-50';
+                      } else if (selectedAgentCategory === 'newActive') {
+                        rowBgClass = 'bg-green-50';
+                      } else if (selectedAgentCategory === 'inactive') {
+                        rowBgClass = 'bg-gray-100';
+                      }
+                    }
+
+                    return (
+                      <div key={idx} className={`border-b hover:bg-gray-50 transition-colors ${rowBgClass}`}>
+                        <div className="grid grid-cols-5 gap-3 p-3 text-sm">
+                          <div className="font-mono text-gray-600">{agent.code}</div>
+                          <div className="font-medium">{agent.name}</div>
+                          <div className="text-center text-gray-600">
+                            <span className="text-xs">{agent.commissionMonths}개월차</span>
+                          </div>
+                          <div className="text-right">
+                            {agent.currentMMP === 0 ? (
+                              <span className="text-gray-400">-</span>
+                            ) : (
+                              <span className="font-medium">{agent.currentMMP}만원</span>
+                            )}
+                          </div>
+                          <div className="text-right text-gray-600">
+                            {agent.previousMMP === 0 || agent.previousMMP === null ? (
+                              <span className="text-gray-400">-</span>
+                            ) : (
+                              <span>{agent.previousMMP}만원</span>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  });
+                })()}
               </div>
             </div>
             
             <div className="mt-4 pt-4 border-t text-center">
-              <span className="text-sm text-gray-500">총 {selectedAgentCategory ? getAgentList(selectedAgentCategory).length : 0}명</span>
+              <span className="text-sm text-gray-500">총 {selectedAgentCategory === 'allAgents' ? getSortedAgents(true).length : (selectedAgentCategory ? getAgentList(selectedAgentCategory).length : 0)}명</span>
             </div>
           </div>
         </div>
