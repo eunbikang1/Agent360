@@ -1,25 +1,24 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Agent360Dashboard from './components/Agent360Dashboard';
+import Branch360Dashboard from './components/Branch360Dashboard';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className="App">
+        <Routes>
+          {/* 기본 경로는 Agent360Dashboard로 리다이렉트 */}
+          <Route path="/" element={<Navigate to="/agent" replace />} />
+
+          {/* Agent360Dashboard - 지점장용 일일 브리핑 */}
+          <Route path="/agent" element={<Agent360Dashboard />} />
+
+          {/* Branch360Dashboard - 지점 상세 분석 */}
+          <Route path="/branch/:agency/:branchName" element={<Branch360Dashboard />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
