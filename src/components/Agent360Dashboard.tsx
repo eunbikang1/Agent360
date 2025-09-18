@@ -383,7 +383,6 @@ const Agent360Dashboard = () => {
   const [branchSortOrder, setBranchSortOrder] = useState<'desc' | 'asc'>('desc');
   const [showCriteriaTooltip, setShowCriteriaTooltip] = useState(false);
   const [branchPeriod, setBranchPeriod] = useState<'current' | 'previous'>('current');
-  const [expandedRecommendations, setExpandedRecommendations] = useState(false);
   const [showAllBranchesModal, setShowAllBranchesModal] = useState(false);
   const [showBranchInfoModal, setBranchInfoModal] = useState(false);
   const [modalSortBy, setModalSortBy] = useState('achievement');
