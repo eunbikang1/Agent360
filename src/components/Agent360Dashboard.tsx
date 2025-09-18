@@ -195,6 +195,23 @@ const Agent360Dashboard = () => {
 
 
 
+  // 지점 기본정보 데이터
+  const getBranchInfoData = () => {
+    const branchTypes = ['대리점', '본부', '지점'];
+    const branches = [
+      { agency: '어센틱금융그룹', branch: '구미 스튜디오', type: '지점', address: '경북 구미시 송정대로 55 2층', phone: '054-123-4567', partnershipDate: '2022.03.15', totalAgents: 47, newAgents: 3, terminatedAgents: 1, activeAgents: 35, isActive: true },
+      { agency: '메타리치', branch: '보험스토어', type: '대리점', address: '서울 강남구 테헤란로 123 4층', phone: '02-567-8901', partnershipDate: '2021.08.22', totalAgents: 28, newAgents: 2, terminatedAgents: 0, activeAgents: 18, isActive: false },
+      { agency: '글로벌금융판매', branch: '케이에스에프에스동대문', type: '본부', address: '서울 동대문구 청계천로 89 3층', phone: '02-234-5678', partnershipDate: '2020.11.10', totalAgents: 52, newAgents: 4, terminatedAgents: 2, activeAgents: 42, isActive: true },
+      { agency: '하나금융서비스', branch: '하나돔', type: '지점', address: '부산 해운대구 해운대로 456 5층', phone: '051-345-6789', partnershipDate: '2023.01.08', totalAgents: 38, newAgents: 1, terminatedAgents: 0, activeAgents: 29, isActive: true },
+      { agency: '리더스금융', branch: '리더스에프엔', type: '대리점', address: '대구 중구 동성로 78 2층', phone: '053-456-7890', partnershipDate: '2022.07.03', totalAgents: 31, newAgents: 2, terminatedAgents: 1, activeAgents: 24, isActive: true },
+      { agency: '글로벌화이브', branch: '글로벌화이브스타', type: '본부', address: '인천 연수구 컨벤시아대로 234 6층', phone: '032-567-8901', partnershipDate: '2021.12.20', totalAgents: 45, newAgents: 3, terminatedAgents: 0, activeAgents: 38, isActive: true },
+      { agency: '에프앤가이드', branch: '에프앤가이드부산', type: '지점', address: '부산 부산진구 서면로 345 4층', phone: '051-678-9012', partnershipDate: '2022.05.14', totalAgents: 29, newAgents: 1, terminatedAgents: 1, activeAgents: 22, isActive: false },
+      { agency: '케이비증권', branch: '케이비대구지점', type: '지점', address: '대구 수성구 범어로 567 3층', phone: '053-789-0123', partnershipDate: '2023.02.28', totalAgents: 33, newAgents: 2, terminatedAgents: 0, activeAgents: 26, isActive: true }
+    ];
+
+    return branches;
+  };
+
   // 관리 포커스 지점 (위험 신호 & 기회 신호)
   const managementFocus = {
     critical: [
@@ -323,6 +340,7 @@ const Agent360Dashboard = () => {
   const [branchPeriod, setBranchPeriod] = useState<'current' | 'previous'>('current');
   const [expandedRecommendations, setExpandedRecommendations] = useState(false);
   const [showAllBranchesModal, setShowAllBranchesModal] = useState(false);
+  const [showBranchInfoModal, setBranchInfoModal] = useState(false);
   const [modalSortBy, setModalSortBy] = useState('achievement');
   const [modalSortOrder, setModalSortOrder] = useState<'desc' | 'asc'>('desc');
   const [selectedMonth, setSelectedMonth] = useState('2025-09');
@@ -1429,25 +1447,14 @@ const Agent360Dashboard = () => {
                     </div>
                   ))}
 
-                {/* 더보기/접기 버튼 - 전체 항목이 5개보다 많을 때만 표시 */}
-                {[...managementFocus.critical, ...managementFocus.opportunities].length > 5 && (
-                  <button
-                    onClick={() => setExpandedRecommendations(!expandedRecommendations)}
-                    className="w-full py-2 text-xs text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors flex items-center justify-center gap-1"
-                  >
-                    {expandedRecommendations ? (
-                      <>
-                        <span>접기</span>
-                        <ChevronRight className="w-3 h-3 rotate-90" />
-                      </>
-                    ) : (
-                      <>
-                        <span>더보기 (+{[...managementFocus.critical, ...managementFocus.opportunities].length - 5}개)</span>
-                        <ChevronRight className="w-3 h-3 -rotate-90" />
-                      </>
-                    )}
-                  </button>
-                )}
+                {/* 지점 기본정보 보기 버튼 */}
+                <button
+                  onClick={() => setBranchInfoModal(true)}
+                  className="w-full py-2 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors flex items-center justify-center gap-1 font-medium"
+                >
+                  <span>지점 기본정보 보기</span>
+                  <ChevronRight className="w-3 h-3" />
+                </button>
               </div>
             </div>
 
@@ -1801,6 +1808,133 @@ const Agent360Dashboard = () => {
               </div>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* 지점 기본정보 모달 */}
+      {showBranchInfoModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setBranchInfoModal(false)}>
+          <div className="bg-white rounded-lg p-6 max-w-7xl w-full mx-4 max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">지점 기본정보</h3>
+              <button
+                onClick={() => setBranchInfoModal(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-auto">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      {/* 기본 정보 */}
+                      <th className="text-left py-3 px-2 bg-blue-50 text-xs font-semibold text-blue-800 border-r border-blue-200">
+                        구분
+                      </th>
+                      <th className="text-left py-3 px-3 bg-blue-50 text-xs font-semibold text-blue-800 border-r border-blue-200">
+                        지점명
+                      </th>
+                      <th className="text-left py-3 px-3 bg-blue-50 text-xs font-semibold text-blue-800 border-r border-blue-200">
+                        주소
+                      </th>
+                      <th className="text-left py-3 px-3 bg-blue-50 text-xs font-semibold text-blue-800 border-r border-blue-200">
+                        연락처
+                      </th>
+                      <th className="text-left py-3 px-3 bg-blue-50 text-xs font-semibold text-blue-800 border-r border-blue-200">
+                        제휴일자
+                      </th>
+
+                      {/* 설계사 관련 */}
+                      <th className="text-center py-3 px-2 bg-green-50 text-xs font-semibold text-green-800 border-r border-green-200">
+                        총 설계사
+                      </th>
+                      <th className="text-center py-3 px-2 bg-green-50 text-xs font-semibold text-green-800 border-r border-green-200">
+                        당월 신규
+                      </th>
+                      <th className="text-center py-3 px-2 bg-green-50 text-xs font-semibold text-green-800 border-r border-green-200">
+                        당월 해촉
+                      </th>
+
+                      {/* 실적 발생 관련 */}
+                      <th className="text-center py-3 px-2 bg-purple-50 text-xs font-semibold text-purple-800 border-r border-purple-200">
+                        가동 설계사
+                      </th>
+                      <th className="text-center py-3 px-2 bg-purple-50 text-xs font-semibold text-purple-800">
+                        가동 여부
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {getBranchInfoData().map((branch, idx) => (
+                      <tr key={idx} className="border-b border-gray-100 hover:bg-gray-50">
+                        {/* 기본 정보 */}
+                        <td className="py-3 px-2 border-r border-gray-200">
+                          <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${
+                            branch.type === '대리점' ? 'bg-blue-100 text-blue-700' :
+                            branch.type === '본부' ? 'bg-green-100 text-green-700' :
+                            'bg-gray-100 text-gray-700'
+                          }`}>
+                            {branch.type}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3 border-r border-gray-200">
+                          <div className="text-xs">
+                            <div className="font-medium text-gray-900">{branch.branch}</div>
+                            <div className="text-gray-500 text-xs">{branch.agency}</div>
+                          </div>
+                        </td>
+                        <td className="py-3 px-3 border-r border-gray-200 text-xs text-gray-600">
+                          {branch.address}
+                        </td>
+                        <td className="py-3 px-3 border-r border-gray-200 text-xs text-gray-700">
+                          {branch.phone}
+                        </td>
+                        <td className="py-3 px-3 border-r border-gray-200 text-xs text-gray-700">
+                          {branch.partnershipDate}
+                        </td>
+
+                        {/* 설계사 관련 */}
+                        <td className="py-3 px-2 text-center border-r border-gray-200 text-xs font-medium text-gray-900">
+                          {branch.totalAgents}명
+                        </td>
+                        <td className="py-3 px-2 text-center border-r border-gray-200">
+                          <span className="text-xs font-medium text-blue-600">
+                            +{branch.newAgents}명
+                          </span>
+                        </td>
+                        <td className="py-3 px-2 text-center border-r border-gray-200">
+                          <span className="text-xs font-medium text-red-600">
+                            -{branch.terminatedAgents}명
+                          </span>
+                        </td>
+
+                        {/* 실적 발생 관련 */}
+                        <td className="py-3 px-2 text-center border-r border-gray-200 text-xs font-medium text-gray-900">
+                          {branch.activeAgents}명
+                        </td>
+                        <td className="py-3 px-2 text-center">
+                          <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${
+                            branch.isActive
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-red-100 text-red-700'
+                          }`}>
+                            {branch.isActive ? '가동' : '미가동'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="mt-4 pt-4 border-t border-gray-200 text-center">
+              <p className="text-xs text-gray-500">지점명 클릭 시 해당 지점의 상세 분석 화면으로 이동합니다</p>
+            </div>
           </div>
         </div>
       )}
