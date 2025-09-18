@@ -557,7 +557,7 @@ const Agent360Dashboard = () => {
     const activeBranchesCountForStats = branchPeriod === 'current' ? 95 : 120;
     const activityRate = Math.round((activeBranchesCountForStats / totalBranchesForStats) * 1000) / 10;
     
-    const result = getAllData ? sorted : sorted.slice(0, 5);
+    const result = getAllData ? sorted : sorted.slice(0, 10);
 
     // 가동 현황 정보와 함께 반환
     return {
@@ -1455,7 +1455,7 @@ const Agent360Dashboard = () => {
             {/* 지점 순위 현황 */}
             <div className="bg-white rounded-lg shadow-sm border p-4">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-semibold text-gray-700">우수 지점 TOP 5</h3>
+                <h3 className="text-sm font-semibold text-gray-700">지점 랭킹 TOP 10</h3>
                 <div className="flex bg-gray-100 rounded-lg p-1">
                   <button
                     onClick={() => setBranchPeriod('current')}
@@ -1560,7 +1560,17 @@ const Agent360Dashboard = () => {
                   ))}
                 </div>
               </div>
-              
+
+              {/* 더보기 버튼 */}
+              <div className="mt-3 pt-3 border-t border-gray-200">
+                <button
+                  onClick={() => setShowAllBranchesModal(true)}
+                  className="w-full text-center text-xs text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                >
+                  더보기 (전체 지점 보기)
+                </button>
+              </div>
+
             </div>
 
             <div className="text-xs text-gray-500 text-center p-2 bg-gray-50 rounded">
