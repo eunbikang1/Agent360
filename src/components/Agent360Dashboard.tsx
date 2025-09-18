@@ -919,26 +919,6 @@ const Agent360Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* 과거 데이터 경고 배너 */}
-      {!isCurrentMonth && (
-        <div className="bg-amber-100 border-b border-amber-300 p-2 text-center">
-          <div className="flex items-center justify-center gap-2 text-sm">
-            <AlertTriangle className="w-4 h-4 text-amber-600" />
-            <span className="text-amber-800 font-medium">
-              {appliedMonth.replace('-', '년 ').replace(/0(\d)/, '$1')}월 마감 기준 과거 데이터입니다
-            </span>
-            <button
-              onClick={() => {
-                setTempSelectedMonth('2025-09');
-                setAppliedMonth('2025-09');
-              }}
-              className="ml-3 px-2 py-0.5 bg-amber-600 text-white rounded text-xs hover:bg-amber-700"
-            >
-              현재로 돌아가기
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Header */}
       <div className="bg-white border-b sticky top-0 z-10">
@@ -949,18 +929,21 @@ const Agent360Dashboard = () => {
               <p className="text-sm text-gray-600 mt-1">
                 강남본부 김영수 지점장 |
                 {isCurrentMonth ? (
-                  <>2025.09.20(금) - 9/19 마감 데이터 반영 | 9월 영업일: {businessDays.elapsed}일/{businessDays.total}일 (잔여 {businessDays.remaining}일)</>
+                  <>2025.09.20(금) | 9월 영업일: {businessDays.elapsed}일/{businessDays.total}일 (잔여 {businessDays.remaining}일)</>
                 ) : (
                   <>{appliedMonth.replace('-', '년 ').replace(/0(\d)/, '$1')}월 마감 기준 데이터</>
                 )}
               </p>
+              {isCurrentMonth && (
+                <p className="text-xs text-gray-500 mt-0.5">9/19 마감 데이터 기준</p>
+              )}
             </div>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-1">
                 <select
                   value={tempSelectedMonth}
                   onChange={(e) => setTempSelectedMonth(e.target.value)}
-                  className="px-3 py-2 text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400"
+                  className="px-2 py-1 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:border-gray-400"
                 >
                   {monthOptions.map(option => (
                     <option key={option.value} value={option.value}>
@@ -970,19 +953,14 @@ const Agent360Dashboard = () => {
                 </select>
                 <button
                   onClick={handleSearchClick}
-                  className="px-3 py-2 text-sm bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
+                  className="px-2 py-1 text-xs bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition-colors"
                 >
                   조회
                 </button>
               </div>
-              {tempSelectedMonth !== appliedMonth && (
-                <span className="text-xs text-gray-500">
-                  조회 버튼을 눌러주세요
-                </span>
-              )}
-              <button className="flex items-center gap-2 px-3 py-2 text-sm bg-gray-700 text-white rounded-md hover:bg-gray-800 transition-colors">
+              <button className="flex items-center gap-2 px-3 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
                 <Download className="w-4 h-4" />
-                엑셀 다운로드
+                원클릭 엑셀 다운로드
               </button>
             </div>
           </div>
