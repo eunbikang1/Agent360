@@ -388,6 +388,7 @@ const Agent360Dashboard = () => {
   const [modalSortBy, setModalSortBy] = useState('achievement');
   const [modalSortOrder, setModalSortOrder] = useState<'desc' | 'asc'>('desc');
   const [selectedMonth, setSelectedMonth] = useState('2025-09');
+  const [expandedRecommendations, setExpandedRecommendations] = useState(false);
   
   // 지점 순위 데이터
   const getBranchRankings = (getAllData = false) => {
@@ -1464,7 +1465,7 @@ const Agent360Dashboard = () => {
               <div className="space-y-2">
                 {/* 확장되지 않았을 때는 5개, 확장했을 때는 전체 표시 */}
                 {[...managementFocus.critical, ...managementFocus.opportunities]
-                  .slice(0, 5)
+                  .slice(0, expandedRecommendations ? undefined : 5)
                   .map((item) => (
                     <div
                       key={item.id}
@@ -1492,6 +1493,21 @@ const Agent360Dashboard = () => {
                   ))}
 
               </div>
+
+              {/* 더보기 버튼 */}
+              {[...managementFocus.critical, ...managementFocus.opportunities].length > 5 && (
+                <div className="mt-3 text-center">
+                  <button
+                    onClick={() => setExpandedRecommendations(!expandedRecommendations)}
+                    className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center justify-center gap-1 mx-auto"
+                  >
+                    {expandedRecommendations ? '접기' : '더보기'}
+                    <ChevronRight className={`w-4 h-4 transition-transform ${
+                      expandedRecommendations ? 'rotate-90' : ''
+                    }`} />
+                  </button>
+                </div>
+              )}
             </div>
 
 
