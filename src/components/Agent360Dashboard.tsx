@@ -1464,7 +1464,7 @@ const Agent360Dashboard = () => {
               <div className="space-y-2">
                 {/* 확장되지 않았을 때는 5개, 확장했을 때는 전체 표시 */}
                 {[...managementFocus.critical, ...managementFocus.opportunities]
-                  .slice(0, expandedRecommendations ? undefined : 5)
+                  .slice(0, 5)
                   .map((item) => (
                     <div
                       key={item.id}
