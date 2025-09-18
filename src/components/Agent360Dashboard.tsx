@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trophy, Download, Building, ChevronRight, ArrowUp, ArrowDown, Activity, AlertTriangle, HelpCircle, X } from 'lucide-react';
+import { Trophy, Download, Building, ChevronRight, ChevronDown, ArrowUp, ArrowDown, Activity, AlertTriangle, HelpCircle, X } from 'lucide-react';
 
 const Agent360Dashboard = () => {
   const navigate = useNavigate();
@@ -1502,8 +1502,8 @@ const Agent360Dashboard = () => {
                     className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center justify-center gap-1 mx-auto"
                   >
                     {expandedRecommendations ? '접기' : '더보기'}
-                    <ChevronRight className={`w-4 h-4 transition-transform ${
-                      expandedRecommendations ? 'rotate-90' : ''
+                    <ChevronDown className={`w-4 h-4 transition-transform ${
+                      expandedRecommendations ? 'rotate-180' : ''
                     }`} />
                   </button>
                 </div>
