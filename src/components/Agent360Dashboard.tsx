@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trophy, Download, Building, ChevronRight, ChevronDown, ArrowUp, ArrowDown, Activity, AlertTriangle, HelpCircle, X, Search } from 'lucide-react';
+import { Trophy, Download, Building, ChevronRight, ChevronDown, ArrowUp, ArrowDown, Activity, AlertTriangle, HelpCircle, X } from 'lucide-react';
 
 const Agent360Dashboard = () => {
   const navigate = useNavigate();
@@ -942,25 +942,25 @@ const Agent360Dashboard = () => {
 
       {/* Header */}
       <div className="bg-white border-b sticky top-0 z-10">
-        <div className="px-6 py-3">
+        <div className="px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">통합 인사이트 뷰</h1>
-                <p className="text-xs text-gray-500">
-                  강남본부 김영수 지점장 |
-                  {isCurrentMonth ? (
-                    <>2025.09.20(금) - 9/19 마감 데이터 반영 | 9월 영업일: {businessDays.elapsed}일/{businessDays.total}일 (잔여 {businessDays.remaining}일)</>
-                  ) : (
-                    <>{appliedMonth.replace('-', '년 ').replace(/0(\d)/, '$1')}월 마감 기준 데이터</>
-                  )}
-                </p>
-              </div>
-              <div className="ml-4 flex items-center gap-2">
+            <div>
+              <h1 className="text-xl font-bold text-gray-900">통합 인사이트 뷰</h1>
+              <p className="text-sm text-gray-600 mt-1">
+                강남본부 김영수 지점장 |
+                {isCurrentMonth ? (
+                  <>2025.09.20(금) - 9/19 마감 데이터 반영 | 9월 영업일: {businessDays.elapsed}일/{businessDays.total}일 (잔여 {businessDays.remaining}일)</>
+                ) : (
+                  <>{appliedMonth.replace('-', '년 ').replace(/0(\d)/, '$1')}월 마감 기준 데이터</>
+                )}
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <select
                   value={tempSelectedMonth}
                   onChange={(e) => setTempSelectedMonth(e.target.value)}
-                  className="px-3 py-1.5 text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-3 py-2 text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400"
                 >
                   {monthOptions.map(option => (
                     <option key={option.value} value={option.value}>
@@ -970,25 +970,23 @@ const Agent360Dashboard = () => {
                 </select>
                 <button
                   onClick={handleSearchClick}
-                  className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-1 transition-colors"
+                  className="px-3 py-2 text-sm bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
                 >
-                  <Search className="w-4 h-4" />
                   조회
                 </button>
-                {tempSelectedMonth !== appliedMonth && (
-                  <span className="text-xs text-orange-600 font-medium">
-                    조회 버튼을 눌러주세요
-                  </span>
-                )}
               </div>
+              {tempSelectedMonth !== appliedMonth && (
+                <span className="text-xs text-gray-500">
+                  조회 버튼을 눌러주세요
+                </span>
+              )}
+              <button className="flex items-center gap-2 px-3 py-2 text-sm bg-gray-700 text-white rounded-md hover:bg-gray-800 transition-colors">
+                <Download className="w-4 h-4" />
+                엑셀 다운로드
+              </button>
             </div>
-            <button className="flex items-center gap-2 px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700">
-              <Download className="w-4 h-4" />
-              원클릭 엑셀 다운로드
-            </button>
           </div>
         </div>
-        
       </div>
 
       <div className="p-6">
