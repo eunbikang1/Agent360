@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trophy, Download, Building, ChevronRight, ChevronDown, ArrowUp, ArrowDown, Activity, AlertTriangle, HelpCircle, X } from 'lucide-react';
+import { Trophy, Download, Building, ChevronRight, ChevronDown, ArrowUp, ArrowDown, Activity, AlertTriangle, HelpCircle, X, Search } from 'lucide-react';
 
 const Agent360Dashboard = () => {
   const navigate = useNavigate();
@@ -65,8 +65,8 @@ const Agent360Dashboard = () => {
     }
   };
 
-  // myKPI는 컴포넌트 내부에서 선택한 월에 따라 결정됨
-  const myKPI = myKPIDefault;
+  // myKPI는 기본값 (컴포넌트 내부에서 재정의됨)
+  let myKPI = myKPIDefault;
 
   // 월별 성과 추이 데이터
   const monthlyTrend = {
@@ -390,11 +390,93 @@ const Agent360Dashboard = () => {
   const [showBranchInfoModal, setBranchInfoModal] = useState(false);
   const [modalSortBy, setModalSortBy] = useState('achievement');
   const [modalSortOrder, setModalSortOrder] = useState<'desc' | 'asc'>('desc');
-  const [selectedMonth, setSelectedMonth] = useState('2025-09');
+  const [tempSelectedMonth, setTempSelectedMonth] = useState('2025-09'); // 드롭다운에서 선택한 월
+  const [appliedMonth, setAppliedMonth] = useState('2025-09'); // 실제 적용된 월
   const [expandedRecommendations, setExpandedRecommendations] = useState(false);
 
   // 현재 날짜 기준으로 실시간 데이터인지 판단
-  const isCurrentMonth = selectedMonth === '2025-09';
+  const isCurrentMonth = appliedMonth === '2025-09';
+
+  // 조회 버튼 클릭 핸들러
+  const handleSearchClick = () => {
+    setAppliedMonth(tempSelectedMonth);
+  };
+
+  // 과거 월 데이터 생성 함수
+  const getHistoricalKPI = (month: string) => {
+    if (month === '2025-09') return myKPIDefault; // 현재 월
+
+    // 과거 월별 다른 데이터 반환
+    const historicalData: { [key: string]: typeof myKPIDefault } = {
+      '2025-08': {
+        goalAchievement: {
+          current: 95.2,
+          target: 50000,
+          actual: 47600,
+          hqAvg: 88.7,
+          vsLastMonth: 18.3,
+          gap: 2400,
+          dailyRequired: 0, // 완료된 월이므로 0
+          hqRankTotal: { rank: 5, total: 50 },
+          hqRankRegion: { rank: 2, total: 10 }
+        },
+        designerActivity: {
+          current: 72.8,
+          active: 510,
+          total: 700,
+          hqAvg: 69.1,
+          vsLastMonth: 15,
+          vsLastMonthPercent: 7.2,
+          plan: 450,
+          planAchievement: 113.3
+        },
+        mobileContract: {
+          current: 52.3,
+          count: 142,
+          total: 271,
+          hqAvg: 48.9,
+          vsLastMonth: 39,
+          vsLastMonthPercent: 6.5
+        }
+      },
+      '2025-07': {
+        goalAchievement: {
+          current: 88.5,
+          target: 45000,
+          actual: 39825,
+          hqAvg: 82.1,
+          vsLastMonth: 15.7,
+          gap: 5175,
+          dailyRequired: 0,
+          hqRankTotal: { rank: 7, total: 50 },
+          hqRankRegion: { rank: 3, total: 10 }
+        },
+        designerActivity: {
+          current: 68.4,
+          active: 479,
+          total: 700,
+          hqAvg: 65.8,
+          vsLastMonth: 8,
+          vsLastMonthPercent: 4.1,
+          plan: 450,
+          planAchievement: 106.4
+        },
+        mobileContract: {
+          current: 48.9,
+          count: 127,
+          total: 260,
+          hqAvg: 45.2,
+          vsLastMonth: 24,
+          vsLastMonthPercent: 5.1
+        }
+      }
+    };
+
+    return historicalData[month] || myKPIDefault;
+  };
+
+  // 선택된 월에 따른 myKPI 데이터
+  myKPI = getHistoricalKPI(appliedMonth);
 
   // 3년치 월 옵션 생성 (2023년 1월부터 2025년 9월까지)
   const monthOptions = [];
@@ -843,10 +925,13 @@ const Agent360Dashboard = () => {
           <div className="flex items-center justify-center gap-2 text-sm">
             <AlertTriangle className="w-4 h-4 text-amber-600" />
             <span className="text-amber-800 font-medium">
-              {selectedMonth.replace('-', '년 ').replace(/0(\d)/, '$1')}월 마감 기준 과거 데이터입니다
+              {appliedMonth.replace('-', '년 ').replace(/0(\d)/, '$1')}월 마감 기준 과거 데이터입니다
             </span>
             <button
-              onClick={() => setSelectedMonth('2025-09')}
+              onClick={() => {
+                setTempSelectedMonth('2025-09');
+                setAppliedMonth('2025-09');
+              }}
               className="ml-3 px-2 py-0.5 bg-amber-600 text-white rounded text-xs hover:bg-amber-700"
             >
               현재로 돌아가기
@@ -867,14 +952,14 @@ const Agent360Dashboard = () => {
                   {isCurrentMonth ? (
                     <>2025.09.20(금) - 9/19 마감 데이터 반영 | 9월 영업일: {businessDays.elapsed}일/{businessDays.total}일 (잔여 {businessDays.remaining}일)</>
                   ) : (
-                    <>{selectedMonth.replace('-', '년 ').replace(/0(\d)/, '$1')}월 마감 기준 데이터</>
+                    <>{appliedMonth.replace('-', '년 ').replace(/0(\d)/, '$1')}월 마감 기준 데이터</>
                   )}
                 </p>
               </div>
-              <div className="ml-4">
+              <div className="ml-4 flex items-center gap-2">
                 <select
-                  value={selectedMonth}
-                  onChange={(e) => setSelectedMonth(e.target.value)}
+                  value={tempSelectedMonth}
+                  onChange={(e) => setTempSelectedMonth(e.target.value)}
                   className="px-3 py-1.5 text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   {monthOptions.map(option => (
@@ -883,6 +968,18 @@ const Agent360Dashboard = () => {
                     </option>
                   ))}
                 </select>
+                <button
+                  onClick={handleSearchClick}
+                  className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-1 transition-colors"
+                >
+                  <Search className="w-4 h-4" />
+                  조회
+                </button>
+                {tempSelectedMonth !== appliedMonth && (
+                  <span className="text-xs text-orange-600 font-medium">
+                    조회 버튼을 눌러주세요
+                  </span>
+                )}
               </div>
             </div>
             <button className="flex items-center gap-2 px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700">
