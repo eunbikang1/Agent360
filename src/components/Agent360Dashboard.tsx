@@ -29,8 +29,8 @@ const Agent360Dashboard = () => {
     remaining: 7
   };
 
-  // 나의 KPI 데이터
-  const myKPI = {
+  // 나의 KPI 데이터 (기본값 - 현재 월용)
+  const myKPIDefault = {
     // 목표달성률 (APE 기준)
     goalAchievement: {
       current: 62.0, // 현재 달성률 (%)
@@ -64,6 +64,9 @@ const Agent360Dashboard = () => {
       vsLastMonthPercent: 3.2 // 전월 동기 대비 증감 (%p) - 비율은 상승
     }
   };
+
+  // myKPI는 컴포넌트 내부에서 선택한 월에 따라 결정됨
+  const myKPI = myKPIDefault;
 
   // 월별 성과 추이 데이터
   const monthlyTrend = {
@@ -389,7 +392,22 @@ const Agent360Dashboard = () => {
   const [modalSortOrder, setModalSortOrder] = useState<'desc' | 'asc'>('desc');
   const [selectedMonth, setSelectedMonth] = useState('2025-09');
   const [expandedRecommendations, setExpandedRecommendations] = useState(false);
-  
+
+  // 현재 날짜 기준으로 실시간 데이터인지 판단
+  const isCurrentMonth = selectedMonth === '2025-09';
+
+  // 3년치 월 옵션 생성 (2023년 1월부터 2025년 9월까지)
+  const monthOptions = [];
+  for (let year = 2025; year >= 2023; year--) {
+    const endMonth = year === 2025 ? 9 : 12;
+    const startMonth = year === 2023 ? 1 : 1;
+    for (let month = endMonth; month >= startMonth; month--) {
+      const value = `${year}-${String(month).padStart(2, '0')}`;
+      const label = `${year}년 ${month}월`;
+      monthOptions.push({ value, label });
+    }
+  }
+
   // 지점 순위 데이터
   const getBranchRankings = (getAllData = false) => {
     const currentMonthData = [
@@ -819,6 +837,24 @@ const Agent360Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* 과거 데이터 경고 배너 */}
+      {!isCurrentMonth && (
+        <div className="bg-amber-100 border-b border-amber-300 p-2 text-center">
+          <div className="flex items-center justify-center gap-2 text-sm">
+            <AlertTriangle className="w-4 h-4 text-amber-600" />
+            <span className="text-amber-800 font-medium">
+              {selectedMonth.replace('-', '년 ').replace(/0(\d)/, '$1')}월 마감 기준 과거 데이터입니다
+            </span>
+            <button
+              onClick={() => setSelectedMonth('2025-09')}
+              className="ml-3 px-2 py-0.5 bg-amber-600 text-white rounded text-xs hover:bg-amber-700"
+            >
+              현재로 돌아가기
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-white border-b sticky top-0 z-10">
         <div className="px-6 py-3">
@@ -826,7 +862,14 @@ const Agent360Dashboard = () => {
             <div className="flex items-center gap-4">
               <div>
                 <h1 className="text-xl font-bold text-gray-900">통합 인사이트 뷰</h1>
-                <p className="text-xs text-gray-500">강남본부 김영수 지점장 | 2025.09.20(금) - 9/19 마감 데이터 반영 | 9월 영업일: {businessDays.elapsed}일/{businessDays.total}일 (잔여 {businessDays.remaining}일)</p>
+                <p className="text-xs text-gray-500">
+                  강남본부 김영수 지점장 |
+                  {isCurrentMonth ? (
+                    <>2025.09.20(금) - 9/19 마감 데이터 반영 | 9월 영업일: {businessDays.elapsed}일/{businessDays.total}일 (잔여 {businessDays.remaining}일)</>
+                  ) : (
+                    <>{selectedMonth.replace('-', '년 ').replace(/0(\d)/, '$1')}월 마감 기준 데이터</>
+                  )}
+                </p>
               </div>
               <div className="ml-4">
                 <select
@@ -834,12 +877,11 @@ const Agent360Dashboard = () => {
                   onChange={(e) => setSelectedMonth(e.target.value)}
                   className="px-3 py-1.5 text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="2025-09">2025년 9월</option>
-                  <option value="2025-08">2025년 8월</option>
-                  <option value="2025-07">2025년 7월</option>
-                  <option value="2025-06">2025년 6월</option>
-                  <option value="2025-05">2025년 5월</option>
-                  <option value="2025-04">2025년 4월</option>
+                  {monthOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -930,10 +972,12 @@ const Agent360Dashboard = () => {
                 </div>
               </div>
 
-              {/* 하루 평균 필요 금액 안내 */}
-              <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                <div className="text-sm text-gray-700 text-center">이번달 목표 달성을 위해 하루 평균 <span className="font-semibold text-blue-600">{formatCurrency(myKPI.goalAchievement.dailyRequired * 10000)}</span>이 필요해요!</div>
-              </div>
+              {/* 하루 평균 필요 금액 안내 - 현재월에만 표시 */}
+              {isCurrentMonth && (
+                <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                  <div className="text-sm text-gray-700 text-center">이번달 목표 달성을 위해 하루 평균 <span className="font-semibold text-blue-600">{formatCurrency(myKPI.goalAchievement.dailyRequired * 10000)}</span>이 필요해요!</div>
+                </div>
+              )}
               
               <div className="grid grid-cols-2 gap-3 mt-4 pt-3 border-t">
                 <div className="text-center">
