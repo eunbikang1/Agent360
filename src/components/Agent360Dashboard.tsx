@@ -320,6 +320,22 @@ const Agent360Dashboard = () => {
       issue: '신입 첫 성과',
       detail: '신규자 첫 계약',
       type: 'opportunity'
+    },
+    {
+      id: 8,
+      agency: '한국지에이금융서비스',
+      branch: '일산지사',
+      issue: '가동자 이탈',
+      detail: '3개월 연속 가동자 1명 중단',
+      type: 'change'
+    },
+    {
+      id: 9,
+      agency: '지에이스타금융서비스',
+      branch: '부천코어',
+      issue: '신규 위촉',
+      detail: '이번 달 신입 2명 영입',
+      type: 'change'
     }
   ];
 
@@ -1486,7 +1502,7 @@ const Agent360Dashboard = () => {
             {/* 방문 추천 지점 */}
             <div className="bg-white rounded-lg shadow-sm border p-4">
               <div className="flex items-center gap-2 mb-3 relative">
-                <h3 className="text-sm font-semibold text-gray-700">방문 추천 지점</h3>
+                <h3 className="text-sm font-semibold text-gray-700">오늘 주목할 지점</h3>
                 <button
                   className="ml-auto p-1 text-gray-400 hover:text-gray-600 relative"
                   onClick={() => setShowCriteriaTooltip(!showCriteriaTooltip)}
@@ -1496,25 +1512,32 @@ const Agent360Dashboard = () => {
 
                 {/* 산출 기준 툴팁 */}
                 {showCriteriaTooltip && (
-                  <div className="absolute top-8 right-0 w-80 bg-gray-800 text-white text-xs rounded-lg p-3 z-20 shadow-lg">
-                    <div className="text-center font-semibold mb-2">방문 추천 산출 기준</div>
+                  <div className="absolute top-8 right-0 w-96 bg-gray-800 text-white text-xs rounded-lg p-4 z-20 shadow-lg max-h-96 overflow-y-auto">
+                    <div className="text-center font-semibold mb-3">오늘 주목할 지점 산출 기준</div>
 
-                    <div className="mb-2 font-semibold text-red-300">위기 상황 (빨간색)</div>
-                    <div className="space-y-1 mb-3 text-xs">
-                      <div>• <strong>3개월 연속 실적 하락:</strong> 직전 3개월 연속 전월 대비 총 APE 하락</div>
-                      <div>• <strong>목표달성 미달:</strong> 월 영업일 절반 경과, 목표 페이스 대비 현재 실적 -30% 이상 부진</div>
+                    <div className="mb-2 font-semibold text-red-300">위험</div>
+                    <div className="space-y-1 mb-4 text-xs">
+                      <div>• <strong>3개월 연속 실적 하락:</strong> 직전 3개월 연속 전월 대비 총 APE 하락 + 당월 누적 APE도 전월 동기보다 낮음</div>
+                      <div>• <strong>목표달성 미달:</strong> 월 영업일 절반 이상 경과 시점에서 목표 페이스 대비 현재 실적 -30% 이상 부진</div>
                       <div>• <strong>핵심인력 해촉:</strong> 지난달 실적이 있었던 가동 설계사가 이번 달 퇴사</div>
                       <div>• <strong>계약 품질 이슈:</strong> 최근 3 영업일 동안 인수거절/청약철회 2건 이상 발생</div>
                     </div>
 
-                    <div className="mb-2 font-semibold text-green-300">기회 상황 (초록색)</div>
-                    <div className="space-y-1 mb-3 text-xs">
+                    <div className="mb-2 font-semibold text-green-300">기회</div>
+                    <div className="space-y-1 mb-4 text-xs">
                       <div>• <strong>실적 급상승:</strong> 전월 동기 대비 APE +30% 이상 급등</div>
                       <div>• <strong>고액 계약 체결:</strong> 월 보험료 30만원 이상 계약 체결</div>
                       <div>• <strong>신규 가동:</strong> 위촉된 설계사가 당월 생애 첫 계약 성공</div>
                     </div>
 
-                    <div className="mt-2 pt-2 border-t border-gray-600 text-center text-gray-300">
+                    <div className="mb-2 font-semibold text-blue-300">변화</div>
+                    <div className="space-y-1 mb-3 text-xs">
+                      <div>• <strong>연속 가동자 이탈:</strong> 직전 3개월 연속 가동 상태였던 설계사가 당월 활동 없음</div>
+                      <div>• <strong>신규 위촉 발생:</strong> 당월 신규 위촉 인원 1명 이상</div>
+                      <div>• <strong>포트폴리오 급변:</strong> 건강 vs 종신/정기 비중이 직전 3개월 평균 대비 ±20%p 이상 변동</div>
+                    </div>
+
+                    <div className="mt-3 pt-2 border-t border-gray-600 text-center text-gray-300">
                       클릭하여 지점 상세보기
                     </div>
                     <div className="absolute -top-2 right-4 w-0 h-0 border-l-4 border-r-4 border-b-4 border-l-transparent border-r-transparent border-b-gray-800"></div>
@@ -1529,27 +1552,30 @@ const Agent360Dashboard = () => {
                   .map((item) => (
                     <div
                       key={item.id}
-                      className={`p-4 bg-white border-l-4 border-r border-t border-b rounded-lg cursor-pointer hover:shadow-sm transition-all ${
-                        item.type === 'risk'
-                          ? 'border-l-red-500 border-red-100 hover:border-red-200'
-                          : 'border-l-green-500 border-green-100 hover:border-green-200'
-                      }`}
+                      className="p-3 bg-white border border-gray-100 cursor-pointer hover:shadow-sm hover:border-gray-200 transition-all"
                       onClick={() => handleVisitBranchClick(item.agency, item.branch)}
                     >
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                          <div className={`w-2 h-2 rounded-full mr-3 ${
-                            item.type === 'risk' ? 'bg-red-500' : 'bg-green-500'
-                          }`}></div>
+                        <div className="flex items-center gap-3">
+                          <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
+                            item.type === 'risk'
+                              ? 'bg-red-100 text-red-800'
+                              : item.type === 'opportunity'
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-blue-100 text-blue-800'
+                          }`}>
+                            {item.type === 'risk' ? '위험' : item.type === 'opportunity' ? '기회' : '변화'}
+                          </span>
                           <div className="flex-1">
-                            <div className="text-sm font-semibold text-gray-900 mb-1">
-                              {item.agency} &gt; {item.branch}
+                            <div className="text-sm font-semibold text-gray-900">
+                              {item.agency} {'>'} {item.branch}
                             </div>
-                            <div className="text-sm text-gray-700 mb-1">{item.issue}</div>
-                            <div className="text-xs text-gray-500">{item.detail}</div>
+                            <div className="text-sm text-gray-600">
+                              {item.issue} · {item.detail}
+                            </div>
                           </div>
                         </div>
-                        <ChevronRight className="w-5 h-5 text-gray-400" />
+                        <ChevronRight className="w-4 h-4 text-gray-400" />
                       </div>
                     </div>
                   ))}
