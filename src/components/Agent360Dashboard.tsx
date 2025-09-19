@@ -270,49 +270,56 @@ const Agent360Dashboard = () => {
       agency: '메타리치',
       branch: '보험스토어',
       issue: '실적 계속 떨어짐',
-      detail: '3개월 연속 하락'
+      detail: '3개월 연속 하락',
+      type: 'risk'
     },
     {
       id: 2,
       agency: '글로벌금융판매',
       branch: '케이에스에프에스동대문',
       issue: '목표 달성 어려움',
-      detail: '현재 32% 부족'
+      detail: '현재 32% 부족',
+      type: 'risk'
     },
     {
       id: 3,
       agency: '지금용코리아',
       branch: '대원',
       issue: '핵심 직원 퇴사',
-      detail: '가동자 2명 해촉'
+      detail: '가동자 2명 해촉',
+      type: 'risk'
     },
     {
       id: 4,
       agency: '더블유에셋',
       branch: '일산센터',
       issue: '계약 취소 많음',
-      detail: '3일간 3건 발생'
+      detail: '3일간 3건 발생',
+      type: 'risk'
     },
     {
       id: 5,
       agency: '글로벌금융판매',
       branch: '리더스일산',
       issue: '실적 크게 상승',
-      detail: '전월 대비 35% 증가'
+      detail: '전월 대비 35% 증가',
+      type: 'opportunity'
     },
     {
       id: 6,
       agency: '어센틱금융그룹',
       branch: '구미 스튜디오',
       issue: '고액 계약 성공',
-      detail: '월 35만원 계약'
+      detail: '월 35만원 계약',
+      type: 'opportunity'
     },
     {
       id: 7,
       agency: '라이프파트너스',
       branch: '부산센터',
       issue: '신입 첫 성과',
-      detail: '신규자 첫 계약'
+      detail: '신규자 첫 계약',
+      type: 'opportunity'
     }
   ];
 
@@ -1489,14 +1496,24 @@ const Agent360Dashboard = () => {
 
                 {/* 산출 기준 툴팁 */}
                 {showCriteriaTooltip && (
-                  <div className="absolute top-8 right-0 w-64 bg-gray-800 text-white text-xs rounded-lg p-3 z-20 shadow-lg">
-                    <div className="text-center font-semibold mb-2">방문 추천 기준</div>
-                    <div className="space-y-1 text-xs">
-                      <div>• 실적 급변 (상승/하락)</div>
-                      <div>• 목표 달성률 변화</div>
-                      <div>• 인력 변동 상황</div>
-                      <div>• 계약 품질 이슈</div>
+                  <div className="absolute top-8 right-0 w-80 bg-gray-800 text-white text-xs rounded-lg p-3 z-20 shadow-lg">
+                    <div className="text-center font-semibold mb-2">방문 추천 산출 기준</div>
+
+                    <div className="mb-2 font-semibold text-red-300">위기 상황 (빨간색)</div>
+                    <div className="space-y-1 mb-3 text-xs">
+                      <div>• <strong>3개월 연속 실적 하락:</strong> 직전 3개월 연속 전월 대비 총 APE 하락</div>
+                      <div>• <strong>목표달성 미달:</strong> 월 영업일 절반 경과, 목표 페이스 대비 현재 실적 -30% 이상 부진</div>
+                      <div>• <strong>핵심인력 해촉:</strong> 지난달 실적이 있었던 가동 설계사가 이번 달 퇴사</div>
+                      <div>• <strong>계약 품질 이슈:</strong> 최근 3 영업일 동안 인수거절/청약철회 2건 이상 발생</div>
                     </div>
+
+                    <div className="mb-2 font-semibold text-green-300">기회 상황 (초록색)</div>
+                    <div className="space-y-1 mb-3 text-xs">
+                      <div>• <strong>실적 급상승:</strong> 전월 동기 대비 APE +30% 이상 급등</div>
+                      <div>• <strong>고액 계약 체결:</strong> 월 보험료 30만원 이상 계약 체결</div>
+                      <div>• <strong>신규 가동:</strong> 위촉된 설계사가 당월 생애 첫 계약 성공</div>
+                    </div>
+
                     <div className="mt-2 pt-2 border-t border-gray-600 text-center text-gray-300">
                       클릭하여 지점 상세보기
                     </div>
@@ -1512,16 +1529,25 @@ const Agent360Dashboard = () => {
                   .map((item) => (
                     <div
                       key={item.id}
-                      className="p-4 bg-white border border-gray-200 rounded-lg cursor-pointer hover:border-gray-300 hover:shadow-sm transition-all"
+                      className={`p-4 bg-white border-l-4 border-r border-t border-b rounded-lg cursor-pointer hover:shadow-sm transition-all ${
+                        item.type === 'risk'
+                          ? 'border-l-red-500 border-red-100 hover:border-red-200'
+                          : 'border-l-green-500 border-green-100 hover:border-green-200'
+                      }`}
                       onClick={() => handleVisitBranchClick(item.agency, item.branch)}
                     >
                       <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="text-sm font-semibold text-gray-900 mb-1">
-                            {item.agency} &gt; {item.branch}
+                        <div className="flex items-center">
+                          <div className={`w-2 h-2 rounded-full mr-3 ${
+                            item.type === 'risk' ? 'bg-red-500' : 'bg-green-500'
+                          }`}></div>
+                          <div className="flex-1">
+                            <div className="text-sm font-semibold text-gray-900 mb-1">
+                              {item.agency} &gt; {item.branch}
+                            </div>
+                            <div className="text-sm text-gray-700 mb-1">{item.issue}</div>
+                            <div className="text-xs text-gray-500">{item.detail}</div>
                           </div>
-                          <div className="text-sm text-gray-700 mb-1">{item.issue}</div>
-                          <div className="text-xs text-gray-500">{item.detail}</div>
                         </div>
                         <ChevronRight className="w-5 h-5 text-gray-400" />
                       </div>
