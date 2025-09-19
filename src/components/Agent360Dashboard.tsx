@@ -37,6 +37,7 @@ const Agent360Dashboard = () => {
       target: 50000, // 목표 (만원)
       actual: 31000, // 실제 (만원)
       hqAvg: 58.3, // 영업본부 평균 (%)
+      nationalAvg: 55.1, // 전국 평균 (%)
       vsLastMonth: 12.5, // 전월 동기 대비 증감 (%p)
       gap: 19000, // 남은 금액 (만원)
       dailyRequired: 2710, // 일평균 필요 (만원)
@@ -49,6 +50,7 @@ const Agent360Dashboard = () => {
       active: 456, // 가동 설계사 수
       total: 700, // 전체 관리 설계사 수
       hqAvg: 62.8, // 영업본부 평균 (%)
+      nationalAvg: 59.4, // 전국 평균 (%)
       vsLastMonth: -5, // 전월 동기 대비 증감 (명) - 전체 설계사 감소
       vsLastMonthPercent: 2.1, // 전월 동기 대비 증감 (%p) - 가동률은 상승
       plan: 450, // 가동 계획
@@ -60,6 +62,7 @@ const Agent360Dashboard = () => {
       count: 103, // 모바일 청약 건수
       total: 225, // 전체 청약 건수
       hqAvg: 42.6, // 영업본부 평균 (%)
+      nationalAvg: 38.9, // 전국 평균 (%)
       vsLastMonth: -12, // 전월 동기 대비 증감 (건) - 모바일 건수 감소
       vsLastMonthPercent: 3.2 // 전월 동기 대비 증감 (%p) - 비율은 상승
     }
@@ -406,73 +409,56 @@ const Agent360Dashboard = () => {
   const getHistoricalKPI = (month: string) => {
     if (month === '2025-09') return myKPIDefault; // 현재 월
 
-    // 과거 월별 다른 데이터 반환
-    const historicalData: { [key: string]: typeof myKPIDefault } = {
-      '2025-08': {
-        goalAchievement: {
-          current: 95.2,
-          target: 50000,
-          actual: 47600,
-          hqAvg: 88.7,
-          vsLastMonth: 18.3,
-          gap: 2400,
-          dailyRequired: 0, // 완료된 월이므로 0
-          hqRankTotal: { rank: 5, total: 50 },
-          hqRankRegion: { rank: 2, total: 10 }
+    // 선택된 월의 년도와 월 파싱
+    const [year, monthNum] = month.split('-').map(Number);
+
+    // 기본값 대비 변동을 위한 시드값 생성 (년도와 월 기반)
+    const seed = year * 12 + monthNum;
+    const variation1 = ((seed % 23) - 11) * 0.02; // -0.22 ~ +0.24 범위의 변동
+    const variation2 = ((seed % 17) - 8) * 0.03; // -0.24 ~ +0.27 범위의 변동
+    const variation3 = ((seed % 13) - 6) * 0.04; // -0.24 ~ +0.28 범위의 변동
+
+    // 과거 월이므로 dailyRequired는 항상 0 (완료된 월)
+    return {
+      goalAchievement: {
+        current: Math.round((myKPIDefault.goalAchievement.current + variation1 * 30) * 10) / 10,
+        target: myKPIDefault.goalAchievement.target,
+        actual: Math.round(myKPIDefault.goalAchievement.actual * (1 + variation1 * 0.15)),
+        hqAvg: Math.round((myKPIDefault.goalAchievement.hqAvg + variation2 * 25) * 10) / 10,
+        nationalAvg: myKPIDefault.goalAchievement.nationalAvg,
+        vsLastMonth: Math.round((variation1 * 15 + 10) * 10) / 10,
+        gap: Math.round(Math.abs(variation1 * 5000)),
+        dailyRequired: 0, // 완료된 월이므로 0
+        hqRankTotal: {
+          rank: Math.max(1, Math.min(50, myKPIDefault.goalAchievement.hqRankTotal.rank + Math.round(variation1 * 8))),
+          total: 50
         },
-        designerActivity: {
-          current: 72.8,
-          active: 510,
-          total: 700,
-          hqAvg: 69.1,
-          vsLastMonth: 15,
-          vsLastMonthPercent: 7.2,
-          plan: 450,
-          planAchievement: 113.3
-        },
-        mobileContract: {
-          current: 52.3,
-          count: 142,
-          total: 271,
-          hqAvg: 48.9,
-          vsLastMonth: 39,
-          vsLastMonthPercent: 6.5
+        hqRankRegion: {
+          rank: Math.max(1, Math.min(10, myKPIDefault.goalAchievement.hqRankRegion.rank + Math.round(variation2 * 3))),
+          total: 10
         }
       },
-      '2025-07': {
-        goalAchievement: {
-          current: 88.5,
-          target: 45000,
-          actual: 39825,
-          hqAvg: 82.1,
-          vsLastMonth: 15.7,
-          gap: 5175,
-          dailyRequired: 0,
-          hqRankTotal: { rank: 7, total: 50 },
-          hqRankRegion: { rank: 3, total: 10 }
-        },
-        designerActivity: {
-          current: 68.4,
-          active: 479,
-          total: 700,
-          hqAvg: 65.8,
-          vsLastMonth: 8,
-          vsLastMonthPercent: 4.1,
-          plan: 450,
-          planAchievement: 106.4
-        },
-        mobileContract: {
-          current: 48.9,
-          count: 127,
-          total: 260,
-          hqAvg: 45.2,
-          vsLastMonth: 24,
-          vsLastMonthPercent: 5.1
-        }
+      designerActivity: {
+        current: Math.round((myKPIDefault.designerActivity.current + variation2 * 20) * 10) / 10,
+        active: Math.round(myKPIDefault.designerActivity.active * (1 + variation2 * 0.2)),
+        total: myKPIDefault.designerActivity.total,
+        hqAvg: Math.round((myKPIDefault.designerActivity.hqAvg + variation3 * 15) * 10) / 10,
+        nationalAvg: myKPIDefault.designerActivity.nationalAvg,
+        vsLastMonth: Math.round(variation2 * 20),
+        vsLastMonthPercent: Math.round((variation2 * 8) * 10) / 10,
+        plan: myKPIDefault.designerActivity.plan,
+        planAchievement: Math.round((100 + variation2 * 25) * 10) / 10
+      },
+      mobileContract: {
+        current: Math.round((myKPIDefault.mobileContract.current + variation3 * 15) * 10) / 10,
+        count: Math.round(myKPIDefault.mobileContract.count * (1 + variation3 * 0.3)),
+        total: Math.round(myKPIDefault.mobileContract.total * (1 + variation1 * 0.1)),
+        hqAvg: Math.round((myKPIDefault.mobileContract.hqAvg + variation1 * 12) * 10) / 10,
+        nationalAvg: myKPIDefault.mobileContract.nationalAvg,
+        vsLastMonth: Math.round(variation3 * 25),
+        vsLastMonthPercent: Math.round((variation3 * 10) * 10) / 10
       }
     };
-
-    return historicalData[month] || myKPIDefault;
   };
 
   // 선택된 월에 따른 myKPI 데이터
