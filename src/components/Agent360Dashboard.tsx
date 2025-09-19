@@ -929,16 +929,18 @@ const Agent360Dashboard = () => {
               <p className="text-sm text-gray-600 mt-1">
                 강남본부 김영수 지점장 |
                 {isCurrentMonth ? (
-                  <>2025.09.20(금) | 9월 영업일: {businessDays.elapsed}일/{businessDays.total}일 (잔여 {businessDays.remaining}일)</>
+                  <> 9/19 마감 데이터 기준</>
                 ) : (
-                  <>{appliedMonth.replace('-', '년 ').replace(/0(\d)/, '$1')}월 마감 기준 데이터</>
+                  <> {appliedMonth.split('-')[0]}년 {parseInt(appliedMonth.split('-')[1])}월 마감 데이터 기준</>
                 )}
               </p>
-              {isCurrentMonth && (
-                <p className="text-xs text-gray-500 mt-0.5">9/19 마감 데이터 기준</p>
-              )}
             </div>
             <div className="flex items-center gap-4">
+              {isCurrentMonth && (
+                <span className="text-xs text-gray-500">
+                  2025.09.20(금) | 9월 영업일: {businessDays.elapsed}일/{businessDays.total}일 (잔여 {businessDays.remaining}일)
+                </span>
+              )}
               <div className="flex items-center gap-1">
                 <select
                   value={tempSelectedMonth}
