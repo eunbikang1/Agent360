@@ -1546,25 +1546,16 @@ const Agent360Dashboard = () => {
 
                 {/* 산출 기준 툴팁 */}
                 {showCriteriaTooltip && (
-                  <div className="absolute top-8 right-0 w-96 bg-gray-800 text-white text-xs rounded-lg p-3 z-20 shadow-lg">
-                    <div className="mb-2 font-semibold text-red-300">위험 신호 (Risk Signal)</div>
-                    <div className="space-y-1 mb-3 text-xs">
-                      <div>• <strong>3개월 연속 실적 하락:</strong> 직전 3개월 연속 전월 대비 총 APE 하락 + 당월 누적 APE도 전월 동기 대비 하락</div>
-                      <div>• <strong>목표달성 미달:</strong> 월 영업일 절반 이상 경과 시, 목표 페이스 대비 현재 실적 -30% 이상 부진</div>
-                      <div>• <strong>핵심인력 해촉:</strong> 지난달에 실적이 있었던 가동 설계사가 이번 달에 퇴사한 경우 (1명 이상)</div>
-                      <div>• <strong>계약 품질 이슈:</strong> 최근 3 영업일 동안 인수거절/청약철회가 2건 이상 발생</div>
-                    </div>
-                    <div className="mb-2 font-semibold text-green-300">기회 신호 (Opportunity Signal)</div>
-                    <div className="space-y-1 mb-3 text-xs">
-                      <div>• <strong>실적 급상승:</strong> 전월 동기 대비 APE +30% 이상 급등</div>
-                      <div>• <strong>고액 계약 체결:</strong> 월 보험료 30만원 이상 계약 체결</div>
-                      <div>• <strong>신규 가동:</strong> 위촉된 설계사가 당월에 생애 첫 계약에 성공</div>
-                    </div>
-                    <div className="mb-2 font-semibold text-blue-300">변화 탐지 (Change Detection Signal)</div>
+                  <div className="absolute top-8 right-0 w-64 bg-gray-800 text-white text-xs rounded-lg p-3 z-20 shadow-lg">
+                    <div className="text-center font-semibold mb-2">방문 추천 기준</div>
                     <div className="space-y-1 text-xs">
-                      <div>• <strong>연속 가동자 이탈:</strong> 직전 3개월 연속 가동 상태였던 설계사 중 당월 활동 없는 인원 1명 이상 발생</div>
-                      <div>• <strong>신규 위촉 발생:</strong> 당월 신규 위촉 인원 1명 이상 발생</div>
-                      <div>• <strong>포트폴리오 급변:</strong> 건강 vs 종신/정기 비중이 직전 3개월 평균 대비 ±20%p 이상 변동</div>
+                      <div>• 실적 급변 (상승/하락)</div>
+                      <div>• 목표 달성률 변화</div>
+                      <div>• 인력 변동 상황</div>
+                      <div>• 계약 품질 이슈</div>
+                    </div>
+                    <div className="mt-2 pt-2 border-t border-gray-600 text-center text-gray-300">
+                      클릭하여 지점 상세보기
                     </div>
                     <div className="absolute -top-2 right-4 w-0 h-0 border-l-4 border-r-4 border-b-4 border-l-transparent border-r-transparent border-b-gray-800"></div>
                   </div>
