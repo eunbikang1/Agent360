@@ -1518,7 +1518,7 @@ const Agent360Dashboard = () => {
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           <div className="text-sm font-semibold text-gray-900 mb-1">
-                            {item.agency} > {item.branch}
+                            {item.agency} &gt; {item.branch}
                           </div>
                           <div className="text-sm text-gray-700 mb-1">{item.issue}</div>
                           <div className="text-xs text-gray-500">{item.detail}</div>
