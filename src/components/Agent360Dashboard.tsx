@@ -263,115 +263,58 @@ const Agent360Dashboard = () => {
     return branches;
   };
 
-  // 관리 포커스 지점 (위험 신호 & 기회 신호)
-  const managementFocus = {
-    critical: [
-      {
-        id: 1,
-        agency: '메타리치',
-        branch: '보험스토어',
-        tag: '3개월 연속 실적 하락',
-        reason: '직전 3개월 연속 전월 대비 총 APE 하락, 당월 누적 APE도 전월 동기 대비 하락',
-        metric: '3개월 연속',
-        priority: 'critical',
-        type: 'risk'
-      },
-      {
-        id: 2,
-        agency: '글로벌금융판매',
-        branch: '케이에스에프에스동대문',
-        tag: '목표달성 미달',
-        reason: '월 영업일 절반 경과, 목표 페이스 대비 현재 실적 -32% 부진',
-        metric: '-32%',
-        priority: 'critical',
-        type: 'risk'
-      },
-      {
-        id: 3,
-        agency: '지금용코리아',
-        branch: '대원',
-        tag: '핵심인력 해촉',
-        reason: '지난달 실적이 있었던 가동 설계사 2명이 이번 달 퇴사',
-        metric: '2명 해촉',
-        priority: 'critical',
-        type: 'risk'
-      },
-      {
-        id: 4,
-        agency: '더블유에셋',
-        branch: '일산센터',
-        tag: '계약 품질 이슈',
-        reason: '최근 3 영업일 동안 인수거절/청약철회 3건 발생',
-        metric: '3일간 3건',
-        priority: 'critical',
-        type: 'risk'
-      }
-    ],
-    opportunities: [
-      {
-        id: 5,
-        agency: '글로벌금융판매',
-        branch: '리더스일산',
-        tag: '실적 급상승',
-        reason: '전월 동기 대비 APE +35% 급등, 성공요인 분석 필요',
-        metric: '+35%',
-        priority: 'opportunity',
-        type: 'opportunity'
-      },
-      {
-        id: 6,
-        agency: '어센틱금융그룹',
-        branch: '구미 스튜디오',
-        tag: '고액 계약 체결',
-        reason: '월 보험료 35만원 계약 체결, 성공사례 전파 기회',
-        metric: '35만원',
-        priority: 'opportunity',
-        type: 'opportunity'
-      },
-      {
-        id: 7,
-        agency: '라이프파트너스',
-        branch: '부산센터',
-        tag: '신규 가동',
-        reason: '위촉된 설계사가 당월 생애 첫 계약 성공, 격려 필요',
-        metric: '첫 계약',
-        priority: 'opportunity',
-        type: 'opportunity'
-      }
-    ],
-    changes: [
-      {
-        id: 8,
-        agency: '한국파이낸셜그룹',
-        branch: '강남점',
-        tag: '연속 가동자 이탈',
-        reason: '직전 3개월 연속 가동이었던 설계사 1명이 당월 활동 없음',
-        metric: '1명 이탈',
-        priority: 'change',
-        type: 'change'
-      },
-      {
-        id: 9,
-        agency: '메가금융판매',
-        branch: '서울본점',
-        tag: '신규 위촉 발생',
-        reason: '당월 신규 위촉 인원 2명 발생, 환영과 관심 필요',
-        metric: '2명 위촉',
-        priority: 'change',
-        type: 'change'
-      },
-      {
-        id: 10,
-        agency: '한국지에이금융서비스',
-        branch: '일산지사',
-        tag: '포트폴리오 급변',
-        reason: '건강보험 vs 종신/정기 비중이 직전 3개월 평균 대비 +25%p 변동',
-        metric: '+25%p',
-        priority: 'change',
-        type: 'change'
-      }
-    ]
-  };
+  // 방문 추천 지점 (간단하고 직관적)
+  const managementFocus = [
+    {
+      id: 1,
+      agency: '메타리치',
+      branch: '보험스토어',
+      issue: '실적 계속 떨어짐',
+      detail: '3개월 연속 하락'
+    },
+    {
+      id: 2,
+      agency: '글로벌금융판매',
+      branch: '케이에스에프에스동대문',
+      issue: '목표 달성 어려움',
+      detail: '현재 32% 부족'
+    },
+    {
+      id: 3,
+      agency: '지금용코리아',
+      branch: '대원',
+      issue: '핵심 직원 퇴사',
+      detail: '가동자 2명 해촉'
+    },
+    {
+      id: 4,
+      agency: '더블유에셋',
+      branch: '일산센터',
+      issue: '계약 취소 많음',
+      detail: '3일간 3건 발생'
+    },
+    {
+      id: 5,
+      agency: '글로벌금융판매',
+      branch: '리더스일산',
+      issue: '실적 크게 상승',
+      detail: '전월 대비 35% 증가'
+    },
+    {
+      id: 6,
+      agency: '어센틱금융그룹',
+      branch: '구미 스튜디오',
+      issue: '고액 계약 성공',
+      detail: '월 35만원 계약'
+    },
+    {
+      id: 7,
+      agency: '라이프파트너스',
+      branch: '부산센터',
+      issue: '신입 첫 성과',
+      detail: '신규자 첫 계약'
+    }
+  ];
 
   const getKPIData = () => {
     return (monthlyTrend as any)[selectedYear][selectedKPI];
@@ -1562,43 +1505,32 @@ const Agent360Dashboard = () => {
                 )}
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {/* 확장되지 않았을 때는 5개, 확장했을 때는 전체 표시 */}
-                {[...managementFocus.critical, ...managementFocus.opportunities, ...managementFocus.changes]
+                {managementFocus
                   .slice(0, expandedRecommendations ? undefined : 5)
                   .map((item) => (
                     <div
                       key={item.id}
-                      className={`flex items-center justify-between p-2 bg-gray-50 rounded-lg cursor-pointer border ${
-                        item.type === 'risk' ? 'hover:bg-red-50' :
-                        item.type === 'opportunity' ? 'hover:bg-green-50' : 'hover:bg-blue-50'
-                      }`}
+                      className="p-4 bg-white border border-gray-200 rounded-lg cursor-pointer hover:border-gray-300 hover:shadow-sm transition-all"
                       onClick={() => handleVisitBranchClick(item.agency, item.branch)}
                     >
-                      <div className="flex items-center">
-                        <div className={`w-2 h-2 rounded-full mr-2 ${
-                          item.type === 'risk' ? 'bg-red-500' :
-                          item.type === 'opportunity' ? 'bg-green-500' : 'bg-blue-500'
-                        }`}></div>
-                        <div>
-                          <div className="text-sm font-medium">{item.agency} &gt; {item.branch}</div>
-                          <div className="text-xs text-gray-500">[{item.tag}] {item.reason}</div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="text-sm font-semibold text-gray-900 mb-1">
+                            {item.agency} > {item.branch}
+                          </div>
+                          <div className="text-sm text-gray-700 mb-1">{item.issue}</div>
+                          <div className="text-xs text-gray-500">{item.detail}</div>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className={`text-sm font-bold ${
-                          item.type === 'risk' ? 'text-red-600' :
-                          item.type === 'opportunity' ? 'text-green-600' : 'text-blue-600'
-                        }`}>{item.metric}</div>
-                        <ChevronRight className="w-4 h-4 text-gray-400" />
+                        <ChevronRight className="w-5 h-5 text-gray-400" />
                       </div>
                     </div>
                   ))}
-
               </div>
 
               {/* 더보기 버튼 */}
-              {[...managementFocus.critical, ...managementFocus.opportunities, ...managementFocus.changes].length > 5 && (
+              {managementFocus.length > 5 && (
                 <div className="mt-3 text-center">
                   <button
                     onClick={() => setExpandedRecommendations(!expandedRecommendations)}
