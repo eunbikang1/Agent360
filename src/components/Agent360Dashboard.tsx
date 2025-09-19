@@ -270,9 +270,9 @@ const Agent360Dashboard = () => {
         id: 1,
         agency: '메타리치',
         branch: '보험스토어',
-        tag: '실적 급하락',
-        reason: '전월 동기 대비 APE -35% 급락',
-        metric: '-35%',
+        tag: '3개월 연속 실적 하락',
+        reason: '직전 3개월 연속 전월 대비 총 APE 하락, 당월 누적 APE도 전월 동기 대비 하락',
+        metric: '3개월 연속',
         priority: 'critical',
         type: 'risk'
       },
@@ -281,7 +281,7 @@ const Agent360Dashboard = () => {
         agency: '글로벌금융판매',
         branch: '케이에스에프에스동대문',
         tag: '목표달성 미달',
-        reason: '목표 페이스 대비 현재 실적 -32% 미달',
+        reason: '월 영업일 절반 경과, 목표 페이스 대비 현재 실적 -32% 부진',
         metric: '-32%',
         priority: 'critical',
         type: 'risk'
@@ -291,7 +291,7 @@ const Agent360Dashboard = () => {
         agency: '지금용코리아',
         branch: '대원',
         tag: '핵심인력 해촉',
-        reason: '지난달 가동 설계사 2명 해촉',
+        reason: '지난달 실적이 있었던 가동 설계사 2명이 이번 달 퇴사',
         metric: '2명 해촉',
         priority: 'critical',
         type: 'risk'
@@ -301,72 +301,74 @@ const Agent360Dashboard = () => {
         agency: '더블유에셋',
         branch: '일산센터',
         tag: '계약 품질 이슈',
-        reason: '당월 인수거절/청약철회 4건 발생',
-        metric: '4건 발생',
-        priority: 'high',
-        type: 'risk'
-      },
-      {
-        id: 5,
-        agency: '한국파이낸셜그룹',
-        branch: '강남점',
-        tag: '활동 중단',
-        reason: '지난달 실적 있었으나 당월 APE 없음',
-        metric: '0원',
+        reason: '최근 3 영업일 동안 인수거절/청약철회 3건 발생',
+        metric: '3일간 3건',
         priority: 'critical',
         type: 'risk'
       }
     ],
     opportunities: [
       {
-        id: 6,
+        id: 5,
         agency: '글로벌금융판매',
         branch: '리더스일산',
         tag: '실적 급상승',
-        reason: '전월 동기 대비 APE +45% 급등',
-        metric: '+45%',
+        reason: '전월 동기 대비 APE +35% 급등, 성공요인 분석 필요',
+        metric: '+35%',
         priority: 'opportunity',
         type: 'opportunity'
       },
       {
-        id: 7,
-        agency: '한국지에이금융서비스',
-        branch: '일산지사',
-        tag: '목표 초과 달성',
-        reason: '당월 목표 125% 달성',
-        metric: '125%',
-        priority: 'opportunity',
-        type: 'opportunity'
-      },
-      {
-        id: 8,
+        id: 6,
         agency: '어센틱금융그룹',
         branch: '구미 스튜디오',
         tag: '고액 계약 체결',
-        reason: '월 보험료 35만원 고액계약 체결',
+        reason: '월 보험료 35만원 계약 체결, 성공사례 전파 기회',
         metric: '35만원',
         priority: 'opportunity',
         type: 'opportunity'
       },
       {
-        id: 9,
-        agency: '메가금융판매',
-        branch: '서울본점',
-        tag: '신규 위촉',
-        reason: '이번 달 신규 설계사 3명 위촉',
-        metric: '3명 위촉',
-        priority: 'opportunity',
-        type: 'opportunity'
-      },
-      {
-        id: 10,
+        id: 7,
         agency: '라이프파트너스',
         branch: '부산센터',
         tag: '신규 가동',
-        reason: '신규 설계사 2명이 첫 계약 성공',
-        metric: '2명 가동',
+        reason: '위촉된 설계사가 당월 생애 첫 계약 성공, 격려 필요',
+        metric: '첫 계약',
         priority: 'opportunity',
         type: 'opportunity'
+      }
+    ],
+    changes: [
+      {
+        id: 8,
+        agency: '한국파이낸셜그룹',
+        branch: '강남점',
+        tag: '연속 가동자 이탈',
+        reason: '직전 3개월 연속 가동이었던 설계사 1명이 당월 활동 없음',
+        metric: '1명 이탈',
+        priority: 'change',
+        type: 'change'
+      },
+      {
+        id: 9,
+        agency: '메가금융판매',
+        branch: '서울본점',
+        tag: '신규 위촉 발생',
+        reason: '당월 신규 위촉 인원 2명 발생, 환영과 관심 필요',
+        metric: '2명 위촉',
+        priority: 'change',
+        type: 'change'
+      },
+      {
+        id: 10,
+        agency: '한국지에이금융서비스',
+        branch: '일산지사',
+        tag: '포트폴리오 급변',
+        reason: '건강보험 vs 종신/정기 비중이 직전 3개월 평균 대비 +25%p 변동',
+        metric: '+25%p',
+        priority: 'change',
+        type: 'change'
       }
     ]
   };
@@ -1544,23 +1546,25 @@ const Agent360Dashboard = () => {
 
                 {/* 산출 기준 툴팁 */}
                 {showCriteriaTooltip && (
-                  <div className="absolute top-8 right-0 w-80 bg-gray-800 text-white text-xs rounded-lg p-3 z-20 shadow-lg">
-                    <div className="mb-2 font-semibold text-red-300">🚨 위험 신호</div>
+                  <div className="absolute top-8 right-0 w-96 bg-gray-800 text-white text-xs rounded-lg p-3 z-20 shadow-lg">
+                    <div className="mb-2 font-semibold text-red-300">위험 신호 (Risk Signal)</div>
                     <div className="space-y-1 mb-3 text-xs">
-                      <div>• <strong>실적 급하락:</strong> 전월 동기 대비 APE -30% 이상</div>
-                      <div>• <strong>목표달성 미달:</strong> 목표 페이스 대비 현재 실적 -30% 이상</div>
-                      <div>• <strong>활동 중단:</strong> 지난달 실적이 있었지만, 이번 달 활동(APE)이 없는 지점</div>
-                      <div>• <strong>핵심인력 해촉:</strong> 지난달에 실적이 있었던 '가동 설계사'가 이번 달에 퇴사(해촉)한 경우 (단 1명이라도 발생 시)</div>
-                      <div>• <strong>계약 품질 이슈:</strong> 당월 인수거절/청약철회 3건 이상</div>
+                      <div>• <strong>3개월 연속 실적 하락:</strong> 직전 3개월 연속 전월 대비 총 APE 하락 + 당월 누적 APE도 전월 동기 대비 하락</div>
+                      <div>• <strong>목표달성 미달:</strong> 월 영업일 절반 이상 경과 시, 목표 페이스 대비 현재 실적 -30% 이상 부진</div>
+                      <div>• <strong>핵심인력 해촉:</strong> 지난달에 실적이 있었던 가동 설계사가 이번 달에 퇴사한 경우 (1명 이상)</div>
+                      <div>• <strong>계약 품질 이슈:</strong> 최근 3 영업일 동안 인수거절/청약철회가 2건 이상 발생</div>
                     </div>
-                    <div className="mb-2 font-semibold text-green-300">🚀 기회 신호</div>
+                    <div className="mb-2 font-semibold text-green-300">기회 신호 (Opportunity Signal)</div>
+                    <div className="space-y-1 mb-3 text-xs">
+                      <div>• <strong>실적 급상승:</strong> 전월 동기 대비 APE +30% 이상 급등</div>
+                      <div>• <strong>고액 계약 체결:</strong> 월 보험료 30만원 이상 계약 체결</div>
+                      <div>• <strong>신규 가동:</strong> 위촉된 설계사가 당월에 생애 첫 계약에 성공</div>
+                    </div>
+                    <div className="mb-2 font-semibold text-blue-300">변화 탐지 (Change Detection Signal)</div>
                     <div className="space-y-1 text-xs">
-                      <div>• <strong>실적 급상승:</strong> 전월 동기 대비 APE +30% 이상</div>
-                      <div>• <strong>목표 초과 달성:</strong> 당월 목표 120% 이상 달성</div>
-                      <div>• <strong>고액 계약 체결:</strong> 월 보험료 30만 원 이상 계약 체결</div>
-                      <div>• <strong>신규 위촉:</strong> 이번 달에 신규 설계사가 위촉된 경우 (단 1명이라도 발생 시)</div>
-                      <div>• <strong>신규 가동:</strong> 위촉된 설계사가 생애 첫 계약(가동)에 성공한 경우 (단 1명이라도 발생 시)</div>
-                      <div>• <strong>체결률 저조:</strong> 설계 건수는 본부 평균 이상, 계약 전환율은 평균 이하</div>
+                      <div>• <strong>연속 가동자 이탈:</strong> 직전 3개월 연속 가동 상태였던 설계사 중 당월 활동 없는 인원 1명 이상 발생</div>
+                      <div>• <strong>신규 위촉 발생:</strong> 당월 신규 위촉 인원 1명 이상 발생</div>
+                      <div>• <strong>포트폴리오 급변:</strong> 건강 vs 종신/정기 비중이 직전 3개월 평균 대비 ±20%p 이상 변동</div>
                     </div>
                     <div className="absolute -top-2 right-4 w-0 h-0 border-l-4 border-r-4 border-b-4 border-l-transparent border-r-transparent border-b-gray-800"></div>
                   </div>
@@ -1569,19 +1573,21 @@ const Agent360Dashboard = () => {
 
               <div className="space-y-2">
                 {/* 확장되지 않았을 때는 5개, 확장했을 때는 전체 표시 */}
-                {[...managementFocus.critical, ...managementFocus.opportunities]
+                {[...managementFocus.critical, ...managementFocus.opportunities, ...managementFocus.changes]
                   .slice(0, expandedRecommendations ? undefined : 5)
                   .map((item) => (
                     <div
                       key={item.id}
                       className={`flex items-center justify-between p-2 bg-gray-50 rounded-lg cursor-pointer border ${
-                        item.type === 'risk' ? 'hover:bg-red-50' : 'hover:bg-green-50'
+                        item.type === 'risk' ? 'hover:bg-red-50' :
+                        item.type === 'opportunity' ? 'hover:bg-green-50' : 'hover:bg-blue-50'
                       }`}
                       onClick={() => handleVisitBranchClick(item.agency, item.branch)}
                     >
                       <div className="flex items-center">
                         <div className={`w-2 h-2 rounded-full mr-2 ${
-                          item.type === 'risk' ? 'bg-red-500' : 'bg-green-500'
+                          item.type === 'risk' ? 'bg-red-500' :
+                          item.type === 'opportunity' ? 'bg-green-500' : 'bg-blue-500'
                         }`}></div>
                         <div>
                           <div className="text-sm font-medium">{item.agency} &gt; {item.branch}</div>
@@ -1590,7 +1596,8 @@ const Agent360Dashboard = () => {
                       </div>
                       <div className="flex items-center gap-2">
                         <div className={`text-sm font-bold ${
-                          item.type === 'risk' ? 'text-red-600' : 'text-green-600'
+                          item.type === 'risk' ? 'text-red-600' :
+                          item.type === 'opportunity' ? 'text-green-600' : 'text-blue-600'
                         }`}>{item.metric}</div>
                         <ChevronRight className="w-4 h-4 text-gray-400" />
                       </div>
@@ -1600,7 +1607,7 @@ const Agent360Dashboard = () => {
               </div>
 
               {/* 더보기 버튼 */}
-              {[...managementFocus.critical, ...managementFocus.opportunities].length > 5 && (
+              {[...managementFocus.critical, ...managementFocus.opportunities, ...managementFocus.changes].length > 5 && (
                 <div className="mt-3 text-center">
                   <button
                     onClick={() => setExpandedRecommendations(!expandedRecommendations)}
