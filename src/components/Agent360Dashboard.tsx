@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trophy, Download, Building, ChevronRight, ChevronDown, ArrowUp, ArrowDown, Activity, AlertTriangle, HelpCircle, X } from 'lucide-react';
+import { Trophy, Download, Building, ChevronRight, ChevronDown, ChevronUp, ArrowUp, ArrowDown, Activity, AlertTriangle, HelpCircle, X } from 'lucide-react';
 
 const Agent360Dashboard = () => {
   const navigate = useNavigate();
@@ -269,72 +269,72 @@ const Agent360Dashboard = () => {
       id: 1,
       agency: '메타리치',
       branch: '보험스토어',
-      issue: '실적 계속 떨어짐',
-      detail: '3개월 연속 하락',
+      issue: '3개월 연속 실적 하락',
+      detail: '',
       type: 'risk'
     },
     {
       id: 2,
       agency: '글로벌금융판매',
       branch: '케이에스에프에스동대문',
-      issue: '목표 달성 어려움',
-      detail: '현재 32% 부족',
+      issue: '목표달성 미달',
+      detail: '',
       type: 'risk'
     },
     {
       id: 3,
       agency: '지금용코리아',
       branch: '대원',
-      issue: '핵심 직원 퇴사',
-      detail: '가동자 2명 해촉',
+      issue: '핵심인력 해촉',
+      detail: '',
       type: 'risk'
     },
     {
       id: 4,
       agency: '더블유에셋',
       branch: '일산센터',
-      issue: '계약 취소 많음',
-      detail: '3일간 3건 발생',
+      issue: '계약 품질 이슈',
+      detail: '',
       type: 'risk'
     },
     {
       id: 5,
       agency: '글로벌금융판매',
       branch: '리더스일산',
-      issue: '실적 크게 상승',
-      detail: '전월 대비 35% 증가',
+      issue: '실적 급상승',
+      detail: '',
       type: 'opportunity'
     },
     {
       id: 6,
       agency: '어센틱금융그룹',
       branch: '구미 스튜디오',
-      issue: '고액 계약 성공',
-      detail: '월 35만원 계약',
+      issue: '고액 계약 체결',
+      detail: '',
       type: 'opportunity'
     },
     {
       id: 7,
       agency: '라이프파트너스',
       branch: '부산센터',
-      issue: '신입 첫 성과',
-      detail: '신규자 첫 계약',
+      issue: '신규 가동',
+      detail: '',
       type: 'opportunity'
     },
     {
       id: 8,
       agency: '한국지에이금융서비스',
       branch: '일산지사',
-      issue: '가동자 이탈',
-      detail: '3개월 연속 가동자 1명 중단',
+      issue: '연속 가동자 이탈',
+      detail: '',
       type: 'change'
     },
     {
       id: 9,
       agency: '지에이스타금융서비스',
       branch: '부천코어',
-      issue: '신규 위촉',
-      detail: '이번 달 신입 2명 영입',
+      issue: '신규 위촉 발생',
+      detail: '',
       type: 'change'
     }
   ];
@@ -359,6 +359,8 @@ const Agent360Dashboard = () => {
   const [branchPeriod, setBranchPeriod] = useState<'current' | 'previous'>('current');
   const [showAllBranchesModal, setShowAllBranchesModal] = useState(false);
   const [showBranchInfoModal, setBranchInfoModal] = useState(false);
+  const [branchInfoSortBy, setBranchInfoSortBy] = useState<'no' | 'agency' | 'branch' | 'address' | 'phone' | 'partnershipDate' | 'currentMonthAPE' | 'totalAgents' | 'activeAgents' | 'agencyBranch'>('agencyBranch');
+  const [branchInfoSortOrder, setBranchInfoSortOrder] = useState<'asc' | 'desc'>('asc');
   const [modalSortBy, setModalSortBy] = useState('achievement');
   const [modalSortOrder, setModalSortOrder] = useState<'desc' | 'asc'>('desc');
   const [tempSelectedMonth, setTempSelectedMonth] = useState('2025-09'); // 드롭다운에서 선택한 월
@@ -1512,11 +1514,14 @@ const Agent360Dashboard = () => {
 
                 {/* 산출 기준 툴팁 */}
                 {showCriteriaTooltip && (
-                  <div className="absolute top-8 right-0 w-96 bg-gray-800 text-white text-xs rounded-lg p-4 z-20 shadow-lg max-h-96 overflow-y-auto">
+                  <div className="fixed inset-0 z-10" onClick={() => setShowCriteriaTooltip(false)}></div>
+                )}
+                {showCriteriaTooltip && (
+                  <div className="absolute top-8 right-0 w-[520px] bg-gray-800 text-white text-sm rounded-lg p-6 z-20 shadow-lg max-h-[500px] overflow-y-auto">
                     <div className="text-center font-semibold mb-3">오늘 주목할 지점 산출 기준</div>
 
                     <div className="mb-2 font-semibold text-red-300">위험</div>
-                    <div className="space-y-1 mb-4 text-xs">
+                    <div className="space-y-2 mb-4 text-sm">
                       <div>• <strong>3개월 연속 실적 하락:</strong> 직전 3개월 연속 전월 대비 총 APE 하락 + 당월 누적 APE도 전월 동기보다 낮음</div>
                       <div>• <strong>목표달성 미달:</strong> 월 영업일 절반 이상 경과 시점에서 목표 페이스 대비 현재 실적 -30% 이상 부진</div>
                       <div>• <strong>핵심인력 해촉:</strong> 지난달 실적이 있었던 가동 설계사가 이번 달 퇴사</div>
@@ -1524,22 +1529,19 @@ const Agent360Dashboard = () => {
                     </div>
 
                     <div className="mb-2 font-semibold text-green-300">기회</div>
-                    <div className="space-y-1 mb-4 text-xs">
+                    <div className="space-y-2 mb-4 text-sm">
                       <div>• <strong>실적 급상승:</strong> 전월 동기 대비 APE +30% 이상 급등</div>
                       <div>• <strong>고액 계약 체결:</strong> 월 보험료 30만원 이상 계약 체결</div>
                       <div>• <strong>신규 가동:</strong> 위촉된 설계사가 당월 생애 첫 계약 성공</div>
                     </div>
 
                     <div className="mb-2 font-semibold text-blue-300">변화</div>
-                    <div className="space-y-1 mb-3 text-xs">
+                    <div className="space-y-2 mb-3 text-sm">
                       <div>• <strong>연속 가동자 이탈:</strong> 직전 3개월 연속 가동 상태였던 설계사가 당월 활동 없음</div>
                       <div>• <strong>신규 위촉 발생:</strong> 당월 신규 위촉 인원 1명 이상</div>
                       <div>• <strong>포트폴리오 급변:</strong> 건강 vs 종신/정기 비중이 직전 3개월 평균 대비 ±20%p 이상 변동</div>
                     </div>
 
-                    <div className="mt-3 pt-2 border-t border-gray-600 text-center text-gray-300">
-                      클릭하여 지점 상세보기
-                    </div>
                     <div className="absolute -top-2 right-4 w-0 h-0 border-l-4 border-r-4 border-b-4 border-l-transparent border-r-transparent border-b-gray-800"></div>
                   </div>
                 )}
@@ -1571,7 +1573,7 @@ const Agent360Dashboard = () => {
                               {item.agency} {'>'} {item.branch}
                             </div>
                             <div className="text-sm text-gray-600">
-                              {item.issue} · {item.detail}
+                              {item.issue}
                             </div>
                           </div>
                         </div>
@@ -1734,7 +1736,7 @@ const Agent360Dashboard = () => {
           <div className="bg-white rounded-lg p-6 max-w-6xl w-full mx-4 max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">
-                전체 지점 랭킹 (160개)
+                전체 지점 랭킹
               </h3>
               <button
                 onClick={() => setShowAllBranchesModal(false)}
@@ -1975,43 +1977,221 @@ const Agent360Dashboard = () => {
                   <thead>
                     <tr className="border-b border-gray-200">
                       {/* 번호 */}
-                      <th className="text-center py-3 px-2 bg-gray-50 text-xs font-semibold text-gray-800 border-r border-gray-200">
-                        번호
+                      <th className="text-center py-3 px-2 bg-gray-50 text-xs font-semibold text-gray-800 border-r border-gray-200 cursor-pointer hover:bg-gray-100"
+                          onClick={() => {
+                            if (branchInfoSortBy === 'no') {
+                              setBranchInfoSortOrder(branchInfoSortOrder === 'asc' ? 'desc' : 'asc');
+                            } else {
+                              setBranchInfoSortBy('no');
+                              setBranchInfoSortOrder('asc');
+                            }
+                          }}>
+                        <div className="flex items-center justify-center gap-1">
+                          번호
+                          {branchInfoSortBy === 'no' && (
+                            branchInfoSortOrder === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
+                          )}
+                        </div>
                       </th>
-                      <th className="text-left py-3 px-3 bg-gray-50 text-xs font-semibold text-gray-800 border-r border-gray-200">
-                        대리점명
+                      <th className="text-left py-3 px-3 bg-gray-50 text-xs font-semibold text-gray-800 border-r border-gray-200 cursor-pointer hover:bg-gray-100"
+                          onClick={() => {
+                            if (branchInfoSortBy === 'agency') {
+                              setBranchInfoSortOrder(branchInfoSortOrder === 'asc' ? 'desc' : 'asc');
+                            } else {
+                              setBranchInfoSortBy('agency');
+                              setBranchInfoSortOrder('asc');
+                            }
+                          }}>
+                        <div className="flex items-center gap-1">
+                          대리점명
+                          {branchInfoSortBy === 'agency' && (
+                            branchInfoSortOrder === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
+                          )}
+                        </div>
                       </th>
-                      <th className="text-left py-3 px-3 bg-gray-50 text-xs font-semibold text-gray-800 border-r border-gray-200">
-                        지점명
+                      <th className="text-left py-3 px-3 bg-gray-50 text-xs font-semibold text-gray-800 border-r border-gray-200 cursor-pointer hover:bg-gray-100"
+                          onClick={() => {
+                            if (branchInfoSortBy === 'branch') {
+                              setBranchInfoSortOrder(branchInfoSortOrder === 'asc' ? 'desc' : 'asc');
+                            } else {
+                              setBranchInfoSortBy('branch');
+                              setBranchInfoSortOrder('asc');
+                            }
+                          }}>
+                        <div className="flex items-center gap-1">
+                          지점명
+                          {branchInfoSortBy === 'branch' && (
+                            branchInfoSortOrder === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
+                          )}
+                        </div>
                       </th>
 
                       {/* 기본 정보 */}
-                      <th className="text-left py-3 px-3 bg-blue-50 text-xs font-semibold text-blue-800 border-r border-blue-200">
-                        주소
+                      <th className="text-left py-3 px-3 bg-blue-50 text-xs font-semibold text-blue-800 border-r border-blue-200 cursor-pointer hover:bg-blue-100"
+                          onClick={() => {
+                            if (branchInfoSortBy === 'address') {
+                              setBranchInfoSortOrder(branchInfoSortOrder === 'asc' ? 'desc' : 'asc');
+                            } else {
+                              setBranchInfoSortBy('address');
+                              setBranchInfoSortOrder('asc');
+                            }
+                          }}>
+                        <div className="flex items-center gap-1">
+                          주소
+                          {branchInfoSortBy === 'address' && (
+                            branchInfoSortOrder === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
+                          )}
+                        </div>
                       </th>
-                      <th className="text-left py-3 px-3 bg-blue-50 text-xs font-semibold text-blue-800 border-r border-blue-200">
-                        연락처
+                      <th className="text-left py-3 px-3 bg-blue-50 text-xs font-semibold text-blue-800 border-r border-blue-200 cursor-pointer hover:bg-blue-100"
+                          onClick={() => {
+                            if (branchInfoSortBy === 'phone') {
+                              setBranchInfoSortOrder(branchInfoSortOrder === 'asc' ? 'desc' : 'asc');
+                            } else {
+                              setBranchInfoSortBy('phone');
+                              setBranchInfoSortOrder('asc');
+                            }
+                          }}>
+                        <div className="flex items-center gap-1">
+                          연락처
+                          {branchInfoSortBy === 'phone' && (
+                            branchInfoSortOrder === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
+                          )}
+                        </div>
                       </th>
-                      <th className="text-left py-3 px-3 bg-blue-50 text-xs font-semibold text-blue-800 border-r border-blue-200">
-                        제휴일자
+                      <th className="text-left py-3 px-3 bg-blue-50 text-xs font-semibold text-blue-800 border-r border-blue-200 cursor-pointer hover:bg-blue-100"
+                          onClick={() => {
+                            if (branchInfoSortBy === 'partnershipDate') {
+                              setBranchInfoSortOrder(branchInfoSortOrder === 'asc' ? 'desc' : 'asc');
+                            } else {
+                              setBranchInfoSortBy('partnershipDate');
+                              setBranchInfoSortOrder('asc');
+                            }
+                          }}>
+                        <div className="flex items-center gap-1">
+                          제휴일자
+                          {branchInfoSortBy === 'partnershipDate' && (
+                            branchInfoSortOrder === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
+                          )}
+                        </div>
                       </th>
 
                       {/* 지점 실적 */}
-                      <th className="text-center py-3 px-2 bg-orange-50 text-xs font-semibold text-orange-800 border-r border-orange-200">
-                        당월 실적
+                      <th className="text-center py-3 px-2 bg-orange-50 text-xs font-semibold text-orange-800 border-r border-orange-200 cursor-pointer hover:bg-orange-100"
+                          onClick={() => {
+                            if (branchInfoSortBy === 'currentMonthAPE') {
+                              setBranchInfoSortOrder(branchInfoSortOrder === 'asc' ? 'desc' : 'asc');
+                            } else {
+                              setBranchInfoSortBy('currentMonthAPE');
+                              setBranchInfoSortOrder('desc');
+                            }
+                          }}>
+                        <div className="flex items-center justify-center gap-1">
+                          당월 실적
+                          {branchInfoSortBy === 'currentMonthAPE' && (
+                            branchInfoSortOrder === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
+                          )}
+                        </div>
                       </th>
 
                       {/* 설계사 위촉 */}
-                      <th className="text-center py-3 px-2 bg-green-50 text-xs font-semibold text-green-800 border-r border-green-200">
-                        위촉설계사
+                      <th className="text-center py-3 px-2 bg-green-50 text-xs font-semibold text-green-800 border-r border-green-200 cursor-pointer hover:bg-green-100"
+                          onClick={() => {
+                            if (branchInfoSortBy === 'totalAgents') {
+                              setBranchInfoSortOrder(branchInfoSortOrder === 'asc' ? 'desc' : 'asc');
+                            } else {
+                              setBranchInfoSortBy('totalAgents');
+                              setBranchInfoSortOrder('desc');
+                            }
+                          }}>
+                        <div className="flex items-center justify-center gap-1">
+                          위촉설계사
+                          {branchInfoSortBy === 'totalAgents' && (
+                            branchInfoSortOrder === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
+                          )}
+                        </div>
                       </th>
-                      <th className="text-center py-3 px-2 bg-green-50 text-xs font-semibold text-green-800">
-                        가동설계사
+                      <th className="text-center py-3 px-2 bg-green-50 text-xs font-semibold text-green-800 cursor-pointer hover:bg-green-100"
+                          onClick={() => {
+                            if (branchInfoSortBy === 'activeAgents') {
+                              setBranchInfoSortOrder(branchInfoSortOrder === 'asc' ? 'desc' : 'asc');
+                            } else {
+                              setBranchInfoSortBy('activeAgents');
+                              setBranchInfoSortOrder('desc');
+                            }
+                          }}>
+                        <div className="flex items-center justify-center gap-1">
+                          가동설계사
+                          {branchInfoSortBy === 'activeAgents' && (
+                            branchInfoSortOrder === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
+                          )}
+                        </div>
                       </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {getBranchInfoData().map((branch, idx) => (
+                    {(() => {
+                      const data = getBranchInfoData();
+                      const sortedData = [...data].sort((a, b) => {
+                        let aVal, bVal;
+
+                        switch(branchInfoSortBy) {
+                          case 'no':
+                            aVal = a.no;
+                            bVal = b.no;
+                            break;
+                          case 'agency':
+                            aVal = a.agency;
+                            bVal = b.agency;
+                            break;
+                          case 'branch':
+                            aVal = a.branch;
+                            bVal = b.branch;
+                            break;
+                          case 'agencyBranch':
+                            aVal = `${a.agency} ${a.branch}`;
+                            bVal = `${b.agency} ${b.branch}`;
+                            break;
+                          case 'address':
+                            aVal = a.address;
+                            bVal = b.address;
+                            break;
+                          case 'phone':
+                            aVal = a.phone;
+                            bVal = b.phone;
+                            break;
+                          case 'partnershipDate':
+                            aVal = a.partnershipDate;
+                            bVal = b.partnershipDate;
+                            break;
+                          case 'currentMonthAPE':
+                            aVal = a.currentMonthAPE;
+                            bVal = b.currentMonthAPE;
+                            break;
+                          case 'totalAgents':
+                            aVal = a.totalAgents === '-' ? -1 : parseInt(a.totalAgents);
+                            bVal = b.totalAgents === '-' ? -1 : parseInt(b.totalAgents);
+                            break;
+                          case 'activeAgents':
+                            aVal = a.activeAgents === '-' ? -1 : parseInt(a.activeAgents);
+                            bVal = b.activeAgents === '-' ? -1 : parseInt(b.activeAgents);
+                            break;
+                          default:
+                            return 0;
+                        }
+
+                        if (typeof aVal === 'string' && typeof bVal === 'string') {
+                          return branchInfoSortOrder === 'asc'
+                            ? aVal.localeCompare(bVal, 'ko-KR')
+                            : bVal.localeCompare(aVal, 'ko-KR');
+                        }
+
+                        if (aVal < bVal) return branchInfoSortOrder === 'asc' ? -1 : 1;
+                        if (aVal > bVal) return branchInfoSortOrder === 'asc' ? 1 : -1;
+                        return 0;
+                      });
+
+                      return sortedData.map((branch, idx) => (
                       <tr key={idx} className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
                           onClick={() => navigate(`/branch/${encodeURIComponent(branch.agency)}/${encodeURIComponent(branch.branch)}`)}>
                         {/* 번호 */}
@@ -2053,7 +2233,8 @@ const Agent360Dashboard = () => {
                           {branch.activeAgents === '-' ? '-' : `${branch.activeAgents}명`}
                         </td>
                       </tr>
-                    ))}
+                    ));
+                    })()}
                   </tbody>
                 </table>
               </div>
