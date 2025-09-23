@@ -1,10 +1,66 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Building, Users, Phone, MapPin, Calendar, TrendingUp, ChevronDown, User, ArrowDown, Download, Briefcase } from 'lucide-react';
 
 const Branch360Dashboard = () => {
   const { agency, branchName } = useParams<{ agency?: string; branchName: string }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // 쿼리 파라미터에서 필터 상태 가져오기
+  const [selectedPeriod, setSelectedPeriod] = useState(searchParams.get('period') || '2025-09');
+  const [selectedYear, setSelectedYear] = useState(searchParams.get('year') || '2025');
+  const [selectedProduct, setSelectedProduct] = useState<'전체' | '건강' | '종신/정기'>(searchParams.get('product') as '전체' | '건강' | '종신/정기' || '전체');
+
+  // 3년치 월 옵션 생성 (2023년 1월부터 2025년 9월까지)
+  const generateMonthOptions = () => {
+    const options = [];
+    for (let year = 2023; year <= 2025; year++) {
+      const endMonth = year === 2025 ? 9 : 12;
+      for (let month = 1; month <= endMonth; month++) {
+        const value = `${year}-${month.toString().padStart(2, '0')}`;
+        const label = `${year}년 ${month}월`;
+        options.push({ value, label });
+      }
+    }
+    return options.reverse(); // 최신 순으로 정렬
+  };
+
+  const monthOptions = generateMonthOptions();
+
+  // 기간 변경 핸들러
+  const handlePeriodChange = (newPeriod: string) => {
+    setSelectedPeriod(newPeriod);
+    const params = new URLSearchParams(searchParams);
+    params.set('period', newPeriod);
+    setSearchParams(params);
+  };
+
+  // CSV 다운로드 함수
+  const downloadCSV = () => {
+    const csvHeaders = [
+      '대리점명', '지점명', '당월APE', '목표달성률', '위촉설계사', '가동설계사', '조회기간'
+    ];
+
+    const csvData = [
+      csvHeaders.join(','),
+      `${selectedAgency},${selectedBranch},${corePerformance.currentApe}만원,${corePerformance.achievementRate.toFixed(1)}%,${currentAgentStatus.total}명,${currentAgentStatus.active}명,${selectedPeriod}`
+    ];
+
+    const csvContent = '\uFEFF' + csvData.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `${selectedAgency}_${selectedBranch}_지점현황_${selectedPeriod}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
 
   // 실제 대리점/지점 데이터 (Agent360Dashboard와 동일)
   const agencies = ['지금용코리아', '글로벌금융판매', '메타리치', '지에이스타금융서비스', '더블유에셋', '한국지에이금융서비스', '메가'];
@@ -131,9 +187,7 @@ const Branch360Dashboard = () => {
   // 상태 변수들
   const [hoveredMonthData, setHoveredMonthData] = useState<any>(null);
   const [hoveredDayData, setHoveredDayData] = useState<any>(null);
-  const [selectedYear, setSelectedYear] = useState<string>('2025');
   const [selectedMetric, setSelectedMetric] = useState<string>('월 APE');
-  const [selectedProduct, setSelectedProduct] = useState<'전체' | '건강' | '종신/정기'>('건강');
   const [productSortBy, setProductSortBy] = useState<'amount' | 'count'>('amount');
   const [dailyMetric, setDailyMetric] = useState<'일 APE' | '청약 건수'>('일 APE'); // 일별 차트 지표
   const [hoveredAverage, setHoveredAverage] = useState<{type: 'daily' | 'monthly', value: number} | null>(null); // 평균선 호버
@@ -692,7 +746,7 @@ const Branch360Dashboard = () => {
 
 
   const handleExcelDownload = () => {
-    alert('엑셀 다운로드 기능이 실행됩니다.');
+    downloadCSV();
   };
 
   return (
@@ -762,13 +816,32 @@ const Branch360Dashboard = () => {
             </div>
           </div>
           
-          <button
-            onClick={handleExcelDownload}
-            className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded flex items-center space-x-2"
-          >
-            <Download className="w-4 h-4" />
-            <span>원클릭 엑셀 다운로드</span>
-          </button>
+          <div className="flex items-center space-x-4">
+            {/* 조회기간 선택 */}
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-600">조회기간:</span>
+              <select
+                value={selectedPeriod}
+                onChange={(e) => handlePeriodChange(e.target.value)}
+                className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                {monthOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* CSV 다운로드 버튼 */}
+            <button
+              onClick={handleExcelDownload}
+              className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded flex items-center space-x-2"
+            >
+              <Download className="w-4 h-4" />
+              <span>원클릭 CSV 다운로드</span>
+            </button>
+          </div>
         </div>
 
         {/* 드롭다운 외부 클릭 시 닫기 */}

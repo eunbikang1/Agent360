@@ -855,14 +855,26 @@ const Agent360Dashboard = () => {
   const handleBranchClick = (agency: string, branchName: string) => {
     const encodedAgency = encodeURIComponent(agency);
     const encodedBranch = encodeURIComponent(branchName);
-    navigate(`/branch/${encodedAgency}/${encodedBranch}`);
+    const queryParams = new URLSearchParams({
+      period: appliedMonth,
+      year: selectedYear,
+      kpi: selectedKPI,
+      product: selectedProduct
+    });
+    navigate(`/branch/${encodedAgency}/${encodedBranch}?${queryParams.toString()}`);
   };
 
   // 방문 추천 지점 클릭 핸들러
   const handleVisitBranchClick = (agency: string, branchName: string) => {
     const encodedAgency = encodeURIComponent(agency);
     const encodedBranch = encodeURIComponent(branchName);
-    navigate(`/branch/${encodedAgency}/${encodedBranch}`);
+    const queryParams = new URLSearchParams({
+      period: appliedMonth,
+      year: selectedYear,
+      kpi: selectedKPI,
+      product: selectedProduct
+    });
+    navigate(`/branch/${encodedAgency}/${encodedBranch}?${queryParams.toString()}`);
   };
 
   // 지점 360° 상세 분석 버튼 클릭 핸들러 (첫 번째 지점으로 이동)
@@ -1489,14 +1501,51 @@ const Agent360Dashboard = () => {
               </div>
             </div>
 
-            {/* 지점별 상세 바로가기 버튼 */}
-            <div className="mt-3">
+            {/* 지점별 상세 바로가기 및 다운로드 버튼 */}
+            <div className="mt-3 flex gap-2">
               <button
                 onClick={handleBranchDetailClick}
-                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-3 rounded text-sm font-medium hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-3 rounded text-sm font-medium hover:shadow-lg transition-all flex items-center justify-center gap-2"
               >
                 <Building className="w-4 h-4" />
                 지점별 상세 바로가기
+              </button>
+              <button
+                onClick={() => {
+                  // 현재 대시보드 데이터를 CSV로 다운로드
+                  const currentDate = new Date().toISOString().split('T')[0];
+                  const filename = `Agent360_Dashboard_${appliedMonth.replace('-', '_')}_${currentDate}.csv`;
+
+                  // CSV 헤더
+                  const headers = ['지점명', '대리점', '당월실적', '목표달성률', '전월대비', '가동설계사수', '신계약건수'];
+
+                  // 데이터 변환
+                  const csvData = getBranchRankings().data.map(branch => [
+                    branch.branch,
+                    branch.agency,
+                    branch.achievement,
+                    `${branch.achievementRate}%`,
+                    `${branch.monthlyChange}%`,
+                    branch.activeAgents,
+                    branch.newContracts
+                  ]);
+
+                  // CSV 생성
+                  const csvContent = [headers, ...csvData]
+                    .map(row => row.map(field => `"${field}"`).join(','))
+                    .join('\n');
+
+                  // 다운로드
+                  const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' });
+                  const link = document.createElement('a');
+                  link.href = URL.createObjectURL(blob);
+                  link.download = filename;
+                  link.click();
+                }}
+                className="bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-3 rounded text-sm font-medium hover:shadow-lg transition-all flex items-center justify-center gap-2"
+              >
+                <Download className="w-4 h-4" />
+                다운로드
               </button>
             </div>
             
@@ -2193,7 +2242,15 @@ const Agent360Dashboard = () => {
 
                       return sortedData.map((branch, idx) => (
                       <tr key={idx} className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
-                          onClick={() => navigate(`/branch/${encodeURIComponent(branch.agency)}/${encodeURIComponent(branch.branch)}`)}>
+                          onClick={() => {
+                            const queryParams = new URLSearchParams({
+                              period: appliedMonth,
+                              year: selectedYear,
+                              kpi: selectedKPI,
+                              product: selectedProduct
+                            });
+                            navigate(`/branch/${encodeURIComponent(branch.agency)}/${encodeURIComponent(branch.branch)}?${queryParams.toString()}`);
+                          }}>
                         {/* 번호 */}
                         <td className="py-3 px-2 text-center border-r border-gray-200 text-xs font-medium text-gray-900">
                           {branch.no}
