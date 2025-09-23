@@ -1566,7 +1566,7 @@ const Agent360Dashboard = () => {
                   <div className="fixed inset-0 z-10" onClick={() => setShowCriteriaTooltip(false)}></div>
                 )}
                 {showCriteriaTooltip && (
-                  <div className="absolute top-8 right-0 w-[520px] bg-gray-800 text-white text-sm rounded-lg p-6 z-20 shadow-lg max-h-[500px] overflow-y-auto">
+                  <div className="absolute top-8 right-0 w-[700px] bg-gray-800 text-white text-sm rounded-lg p-6 z-20 shadow-lg max-h-[500px] overflow-y-auto">
                     <div className="text-center font-semibold mb-3">오늘 주목할 지점 산출 기준</div>
 
                     <div className="mb-2 font-semibold text-red-300">위험</div>
