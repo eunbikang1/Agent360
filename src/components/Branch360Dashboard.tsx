@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { Building, Users, Phone, MapPin, Calendar, TrendingUp, ChevronDown, User, ArrowDown, Download, Briefcase } from 'lucide-react';
+import { Building, Users, Phone, MapPin, Calendar, TrendingUp, ChevronDown, User, ArrowDown, Download, Briefcase, AlertTriangle, TrendingDown, UserPlus } from 'lucide-react';
 
 const Branch360Dashboard = () => {
   const { agency, branchName } = useParams<{ agency?: string; branchName: string }>();
@@ -89,6 +89,93 @@ const Branch360Dashboard = () => {
   const [selectedBranch, setSelectedBranch] = useState(displayedBranch);
   const [showAgencyDropdown, setShowAgencyDropdown] = useState(false);
   const [showBranchDropdown, setShowBranchDropdown] = useState(false);
+  const [showAlertTooltip, setShowAlertTooltip] = useState(false);
+
+  // 알림 타입 정의
+  type AlertType = '위험' | '기회' | '변화';
+  type AlertItem = {
+    type: AlertType;
+    title: string;
+    description: string;
+    icon: React.ReactNode;
+    color: string;
+    bgColor: string;
+    priority: number;
+  };
+
+  // 지점별 알림 시스템
+  const getBranchAlerts = (agency: string, branch: string): AlertItem[] => {
+    const alerts: AlertItem[] = [];
+
+    // 위험 알림들 (우선순위 1)
+    if (branch === '역삼지점') {
+      alerts.push({
+        type: '위험',
+        title: '3개월 연속 실적 하락',
+        description: '직전 3개월 연속 전월 대비 총 APE 하락 + 당월 누적 APE도 전월 동기보다 낮음',
+        icon: <TrendingDown className="w-3 h-3" />,
+        color: 'text-red-600',
+        bgColor: 'bg-red-100',
+        priority: 1
+      });
+      alerts.push({
+        type: '위험',
+        title: '목표달성 미달',
+        description: '월 영업일 절반 이상 경과 시점에서 목표 페이스 대비 현재 실적 -30% 이상 부진',
+        icon: <AlertTriangle className="w-3 h-3" />,
+        color: 'text-red-600',
+        bgColor: 'bg-red-100',
+        priority: 1
+      });
+    }
+
+    // 기회 알림들 (우선순위 2)
+    if (branch === '강남지점') {
+      alerts.push({
+        type: '기회',
+        title: '실적 급상승',
+        description: '전월 동기 대비 APE +30% 이상 급등',
+        icon: <TrendingUp className="w-3 h-3" />,
+        color: 'text-green-600',
+        bgColor: 'bg-green-100',
+        priority: 2
+      });
+      alerts.push({
+        type: '기회',
+        title: '고액 계약 체결',
+        description: '월 보험료 30만원 이상 계약 체결',
+        icon: <Briefcase className="w-3 h-3" />,
+        color: 'text-green-600',
+        bgColor: 'bg-green-100',
+        priority: 2
+      });
+    }
+
+    // 변화 알림들 (우선순위 3)
+    if (branch === '서초지점') {
+      alerts.push({
+        type: '변화',
+        title: '신규 위촉 발생',
+        description: '당월 신규 위촉 인원 1명 이상',
+        icon: <UserPlus className="w-3 h-3" />,
+        color: 'text-blue-600',
+        bgColor: 'bg-blue-100',
+        priority: 3
+      });
+    }
+
+    return alerts.sort((a, b) => a.priority - b.priority);
+  };
+
+  // 현재 지점의 알림들
+  const currentAlerts = getBranchAlerts(selectedAgency, selectedBranch);
+
+  // 알림 카운트 (타입별)
+  const alertCounts = {
+    위험: currentAlerts.filter(alert => alert.type === '위험').length,
+    기회: currentAlerts.filter(alert => alert.type === '기회').length,
+    변화: currentAlerts.filter(alert => alert.type === '변화').length
+  };
 
   // 선택된 대리점의 지점 목록
   const availableBranches = generateBranchesForAgency(selectedAgency);
@@ -792,7 +879,47 @@ const Branch360Dashboard = () => {
                   className="flex items-center space-x-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200"
                 >
                   <span className="text-sm text-blue-600">지점:</span>
-                  <span className="text-sm font-bold text-blue-700">{selectedBranch}</span>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm font-bold text-blue-700">{selectedBranch}</span>
+                    {/* 알림 뱃지 */}
+                    {currentAlerts.length > 0 && (
+                      <div className="flex items-center space-x-1">
+                        {alertCounts.위험 > 0 && (
+                          <div
+                            className="relative"
+                            onMouseEnter={() => setShowAlertTooltip(true)}
+                            onMouseLeave={() => setShowAlertTooltip(false)}
+                          >
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 cursor-help">
+                              🔴{alertCounts.위험}
+                            </span>
+                          </div>
+                        )}
+                        {alertCounts.기회 > 0 && (
+                          <div
+                            className="relative"
+                            onMouseEnter={() => setShowAlertTooltip(true)}
+                            onMouseLeave={() => setShowAlertTooltip(false)}
+                          >
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 cursor-help">
+                              🟢{alertCounts.기회}
+                            </span>
+                          </div>
+                        )}
+                        {alertCounts.변화 > 0 && (
+                          <div
+                            className="relative"
+                            onMouseEnter={() => setShowAlertTooltip(true)}
+                            onMouseLeave={() => setShowAlertTooltip(false)}
+                          >
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 cursor-help">
+                              🔵{alertCounts.변화}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                   <ChevronDown className="w-4 h-4 text-blue-600" />
                 </button>
                 {showBranchDropdown && (
@@ -809,6 +936,36 @@ const Branch360Dashboard = () => {
                       </button>
                     ))}
                   </div>
+                )}
+
+                {/* 알림 상세 툴팁 */}
+                {showAlertTooltip && currentAlerts.length > 0 && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => setShowAlertTooltip(false)}></div>
+                    <div className="absolute top-full left-0 mt-2 w-96 bg-white border border-gray-200 rounded-lg shadow-lg z-20 p-4">
+                      <div className="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+                        <AlertTriangle className="w-4 h-4 mr-2 text-orange-500" />
+                        {selectedBranch} 주의사항
+                      </div>
+                      <div className="space-y-3 max-h-60 overflow-y-auto">
+                        {currentAlerts.map((alert, index) => (
+                          <div key={index} className={`flex items-start space-x-3 p-3 rounded-lg ${alert.bgColor}`}>
+                            <div className={`flex-shrink-0 ${alert.color} mt-0.5`}>
+                              {alert.icon}
+                            </div>
+                            <div className="flex-1">
+                              <div className={`font-medium text-sm ${alert.color}`}>
+                                {alert.type}: {alert.title}
+                              </div>
+                              <div className="text-xs text-gray-600 mt-1">
+                                {alert.description}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </>
                 )}
               </div>
 
