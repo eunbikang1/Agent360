@@ -1960,7 +1960,7 @@ const Agent360Dashboard = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setBranchInfoModal(false)}>
           <div className="bg-white rounded-lg p-6 max-w-7xl w-full mx-4 max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">전체 관리 지점 목록 (160개)</h3>
+              <h3 className="text-lg font-semibold text-gray-900">전체 관리 지점 목록</h3>
               <button
                 onClick={() => setBranchInfoModal(false)}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -2012,7 +2012,8 @@ const Agent360Dashboard = () => {
                   </thead>
                   <tbody>
                     {getBranchInfoData().map((branch, idx) => (
-                      <tr key={idx} className="border-b border-gray-100 hover:bg-gray-50">
+                      <tr key={idx} className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
+                          onClick={() => navigate(`/branch/${encodeURIComponent(branch.agency)}/${encodeURIComponent(branch.branch)}`)}>
                         {/* 번호 */}
                         <td className="py-3 px-2 text-center border-r border-gray-200 text-xs font-medium text-gray-900">
                           {branch.no}
