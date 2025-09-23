@@ -356,6 +356,9 @@ const Agent360Dashboard = () => {
   const [branchSortBy, setBranchSortBy] = useState('achievement');
   const [branchSortOrder, setBranchSortOrder] = useState<'desc' | 'asc'>('desc');
   const [showCriteriaTooltip, setShowCriteriaTooltip] = useState(false);
+  const [modalSize, setModalSize] = useState({ width: 700, height: 500 });
+  const [isResizing, setIsResizing] = useState(false);
+  const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width: 0, height: 0 });
   const [branchPeriod, setBranchPeriod] = useState<'current' | 'previous'>('current');
   const [showAllBranchesModal, setShowAllBranchesModal] = useState(false);
   const [showBranchInfoModal, setBranchInfoModal] = useState(false);
@@ -849,6 +852,52 @@ const Agent360Dashboard = () => {
     };
     
     return (productData as any)[selectedProduct][productSortBy === 'amount' ? 'byAmount' : 'byCount'];
+  };
+
+  // 모달 리사이즈 핸들러
+  const handleResizeStart = (e: React.MouseEvent, direction: string) => {
+    e.preventDefault();
+    setIsResizing(true);
+    setResizeStart({
+      x: e.clientX,
+      y: e.clientY,
+      width: modalSize.width,
+      height: modalSize.height
+    });
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizing) return;
+
+      const deltaX = e.clientX - resizeStart.x;
+      const deltaY = e.clientY - resizeStart.y;
+
+      let newWidth = modalSize.width;
+      let newHeight = modalSize.height;
+
+      if (direction.includes('right')) {
+        newWidth = Math.max(300, resizeStart.width + deltaX);
+      }
+      if (direction.includes('left')) {
+        newWidth = Math.max(300, resizeStart.width - deltaX);
+      }
+      if (direction.includes('bottom')) {
+        newHeight = Math.max(200, resizeStart.height + deltaY);
+      }
+      if (direction.includes('top')) {
+        newHeight = Math.max(200, resizeStart.height - deltaY);
+      }
+
+      setModalSize({ width: newWidth, height: newHeight });
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
   };
 
   // 지점 클릭 핸들러
@@ -1566,7 +1615,38 @@ const Agent360Dashboard = () => {
                   <div className="fixed inset-0 z-10" onClick={() => setShowCriteriaTooltip(false)}></div>
                 )}
                 {showCriteriaTooltip && (
-                  <div className="absolute top-8 right-0 w-[700px] bg-gray-800 text-white text-sm rounded-lg p-6 z-20 shadow-lg max-h-[500px] overflow-y-auto">
+                  <div
+                    className="absolute top-8 right-0 bg-gray-800 text-white text-sm rounded-lg p-6 z-20 shadow-lg overflow-y-auto select-none"
+                    style={{
+                      width: `${modalSize.width}px`,
+                      height: `${modalSize.height}px`,
+                      minWidth: '300px',
+                      minHeight: '200px'
+                    }}
+                  >
+                    {/* Resize handles */}
+                    <div
+                      className="absolute top-0 right-0 w-4 h-4 cursor-se-resize opacity-50 hover:opacity-100"
+                      onMouseDown={(e) => handleResizeStart(e, 'se')}
+                      style={{ background: 'linear-gradient(-45deg, transparent 40%, white 40%, white 60%, transparent 60%)' }}
+                    ></div>
+                    <div
+                      className="absolute top-0 right-2 left-2 h-1 cursor-n-resize opacity-0 hover:opacity-50 hover:bg-gray-600"
+                      onMouseDown={(e) => handleResizeStart(e, 'n')}
+                    ></div>
+                    <div
+                      className="absolute bottom-0 right-2 left-2 h-1 cursor-s-resize opacity-0 hover:opacity-50 hover:bg-gray-600"
+                      onMouseDown={(e) => handleResizeStart(e, 's')}
+                    ></div>
+                    <div
+                      className="absolute top-2 bottom-2 left-0 w-1 cursor-w-resize opacity-0 hover:opacity-50 hover:bg-gray-600"
+                      onMouseDown={(e) => handleResizeStart(e, 'w')}
+                    ></div>
+                    <div
+                      className="absolute top-2 bottom-2 right-0 w-1 cursor-e-resize opacity-0 hover:opacity-50 hover:bg-gray-600"
+                      onMouseDown={(e) => handleResizeStart(e, 'e')}
+                    ></div>
+
                     <div className="text-center font-semibold mb-3">오늘 주목할 지점 산출 기준</div>
 
                     <div className="mb-2 font-semibold text-red-300">위험</div>
