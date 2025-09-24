@@ -1285,42 +1285,58 @@ const Branch360Dashboard = () => {
                 </div>
                 당월 실적 현황
               </h2>
-              <span className="text-sm text-gray-500">{getCurrentMonth()}월 기준</span>
             </div>
 
             {/* APE 실적 현황 - 심플 버전 */}
-            <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h3 className="text-base font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">목표달성률 (APE 기준)</h3>
+            <div className="bg-white rounded-lg shadow-sm border p-6 relative">
+              <div className="flex justify-between items-start mb-4 border-b border-gray-100 pb-2">
+                <h3 className="text-base font-bold text-gray-800">목표달성률</h3>
+                <span className="text-xs text-gray-500">APE 기준</span>
+              </div>
 
               <div className="text-center mb-4">
                 <div className="text-5xl font-black text-blue-600 mb-2">{corePerformance.achievementRate.toFixed(1)}%</div>
-                <div className="text-lg text-gray-600 font-medium mb-4">
-                  {formatCurrency(corePerformance.currentApe * 10000)} / {formatCurrency(corePerformance.targetApe * 10000)}
+                <div className="text-sm text-gray-600 font-medium mb-4">
+                  달성 {formatCurrency(corePerformance.currentApe * 10000)} / 목표 {formatCurrency(corePerformance.targetApe * 10000)}
                 </div>
 
                 <div className="w-full bg-gray-200 rounded-full h-5 mb-2 relative">
                   <div className="bg-blue-500 h-5 rounded-full transition-all" style={{width: `${corePerformance.achievementRate}%`}}></div>
-                  {/* 기대 진도선 (15일/22일 = 68.2%) */}
+                  {/* 목표 진도율선 (15일/22일 = 68.2%) */}
                   <div
                     className="absolute top-0 h-5 w-0.5 bg-orange-500 z-10 cursor-pointer"
                     style={{left: `${(15/22)*100}%`}}
                     onMouseEnter={() => setShowExpectedProgressTooltip(true)}
                     onMouseLeave={() => setShowExpectedProgressTooltip(false)}
                   />
-                  {/* 기대 진도 호버 영역 확대 */}
+                  {/* 목표 진도율 삼각형 표시 */}
                   <div
-                    className="absolute top-0 h-5 w-4 z-10 cursor-pointer"
+                    className="absolute -bottom-3 z-10"
+                    style={{left: `${(15/22)*100}%`, transform: 'translateX(-50%)'}}
+                  >
+                    <div
+                      className="w-0 h-0"
+                      style={{
+                        borderLeft: '6px solid transparent',
+                        borderRight: '6px solid transparent',
+                        borderBottom: '8px solid #f97316'
+                      }}
+                    ></div>
+                  </div>
+                  {/* 목표 진도율 호버 영역 확대 */}
+                  <div
+                    className="absolute -bottom-3 h-7 w-6 z-10 cursor-pointer"
                     style={{left: `${(15/22)*100}%`, transform: 'translateX(-50%)'}}
                     onMouseEnter={() => setShowExpectedProgressTooltip(true)}
                     onMouseLeave={() => setShowExpectedProgressTooltip(false)}
                   />
-                  {/* 기대 진도 툴팁 */}
+                  {/* 목표 진도율 툴팁 */}
                   {showExpectedProgressTooltip && (
                     <div
                       className="absolute top-6 bg-gray-800 text-white text-xs rounded px-3 py-2 whitespace-nowrap z-20 shadow-lg"
                       style={{left: `${(15/22)*100}%`, transform: 'translateX(-50%)'}}
                     >
-                      <div className="font-bold mb-1">기대진도 {Math.round((15/22)*100)}%</div>
+                      <div className="font-bold mb-1">목표 진도율 {Math.round((15/22)*100)}%</div>
                       <div className="text-gray-300">영업일 기준: 15일/22일</div>
                     </div>
                   )}
@@ -2024,10 +2040,10 @@ const Branch360Dashboard = () => {
               </div>
             </div>
 
-            {/* 상품 판매 현황 */}
+            {/* 주력 상품 */}
             <div className="bg-white rounded-lg shadow-sm border p-4">
               <div className="flex items-center justify-between mb-1">
-                <h3 className="text-sm font-semibold text-gray-700">상품 판매 현황</h3>
+                <h3 className="text-sm font-semibold text-gray-700">주력 상품</h3>
                 <p className="text-xs text-gray-500">*직전 3개월 평균 기준</p>
               </div>
 
@@ -2061,15 +2077,26 @@ const Branch360Dashboard = () => {
                     return (
                       <div
                         key={idx}
-                        className="flex items-center gap-3 mb-1 group relative cursor-pointer"
+                        className="flex items-center gap-3 mb-1 group relative"
                         title={`직전 3개월 평균 APE: ${formattedAmount}`}
                       >
                         <span className="text-xs text-gray-700 w-28 flex-shrink-0">{item.name}</span>
-                        <div className="flex-1 bg-gray-200 rounded-full h-4">
+                        <div className="flex-1 bg-gray-200 rounded-full h-4 relative">
                           <div
                             className="h-4 rounded-full transition-all hover:opacity-80"
                             style={{ width: `${item.value}%`, backgroundColor: item.color }}
                           />
+                          {/* 전체 평균선 */}
+                          {selectedProduct === '전체' && (
+                            <div
+                              className="absolute top-0 bottom-0 w-0.5 bg-orange-500 z-10"
+                              style={{
+                                left: `${item.name === '건강' ? '60%' : '40%'}`,
+                                boxShadow: '0 0 4px rgba(255, 165, 0, 0.5)'
+                              }}
+                              title={`전체 평균: ${item.name === '건강' ? '60%' : '40%'}`}
+                            />
+                          )}
                         </div>
                         <span className="text-xs font-medium text-gray-700 w-8 text-right flex-shrink-0">{item.value}%</span>
 
@@ -2081,6 +2108,18 @@ const Branch360Dashboard = () => {
                     );
                   })}
                 </div>
+
+                {/* 범례 - 전체 상품군 선택시에만 표시 */}
+                {selectedProduct === '전체' && (
+                  <div className="mt-3 pt-2 border-t border-gray-100">
+                    <div className="flex items-center justify-center gap-4 text-xs">
+                      <div className="flex items-center">
+                        <div className="w-4 h-0.5 bg-orange-500 mr-2"></div>
+                        <span className="text-gray-600">전체 평균 (건강 60% / 종신정기 40%)</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Top 3 상품 - 테이블 형태 */}
@@ -2121,7 +2160,7 @@ const Branch360Dashboard = () => {
                     {getTopProducts().map((product: any, idx: number) => (
                       <div
                         key={product.rank}
-                        className="grid gap-2 p-2 hover:bg-blue-50 rounded-lg cursor-pointer transition-all"
+                        className="grid gap-2 p-2 rounded-lg"
                         style={{gridTemplateColumns: '30px 1fr 80px 80px'}}
                       >
                         <div className="flex items-center">
