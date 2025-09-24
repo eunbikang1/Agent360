@@ -5,7 +5,7 @@ import { Trophy, Download, Building, ChevronRight, ChevronDown, ChevronUp, Arrow
 const Agent360Dashboard = () => {
   const navigate = useNavigate();
   const [selectedKPI, setSelectedKPI] = useState('nb_plan');
-  const [selectedYear, setSelectedYear] = useState('2025');
+  const [selectedYear] = useState('2025'); // eslint-disable-line @typescript-eslint/no-unused-vars
   const [selectedProduct, setSelectedProduct] = useState('전체');
   const [productSortBy, setProductSortBy] = useState('amount');
 
