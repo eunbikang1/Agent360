@@ -2355,25 +2355,27 @@ const Branch360Dashboard = () => {
                 return (
                   <div className="bg-white rounded-lg border border-gray-200">
                     <div className="bg-green-50 px-4 py-2 border-b border-green-200 rounded-t-lg">
-                      <h4 className="font-medium text-green-800 text-sm">당월 가동 설계사 목록 ({activeAgents.length}명)</h4>
+                      <h4 className="font-medium text-green-800 text-sm">가동 설계사 목록 ({activeAgents.length}명)</h4>
                     </div>
                     <div className="max-h-60 overflow-y-auto">
                       <table className="w-full text-xs">
                         <thead className="bg-gray-50 sticky top-0">
                           <tr>
-                            <th className="px-4 py-2 text-left font-medium text-gray-700 w-24">설계사코드</th>
-                            <th className="px-4 py-2 text-left font-medium text-gray-700 w-20">이름</th>
-                            <th className="px-4 py-2 text-right font-medium text-gray-700">당월 MMP</th>
-                            <th className="px-4 py-2 text-right font-medium text-gray-700">전월 MMP</th>
+                            <th className="px-3 py-2 text-left font-medium text-gray-700 w-20">설계사코드</th>
+                            <th className="px-3 py-2 text-left font-medium text-gray-700 w-16">이름</th>
+                            <th className="px-3 py-2 text-right font-medium text-gray-700 whitespace-nowrap">MMP</th>
+                            <th className="px-3 py-2 text-right font-medium text-gray-700 whitespace-nowrap">전월 MMP</th>
                           </tr>
                         </thead>
                         <tbody>
                           {activeAgents.length > 0 ? activeAgents.map((agent, idx) => (
                             <tr key={agent.name} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                              <td className="px-4 py-2 text-gray-600 font-mono text-xs">{agent.agentCode}</td>
-                              <td className="px-4 py-2 font-medium text-gray-800">{agent.name}</td>
-                              <td className="px-4 py-2 text-right font-medium text-green-600">{agent.currentMonth.premium}만원</td>
-                              <td className="px-4 py-2 text-right text-gray-600">{agent.previousMonth.premium}만원</td>
+                              <td className="px-3 py-2 text-gray-600 font-mono text-xs">{agent.agentCode}</td>
+                              <td className="px-3 py-2 font-medium text-gray-800">{agent.name}</td>
+                              <td className="px-3 py-2 text-right font-medium text-green-600 whitespace-nowrap">{agent.currentMonth.premium.toFixed(1)}만원</td>
+                              <td className="px-3 py-2 text-right text-gray-600 whitespace-nowrap">
+                                {agent.previousMonth.premium === 0 ? '-' : `${agent.previousMonth.premium.toFixed(1)}만원`}
+                              </td>
                             </tr>
                           )) : (
                             <tr>
@@ -2442,10 +2444,12 @@ const Branch360Dashboard = () => {
                         <tbody>
                           {inactiveAgents.length > 0 ? inactiveAgents.map((agent, idx) => (
                             <tr key={agent.name} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                              <td className="px-4 py-2 text-gray-600 font-mono text-xs">{agent.agentCode}</td>
-                              <td className="px-4 py-2 font-medium text-gray-800">{agent.name}</td>
-                              <td className="px-4 py-2 text-right text-gray-400">-</td>
-                              <td className="px-4 py-2 text-right text-gray-600">{agent.previousMonth.premium}만원</td>
+                              <td className="px-3 py-2 text-gray-600 font-mono text-xs">{agent.agentCode}</td>
+                              <td className="px-3 py-2 font-medium text-gray-800">{agent.name}</td>
+                              <td className="px-3 py-2 text-right text-gray-400">-</td>
+                              <td className="px-3 py-2 text-right text-gray-600 whitespace-nowrap">
+                                {agent.previousMonth.premium === 0 ? '-' : `${agent.previousMonth.premium.toFixed(1)}만원`}
+                              </td>
                             </tr>
                           )) : (
                             <tr>
@@ -2910,7 +2914,7 @@ const Branch360Dashboard = () => {
                   <div>
                     <span className="text-gray-600">보험료</span>
                     <div className={`font-bold ${selectedAgent.isActive ? 'text-blue-700' : 'text-gray-400'}`}>
-                      {selectedAgent.isActive ? `${selectedAgent.currentMonth.premium}만원` : '-'}
+                      {selectedAgent.isActive ? `${selectedAgent.currentMonth.premium.toFixed(1)}만원` : '-'}
                     </div>
                   </div>
                   <div>
@@ -2927,7 +2931,9 @@ const Branch360Dashboard = () => {
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="text-gray-600">보험료</span>
-                    <div className="font-medium text-gray-700">{selectedAgent.previousMonth.premium}만원</div>
+                    <div className="font-medium text-gray-700">
+                      {selectedAgent.previousMonth.premium === 0 ? '-' : `${selectedAgent.previousMonth.premium.toFixed(1)}만원`}
+                    </div>
                   </div>
                   <div>
                     <span className="text-gray-600">건수</span>
@@ -2941,7 +2947,7 @@ const Branch360Dashboard = () => {
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="text-gray-600">평균 보험료</span>
-                    <div className="font-medium text-green-700">{selectedAgent.threeMonthAverage?.premium || 0}만원</div>
+                    <div className="font-medium text-green-700">{(selectedAgent.threeMonthAverage?.premium || 0).toFixed(1)}만원</div>
                   </div>
                   <div>
                     <span className="text-gray-600">평균 건수</span>
