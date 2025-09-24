@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trophy, Download, Building, ChevronRight, ChevronDown, ChevronUp, ArrowUp, ArrowDown, Activity, AlertTriangle, HelpCircle, X } from 'lucide-react';
+import { Trophy, Download, Building, ChevronRight, ChevronDown, ChevronUp, ArrowUp, ArrowDown, Activity, AlertTriangle, HelpCircle, X, Search } from 'lucide-react';
 
 const Agent360Dashboard = () => {
   const navigate = useNavigate();
@@ -203,7 +203,7 @@ const Agent360Dashboard = () => {
 
   // 지점 기본정보 데이터 함수
   const getBranchInfoData = () => {
-    // 기존 지점 랭킹 데이터에서 전체 160개 지점 가져오기 (가동 + 비가동)
+    // 기존 지점 순위 데이터에서 전체 160개 지점 가져오기 (가동 + 비가동)
     const rankingData = getBranchRankings(true).data;
 
     // 기본 주소, 연락처, 제휴일자 정보 매핑
@@ -264,22 +264,66 @@ const Agent360Dashboard = () => {
   };
 
   // 방문 추천 지점 (간단하고 직관적)
+  // 메인 대시보드용 알림 시스템 (Branch360Dashboard와 동일한 로직)
+  const getMainDashboardBranchAlerts = (agency: string, branch: string) => {
+    const alerts = [];
+
+    // 복수 알림이 있는 지점들
+    if (agency === '메타리치' && branch === '보험스토어') {
+      alerts.push(
+        { type: '위험', title: '3개월 연속 실적 하락', priority: 1 },
+        { type: '위험', title: '목표달성 미달', priority: 1 },
+        { type: '기회', title: '신규 위촉 발생', priority: 2 }
+      );
+    } else if (agency === '삼성화재' && branch === '역삼지점') {
+      alerts.push(
+        { type: '위험', title: '3개월 연속 실적 하락', priority: 1 },
+        { type: '위험', title: '목표달성 미달', priority: 1 }
+      );
+    } else if (agency === '삼성화재' && branch === '강남지점') {
+      alerts.push(
+        { type: '기회', title: '실적 급상승', priority: 2 },
+        { type: '기회', title: '고액 계약 체결', priority: 2 }
+      );
+    } else if (agency === '삼성화재' && branch === '서초지점') {
+      alerts.push(
+        { type: '변화', title: '신규 위촉 발생', priority: 3 }
+      );
+    } else if (agency === '글로벌금융판매' && branch === '케이에스에프에스동대문') {
+      alerts.push(
+        { type: '위험', title: '목표달성 미달', priority: 1 },
+        { type: '위험', title: '계약 품질 이슈', priority: 1 }
+      );
+    } else if (agency === '글로벌금융판매' && branch === '리더스일산') {
+      alerts.push(
+        { type: '기회', title: '실적 급상승', priority: 2 },
+        { type: '변화', title: '신규 위촉 발생', priority: 3 },
+        { type: '기회', title: '고액 계약 체결', priority: 2 }
+      );
+    }
+
+    return alerts.sort((a, b) => a.priority - b.priority);
+  };
+
+
   const managementFocus = [
     {
       id: 1,
       agency: '메타리치',
       branch: '보험스토어',
-      issue: '3개월 연속 실적 하락',
+      issue: '3개월 연속 실적 하락 (외 2건)',
       detail: '',
-      type: 'risk'
+      type: 'risk',
+      alerts: getMainDashboardBranchAlerts('메타리치', '보험스토어')
     },
     {
       id: 2,
       agency: '글로벌금융판매',
       branch: '케이에스에프에스동대문',
-      issue: '목표달성 미달',
+      issue: '목표달성 미달 (외 1건)',
       detail: '',
-      type: 'risk'
+      type: 'risk',
+      alerts: getMainDashboardBranchAlerts('글로벌금융판매', '케이에스에프에스동대문')
     },
     {
       id: 3,
@@ -301,9 +345,10 @@ const Agent360Dashboard = () => {
       id: 5,
       agency: '글로벌금융판매',
       branch: '리더스일산',
-      issue: '실적 급상승',
+      issue: '실적 급상승 (외 2건)',
       detail: '',
-      type: 'opportunity'
+      type: 'opportunity',
+      alerts: getMainDashboardBranchAlerts('글로벌금융판매', '리더스일산')
     },
     {
       id: 6,
@@ -340,7 +385,11 @@ const Agent360Dashboard = () => {
   ];
 
   const getKPIData = () => {
-    return (monthlyTrend as any)[selectedYear][selectedKPI];
+    const fullData = (monthlyTrend as any)[selectedYear][selectedKPI];
+    const selectedMonthNumber = parseInt(appliedMonth.split('-')[1]);
+
+    // 선택된 월까지의 데이터만 반환
+    return fullData.slice(0, selectedMonthNumber);
   };
   
   const getMaxValue = (data: any[], kpi: string) => {
@@ -714,8 +763,7 @@ const Agent360Dashboard = () => {
         { day: 16, apeAmount: 18, contractCount: 13, isWeekend: false },
         { day: 17, apeAmount: 4, contractCount: 19, isWeekend: false },
         { day: 18, apeAmount: 35, contractCount: 10, isWeekend: false },
-        { day: 19, apeAmount: 14, contractCount: 16, isWeekend: false },
-        { day: 20, apeAmount: 7, contractCount: 21, isWeekend: false }
+        { day: 19, apeAmount: 14, contractCount: 16, isWeekend: false }
       ],
       '건강': [
         { day: 1, apeAmount: 8, contractCount: 9, isWeekend: false },
@@ -736,8 +784,7 @@ const Agent360Dashboard = () => {
         { day: 16, apeAmount: 11, contractCount: 9, isWeekend: false },
         { day: 17, apeAmount: 2, contractCount: 13, isWeekend: false },
         { day: 18, apeAmount: 25, contractCount: 7, isWeekend: false },
-        { day: 19, apeAmount: 9, contractCount: 12, isWeekend: false },
-        { day: 20, apeAmount: 4, contractCount: 14, isWeekend: false }
+        { day: 19, apeAmount: 9, contractCount: 12, isWeekend: false }
       ],
       '종신/정기': [
         { day: 1, apeAmount: 7, contractCount: 3, isWeekend: false },
@@ -758,8 +805,7 @@ const Agent360Dashboard = () => {
         { day: 16, apeAmount: 7, contractCount: 4, isWeekend: false },
         { day: 17, apeAmount: 2, contractCount: 6, isWeekend: false },
         { day: 18, apeAmount: 10, contractCount: 3, isWeekend: false },
-        { day: 19, apeAmount: 5, contractCount: 4, isWeekend: false },
-        { day: 20, apeAmount: 3, contractCount: 7, isWeekend: false }
+        { day: 19, apeAmount: 5, contractCount: 4, isWeekend: false }
       ]
     };
     return (baseData as any)[selectedProduct] || baseData['전체'];
@@ -789,7 +835,7 @@ const Agent360Dashboard = () => {
   const getPortfolioData = () => {
     if (selectedProduct === '전체') {
       return [
-        { name: '건강보험', value: 65, color: '#3b82f6' },
+        { name: '건강', value: 65, color: '#3b82f6' },
         { name: '종신/정기', value: 35, color: '#10b981' }
       ];
     } else if (selectedProduct === '건강') {
@@ -939,30 +985,47 @@ const Agent360Dashboard = () => {
 
       {/* Header */}
       <div className="bg-white border-b sticky top-0 z-10">
-        <div className="px-6 py-4">
+        {/* 타이틀 및 현재 정보 표시 영역 */}
+        <div className="px-6 py-4 border-b border-gray-100">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-bold text-gray-900">통합 인사이트 뷰</h1>
-              <p className="text-sm text-gray-600 mt-1">
-                강남본부 김영수 지점장 |
-                {isCurrentMonth ? (
-                  <> 9/19 마감 데이터 기준</>
-                ) : (
-                  <> {appliedMonth.split('-')[0]}년 {parseInt(appliedMonth.split('-')[1])}월 마감 데이터 기준</>
-                )}
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              {isCurrentMonth && (
-                <span className="text-xs text-gray-500">
-                  2025.09.20(금) | 9월 영업일: {businessDays.elapsed}일/{businessDays.total}일 (잔여 {businessDays.remaining}일)
+              <h1 className="text-xl font-bold text-gray-900 mb-1">통합 인사이트 뷰</h1>
+              <div className="text-sm text-gray-600">
+                <span className="font-medium">강남본부 김영수 지점장</span>
+                <span className="ml-3 text-gray-500">
+                  {isCurrentMonth ? (
+                    <>2025.09.19 마감 기준</>
+                  ) : (
+                    <>{appliedMonth.split('-')[0]}.{appliedMonth.split('-')[1]} 마감일 기준</>
+                  )}
                 </span>
+              </div>
+            </div>
+            <div className="text-right">
+              {isCurrentMonth && (
+                <>
+                  <div className="text-sm text-gray-500">2025.09.20(금)</div>
+                  <div className="text-xs text-gray-400 mt-1">
+                    9월 영업일: {businessDays.elapsed}일/{businessDays.total}일 (잔여 {businessDays.remaining}일)
+                  </div>
+                </>
               )}
-              <div className="flex items-center gap-1">
+            </div>
+          </div>
+        </div>
+
+        {/* 조회 조건 및 액션 영역 */}
+        <div className="px-6 py-3 bg-gray-50">
+          <div className="flex items-center justify-between">
+            {/* 조회 조건 그룹 */}
+            <div className="flex items-center space-x-6">
+              {/* 조회년월 선택 */}
+              <div className="flex items-center space-x-3">
+                <span className="text-sm font-medium text-gray-700 min-w-0">조회년월</span>
                 <select
                   value={tempSelectedMonth}
                   onChange={(e) => setTempSelectedMonth(e.target.value)}
-                  className="px-2 py-1 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:border-gray-400"
+                  className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-32"
                 >
                   {monthOptions.map(option => (
                     <option key={option.value} value={option.value}>
@@ -970,16 +1033,22 @@ const Agent360Dashboard = () => {
                     </option>
                   ))}
                 </select>
-                <button
-                  onClick={handleSearchClick}
-                  className="px-2 py-1 text-xs bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition-colors"
-                >
-                  조회
-                </button>
               </div>
-              <button className="flex items-center gap-2 px-3 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
+            </div>
+
+            {/* 액션 버튼 그룹 */}
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={handleSearchClick}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg flex items-center space-x-2 transition-colors"
+              >
+                <Search className="w-4 h-4" />
+                <span>조회</span>
+              </button>
+
+              <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg flex items-center space-x-2 transition-colors">
                 <Download className="w-4 h-4" />
-                원클릭 엑셀 다운로드
+                <span>원클릭 엑셀 다운로드</span>
               </button>
             </div>
           </div>
@@ -1113,7 +1182,7 @@ const Agent360Dashboard = () => {
             {/* 월별 성과 추이 */}
             <div className="bg-white rounded-lg shadow-sm border p-4">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-semibold text-gray-700">월별 성과 추이</h3>
+                <h3 className="text-sm font-semibold text-gray-700">2025년 월별 성과</h3>
                 
                 <div className="space-y-2">
                   {/* KPI 선택 - 토글 버튼 스타일 */}
@@ -1137,22 +1206,6 @@ const Agent360Dashboard = () => {
                     ))}
                   </div>
 
-                  {/* 년도 선택 */}
-                  <div className="flex gap-1 justify-end">
-                    {['2023', '2024', '2025'].map(year => (
-                      <button
-                        key={year}
-                        onClick={() => setSelectedYear(year)}
-                        className={`px-2 py-1 text-xs rounded ${
-                          selectedYear === year
-                            ? 'bg-gray-600 text-white'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                        }`}
-                      >
-                        {year}
-                      </button>
-                    ))}
-                  </div>
                 </div>
               </div>
               
@@ -1313,7 +1366,7 @@ const Agent360Dashboard = () => {
             
             {/* 이번달 일별 실적 */}
             <div className="bg-white rounded-lg shadow-sm border p-4">
-              <h3 className="text-sm font-semibold text-gray-700 mb-4">일별 실적 추이</h3>
+              <h3 className="text-sm font-semibold text-gray-700 mb-4">{parseInt(appliedMonth.split('-')[1])}월 일별 실적</h3>
               
               <div className="h-60 relative bg-gray-50 rounded-lg p-3" style={{overflow: 'visible'}} onMouseLeave={() => setHoveredDayData(null)}>
                 {/* 차트 영역 */}
@@ -1554,47 +1607,10 @@ const Agent360Dashboard = () => {
             <div className="mt-3 flex gap-2">
               <button
                 onClick={handleBranchDetailClick}
-                className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-3 rounded text-sm font-medium hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-3 rounded text-sm font-medium hover:shadow-lg transition-all flex items-center justify-center gap-2"
               >
                 <Building className="w-4 h-4" />
                 지점별 상세 바로가기
-              </button>
-              <button
-                onClick={() => {
-                  // 현재 대시보드 데이터를 CSV로 다운로드
-                  const currentDate = new Date().toISOString().split('T')[0];
-                  const filename = `Agent360_Dashboard_${appliedMonth.replace('-', '_')}_${currentDate}.csv`;
-
-                  // CSV 헤더
-                  const headers = ['지점명', '대리점', '당월실적', '목표달성률', '전월대비', '가동설계사수', '신계약건수'];
-
-                  // 데이터 변환
-                  const csvData = getBranchRankings().data.map(branch => [
-                    branch.branch,
-                    branch.agency,
-                    branch.achievement,
-                    `${branch.achievementRate}%`,
-                    `${branch.monthlyChange}%`,
-                    branch.activeAgents,
-                    branch.newContracts
-                  ]);
-
-                  // CSV 생성
-                  const csvContent = [headers, ...csvData]
-                    .map(row => row.map(field => `"${field}"`).join(','))
-                    .join('\n');
-
-                  // 다운로드
-                  const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' });
-                  const link = document.createElement('a');
-                  link.href = URL.createObjectURL(blob);
-                  link.download = filename;
-                  link.click();
-                }}
-                className="bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-3 rounded text-sm font-medium hover:shadow-lg transition-all flex items-center justify-center gap-2"
-              >
-                <Download className="w-4 h-4" />
-                다운로드
               </button>
             </div>
             
@@ -1732,7 +1748,7 @@ const Agent360Dashboard = () => {
             {/* 지점 순위 현황 */}
             <div className="bg-white rounded-lg shadow-sm border p-4">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-semibold text-gray-700">지점 랭킹 TOP 5</h3>
+                <h3 className="text-sm font-semibold text-gray-700">지점 순위 TOP 5</h3>
                 <div className="flex bg-gray-100 rounded-lg p-1">
                   <button
                     onClick={() => setBranchPeriod('current')}
@@ -1844,7 +1860,7 @@ const Agent360Dashboard = () => {
                   onClick={() => setShowAllBranchesModal(true)}
                   className="w-full text-center text-xs text-blue-600 hover:text-blue-800 font-medium transition-colors"
                 >
-                  더보기 (전체 랭킹 보기)
+                  더보기 (전체 순위 보기)
                 </button>
               </div>
 
@@ -1865,7 +1881,7 @@ const Agent360Dashboard = () => {
           <div className="bg-white rounded-lg p-6 max-w-6xl w-full mx-4 max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">
-                전체 지점 랭킹
+                전체 지점 순위
               </h3>
               <button
                 onClick={() => setShowAllBranchesModal(false)}
