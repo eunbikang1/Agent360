@@ -2354,32 +2354,37 @@ const Branch360Dashboard = () => {
 
                 return (
                   <div className="bg-white rounded-lg border border-gray-200">
-                    <div className="bg-green-50 px-4 py-2 border-b border-green-200 rounded-t-lg">
+                    <div className="bg-green-50 px-4 py-2 border-b border-green-200 rounded-t-lg flex justify-between items-center">
                       <h4 className="font-medium text-green-800 text-sm">가동 설계사 목록 ({activeAgents.length}명)</h4>
+                      <div className="text-xs text-gray-500">
+                        [단위: 만원]
+                      </div>
                     </div>
                     <div className="max-h-60 overflow-y-auto">
                       <table className="w-full text-xs">
                         <thead className="bg-gray-50 sticky top-0">
                           <tr>
-                            <th className="px-3 py-2 text-left font-medium text-gray-700 w-20">설계사코드</th>
-                            <th className="px-3 py-2 text-left font-medium text-gray-700 w-16">이름</th>
-                            <th className="px-3 py-2 text-right font-medium text-gray-700 whitespace-nowrap">MMP</th>
-                            <th className="px-3 py-2 text-right font-medium text-gray-700 whitespace-nowrap">전월 MMP</th>
+                            <th className="px-2 py-2 text-left font-medium text-gray-700 w-20">설계사코드</th>
+                            <th className="px-2 py-2 text-left font-medium text-gray-700">이름</th>
+                            <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap">위촉월차</th>
+                            <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap">당월 MMP</th>
+                            <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap">전월 MMP</th>
                           </tr>
                         </thead>
                         <tbody>
                           {activeAgents.length > 0 ? activeAgents.map((agent, idx) => (
                             <tr key={agent.name} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                              <td className="px-3 py-2 text-gray-600 font-mono text-xs">{agent.agentCode}</td>
-                              <td className="px-3 py-2 font-medium text-gray-800">{agent.name}</td>
-                              <td className="px-3 py-2 text-right font-medium text-green-600 whitespace-nowrap">{agent.currentMonth.premium.toFixed(1)}만원</td>
-                              <td className="px-3 py-2 text-right text-gray-600 whitespace-nowrap">
-                                {agent.previousMonth.premium === 0 ? '-' : `${agent.previousMonth.premium.toFixed(1)}만원`}
+                              <td className="px-2 py-2 text-gray-600 font-mono text-xs">{agent.agentCode}</td>
+                              <td className="px-2 py-2 font-medium text-gray-800">{agent.name}</td>
+                              <td className="px-2 py-2 text-right text-gray-600 text-xs">{agent.commissionMonth.replace('개월', '')}</td>
+                              <td className="px-2 py-2 text-right font-medium text-green-600 whitespace-nowrap">{agent.currentMonth.premium.toFixed(1)}</td>
+                              <td className="px-2 py-2 text-right text-gray-600 whitespace-nowrap">
+                                {agent.previousMonth.premium === 0 ? '-' : agent.previousMonth.premium.toFixed(1)}
                               </td>
                             </tr>
                           )) : (
                             <tr>
-                              <td colSpan={4} className="px-4 py-6 text-center text-gray-500 text-sm">해당 설계사가 없습니다</td>
+                              <td colSpan={5} className="px-4 py-6 text-center text-gray-500 text-sm">해당 설계사가 없습니다</td>
                             </tr>
                           )}
                         </tbody>
@@ -2424,36 +2429,47 @@ const Branch360Dashboard = () => {
               {/* 미가동 설계사 리스트 */}
               {(() => {
                 const allData = getSortedAgents(true);
-                const inactiveAgents = allData.filter(agent => agent.currentMonth.premium === 0);
+                const inactiveAgents = allData.filter(agent => agent.currentMonth.premium === 0)
+                  .sort((a, b) => {
+                    // 위촉월차 내림차순 (경력 많은 순)
+                    const aMonths = parseInt(a.commissionMonth.replace('개월', ''));
+                    const bMonths = parseInt(b.commissionMonth.replace('개월', ''));
+                    return bMonths - aMonths;
+                  });
 
                 return (
                   <div className="bg-white rounded-lg border border-gray-200">
-                    <div className="bg-gray-50 px-4 py-2 border-b border-gray-200 rounded-t-lg">
+                    <div className="bg-gray-50 px-4 py-2 border-b border-gray-200 rounded-t-lg flex justify-between items-center">
                       <h4 className="font-medium text-gray-700 text-sm">미가동 설계사 목록 ({inactiveAgents.length}명)</h4>
+                      <div className="text-xs text-gray-500">
+                        [단위: 만원]
+                      </div>
                     </div>
                     <div className="max-h-60 overflow-y-auto">
                       <table className="w-full text-xs">
                         <thead className="bg-gray-50 sticky top-0">
                           <tr>
-                            <th className="px-4 py-2 text-left font-medium text-gray-700 w-24">설계사코드</th>
-                            <th className="px-4 py-2 text-left font-medium text-gray-700 w-20">이름</th>
-                            <th className="px-4 py-2 text-right font-medium text-gray-700">당월 MMP</th>
-                            <th className="px-4 py-2 text-right font-medium text-gray-700">전월 MMP</th>
+                            <th className="px-2 py-2 text-left font-medium text-gray-700 w-20">설계사코드</th>
+                            <th className="px-2 py-2 text-left font-medium text-gray-700">이름</th>
+                            <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap">위촉월차</th>
+                            <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap">당월 MMP</th>
+                            <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap">전월 MMP</th>
                           </tr>
                         </thead>
                         <tbody>
                           {inactiveAgents.length > 0 ? inactiveAgents.map((agent, idx) => (
                             <tr key={agent.name} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                              <td className="px-3 py-2 text-gray-600 font-mono text-xs">{agent.agentCode}</td>
-                              <td className="px-3 py-2 font-medium text-gray-800">{agent.name}</td>
-                              <td className="px-3 py-2 text-right text-gray-400">-</td>
-                              <td className="px-3 py-2 text-right text-gray-600 whitespace-nowrap">
-                                {agent.previousMonth.premium === 0 ? '-' : `${agent.previousMonth.premium.toFixed(1)}만원`}
+                              <td className="px-2 py-2 text-gray-600 font-mono text-xs">{agent.agentCode}</td>
+                              <td className="px-2 py-2 font-medium text-gray-800">{agent.name}</td>
+                              <td className="px-2 py-2 text-right text-gray-600 text-xs">{agent.commissionMonth.replace('개월', '')}</td>
+                              <td className="px-2 py-2 text-right text-gray-400">-</td>
+                              <td className="px-2 py-2 text-right text-gray-600 whitespace-nowrap">
+                                {agent.previousMonth.premium === 0 ? '-' : agent.previousMonth.premium.toFixed(1)}
                               </td>
                             </tr>
                           )) : (
                             <tr>
-                              <td colSpan={4} className="px-4 py-6 text-center text-gray-500 text-sm">미가동 설계사가 없습니다</td>
+                              <td colSpan={5} className="px-4 py-6 text-center text-gray-500 text-sm">미가동 설계사가 없습니다</td>
                             </tr>
                           )}
                         </tbody>
@@ -2570,7 +2586,7 @@ const Branch360Dashboard = () => {
                         }}
                         className="text-center hover:text-blue-600 transition-colors"
                       >
-                        경력 {agentSortBy === 'experience' && (agentSortOrder === 'desc' ? '↓' : '↑')}
+                        설계사 경력 {agentSortBy === 'experience' && (agentSortOrder === 'desc' ? '↓' : '↑')}
                       </button>
                       <button
                         onClick={() => {
@@ -2583,7 +2599,7 @@ const Branch360Dashboard = () => {
                         }}
                         className="text-center hover:text-blue-600 transition-colors"
                       >
-                        위촉월수 {agentSortBy === 'commissionMonth' && (agentSortOrder === 'desc' ? '↓' : '↑')}
+                        위촉월차 {agentSortBy === 'commissionMonth' && (agentSortOrder === 'desc' ? '↓' : '↑')}
                       </button>
                       <button
                         onClick={() => {
@@ -3046,7 +3062,7 @@ const Branch360Dashboard = () => {
                     }}
                     className="text-left hover:text-blue-600 transition-colors"
                   >
-                    경력 {agentSortBy === 'experience' && (agentSortOrder === 'desc' ? '↓' : '↑')}
+                    설계사 경력 {agentSortBy === 'experience' && (agentSortOrder === 'desc' ? '↓' : '↑')}
                   </button>
                   <button
                     onClick={() => {
@@ -3059,7 +3075,7 @@ const Branch360Dashboard = () => {
                     }}
                     className="text-left hover:text-blue-600 transition-colors"
                   >
-                    위촉월수 {agentSortBy === 'commissionMonth' && (agentSortOrder === 'desc' ? '↓' : '↑')}
+                    위촉월차 {agentSortBy === 'commissionMonth' && (agentSortOrder === 'desc' ? '↓' : '↑')}
                   </button>
                   <button
                     onClick={() => {
