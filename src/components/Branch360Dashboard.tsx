@@ -1527,45 +1527,59 @@ const Branch360Dashboard = () => {
               </div>
             </div>
 
-            {/* 설계 & 청약 */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-white rounded-lg shadow-sm border p-4">
+            {/* 설계 & 청약 - 체결률 화살표 포함 */}
+            <div className="flex items-center gap-2">
+              {/* 설계 카드 */}
+              <div className="bg-white rounded-lg shadow-sm border p-4 flex-1">
                 <h4 className="text-sm font-semibold text-gray-700 mb-3">설계</h4>
-                
+
                 {/* 메인 수치 영역 */}
                 <div className="text-center mb-3">
                   <div className="text-2xl font-bold text-blue-600">{corePerformance.proposalCount}<span className="text-base text-gray-500">건</span></div>
                 </div>
-                
+
                 {/* 전월 대비 영역 */}
-                <div className="text-center mb-3 pb-3 border-b border-gray-100">
+                <div className="text-center">
                   <span className="text-xs text-gray-500">전월 동기 대비 {corePerformance.proposalGrowth > 0 ? '▲' : '▼'} </span>
                   <span className={`text-sm font-medium ${corePerformance.proposalGrowth > 0 ? 'text-green-600' : 'text-red-600'}`}>{Math.abs(corePerformance.proposalGrowth)}건</span>
                 </div>
-                
-                {/* 전환율 영역 */}
-                <div className="text-center bg-gray-50 rounded px-2 py-1">
-                  <span className="text-xs text-gray-600">설계 → 청약 95건</span>
-                </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow-sm border p-4">
+              {/* 체결률 화살표 */}
+              {(() => {
+                const actualContractCount = 73; // 실제 계약 완료 건수 (73건)
+                const conversionRate = Math.round((actualContractCount / corePerformance.proposalCount) * 100);
+
+                return (
+                  <div className="flex flex-col items-center px-2">
+                    <div className="text-2xl">→</div>
+                    <div className="text-center">
+                      <div className={`text-lg font-bold ${
+                        conversionRate >= 60 ? 'text-green-600' :
+                        conversionRate >= 40 ? 'text-yellow-600' :
+                        'text-red-600'
+                      }`}>
+                        {conversionRate}%
+                      </div>
+                      <div className="text-xs text-gray-500 whitespace-nowrap">계약률</div>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* 청약 카드 */}
+              <div className="bg-white rounded-lg shadow-sm border p-4 flex-1">
                 <h4 className="text-sm font-semibold text-gray-700 mb-3">청약</h4>
-                
+
                 {/* 메인 수치 영역 */}
                 <div className="text-center mb-3">
                   <div className="text-2xl font-bold text-blue-600">{corePerformance.contractCount}<span className="text-base text-gray-500">건</span></div>
                 </div>
-                
+
                 {/* 전월 대비 영역 */}
-                <div className="text-center mb-3 pb-3 border-b border-gray-100">
+                <div className="text-center">
                   <span className="text-xs text-gray-500">전월 동기 대비 {corePerformance.contractGrowth > 0 ? '▲' : '▼'} </span>
                   <span className={`text-sm font-medium ${corePerformance.contractGrowth > 0 ? 'text-green-600' : 'text-red-600'}`}>{Math.abs(corePerformance.contractGrowth)}건</span>
-                </div>
-                
-                {/* 계약 상태 분석 */}
-                <div className="text-center bg-gray-50 rounded px-2 py-1">
-                  <span className="text-xs text-gray-600">계약 87건 | 철회 3건 | 반송 5건</span>
                 </div>
               </div>
             </div>

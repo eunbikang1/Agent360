@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trophy, Download, Building, ChevronRight, ChevronDown, ChevronUp, ArrowUp, ArrowDown, Activity, AlertTriangle, HelpCircle, X, Search } from 'lucide-react';
+import { Trophy, Download, Building, ChevronRight, ChevronDown, ChevronUp, ArrowUp, ArrowDown, Activity, AlertTriangle, HelpCircle, X, Search, Users } from 'lucide-react';
 
 const Agent360Dashboard = () => {
   const navigate = useNavigate();
@@ -421,7 +421,50 @@ const Agent360Dashboard = () => {
 
   const remainingDays = getRemainingBusinessDays();
   const shouldShowLastMonthComparison = remainingDays <= 10;
-  const [dailyChartMetric, setDailyChartMetric] = useState<'실적' | '청약' | '설계'>('실적');
+  const [dailyChartMetric, setDailyChartMetric] = useState<'APE' | 'MMP' | '청약' | '설계'>(performanceType);
+  const [visitEducationType, setVisitEducationType] = useState<'방문' | '교육'>('방문');
+  const [showVisitEducationList, setShowVisitEducationList] = useState(false);
+
+  // 방문/교육 데이터 생성
+  const visitEducationData = {
+    방문: {
+      count: 23,
+      data: [
+        { date: '9/25', agency: '글로벌금융판매', branch: '하나돔', detail: '주력상품 홍보 및 업무 지원' },
+        { date: '9/24', agency: '메타리치', branch: '골드자산관리센터', detail: '신상품 설명 및 판매 도구 전달' },
+        { date: '9/24', agency: '지금용코리아', branch: '그레이트탑', detail: '분기별 실적 점검 및 개선방안 논의' },
+        { date: '9/23', agency: '더블유에셋', branch: '서울지사', detail: '고객관리 방법 지도 및 상품자료 전달' },
+        { date: '9/23', agency: '글로벌금융판매', branch: '리더스에이치비', detail: '설계사 교육프로그램 안내' },
+        { date: '9/22', agency: '지에이스타금융서비스', branch: '부천코어', detail: '마케팅 지원 및 홍보물 제공' },
+        { date: '9/22', agency: '한국지에이금융서비스', branch: '일산지사', detail: '신규 위촉 설계사 면담' },
+        { date: '9/21', agency: '메가', branch: '인슈에셋고양', detail: '월별 목표 설정 및 달성 전략 수립' },
+        { date: '9/20', agency: '글로벌금융판매', branch: '브릿지재무설계', detail: '고객 서비스 품질 개선 방안 논의' },
+        { date: '9/20', agency: '메타리치', branch: '리치골드', detail: '상품 포트폴리오 다양화 컨설팅' }
+      ]
+    },
+    교육: {
+      count: 15,
+      data: [
+        { date: '9/25', agency: '글로벌금융판매', branch: '하나돔강북', detail: '신상품 교육: 건강보험 2.0 출시 설명' },
+        { date: '9/24', agency: '메타리치', branch: '보험스토어', detail: '디지털 영업도구 활용법 교육' },
+        { date: '9/23', agency: '지금용코리아', branch: '서울A', detail: '고객 상담 스킬 향상 교육' },
+        { date: '9/23', agency: '더블유에셋', branch: '기업금융본부', detail: '법인 영업 전략 교육' },
+        { date: '9/22', agency: '글로벌금융판매', branch: '케이엘아이케이베스트', detail: '종신보험 상품 설명 및 판매 기법' },
+        { date: '9/21', agency: '지에이스타금융서비스', branch: '부천코어', detail: '고객 니즈 분석 및 맞춤 제안 교육' },
+        { date: '9/20', agency: '한국지에이금융서비스', branch: '일산지사', detail: '신입 설계사 기초 교육' },
+        { date: '9/20', agency: '메가', branch: '인슈에셋고양', detail: '정기보험 상품 교육' },
+        { date: '9/19', agency: '메타리치', branch: '골드자산관리센터', detail: '고객 관리 시스템 사용법 교육' },
+        { date: '9/18', agency: '글로벌금융판매', branch: '굿브즈스카이', detail: '영업 프로세스 개선 교육' }
+      ]
+    }
+  };
+
+  // performanceType 변경시 dailyChartMetric도 업데이트
+  useEffect(() => {
+    if (dailyChartMetric === 'APE' || dailyChartMetric === 'MMP') {
+      setDailyChartMetric(performanceType);
+    }
+  }, [performanceType, dailyChartMetric]);
   const [showAllBranchesModal, setShowAllBranchesModal] = useState(false);
   const [showBranchInfoModal, setBranchInfoModal] = useState(false);
   const [branchInfoSortBy, setBranchInfoSortBy] = useState<'no' | 'agency' | 'branch' | 'address' | 'phone' | 'partnershipDate' | 'currentMonthAPE' | 'totalAgents' | 'activeAgents' | 'agencyBranch'>('agencyBranch');
@@ -1613,9 +1656,10 @@ const Agent360Dashboard = () => {
                 </div>
               </div>
               
-              {/* 설계 건수 & 청약 건수 */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-white rounded-lg shadow-sm border p-4">
+              {/* 설계 건수 & 청약 건수 - 체결률 화살표 포함 */}
+              <div className="flex items-center gap-2">
+                {/* 설계 카드 */}
+                <div className="bg-white rounded-lg shadow-sm border p-4 flex-1">
                   <h4 className="text-sm font-semibold text-gray-700 mb-3">설계</h4>
                   <div className="text-center mb-3">
                     <div className="text-2xl font-bold text-blue-600">{getFilteredData('design')}<span className="text-base text-gray-500">건</span></div>
@@ -1626,7 +1670,32 @@ const Agent360Dashboard = () => {
                   </div>
                 </div>
 
-                <div className="bg-white rounded-lg shadow-sm border p-4">
+                {/* 체결률 화살표 */}
+                {(() => {
+                  const designCount = getFilteredData('design');
+                  const contractCount = getFilteredData('contract');
+                  const actualContractCount = Math.round(contractCount * 0.76); // 실제 계약 완료 건수
+                  const conversionRate = Math.round((actualContractCount / designCount) * 100);
+
+                  return (
+                    <div className="flex flex-col items-center px-2">
+                      <div className="text-2xl">→</div>
+                      <div className="text-center">
+                        <div className={`text-lg font-bold ${
+                          conversionRate >= 60 ? 'text-green-600' :
+                          conversionRate >= 40 ? 'text-yellow-600' :
+                          'text-red-600'
+                        }`}>
+                          {conversionRate}%
+                        </div>
+                        <div className="text-xs text-gray-500 whitespace-nowrap">계약률</div>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* 청약 카드 */}
+                <div className="bg-white rounded-lg shadow-sm border p-4 flex-1">
                   <h4 className="text-sm font-semibold text-gray-700 mb-3">청약</h4>
                   <div className="text-center mb-3">
                     <div className="text-2xl font-bold text-blue-600">{getFilteredData('contract')}<span className="text-base text-gray-500">건</span></div>
@@ -1638,18 +1707,18 @@ const Agent360Dashboard = () => {
                 </div>
               </div>
             </div>
-            
-            {/* 이번달 일별 실적 */}
+
+{/* 이번달 일별 실적 */}
             <div className="bg-white rounded-lg shadow-sm border p-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-semibold text-gray-700">{parseInt(appliedMonth.split('-')[1])}월 일별 실적</h3>
 
                 {/* 지표 선택 토글 */}
                 <div className="flex bg-gray-100 rounded-lg p-1">
-                  {(['실적', '청약', '설계'] as const).map(metric => (
+                  {([performanceType, '청약', '설계'] as const).map(metric => (
                     <button
                       key={metric}
-                      onClick={() => setDailyChartMetric(metric)}
+                      onClick={() => setDailyChartMetric(metric as any)}
                       className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
                         dailyChartMetric === metric
                           ? 'bg-white text-gray-900 shadow-sm'
@@ -1667,7 +1736,7 @@ const Agent360Dashboard = () => {
                 {(() => {
                   const businessDayData = getDailyData().filter(d => !d.isWeekend);
                   const values = businessDayData.map(d => {
-                    if (dailyChartMetric === '실적') return d.apeAmount;
+                    if (dailyChartMetric === 'APE' || dailyChartMetric === 'MMP') return d.apeAmount;
                     if (dailyChartMetric === '청약') return d.contractCount;
                     return d.proposalCount;
                   });
@@ -1676,7 +1745,7 @@ const Agent360Dashboard = () => {
                   return (
                     <div className="absolute top-2 right-2 text-xs font-medium flex items-center gap-1 z-20 text-gray-600">
                       <div className="w-4 h-0.5" style={{backgroundColor: '#facc15'}}></div>
-                      <span>일 평균: {dailyChartMetric === '실적' ? formatCurrency(average * 10000) : `${average.toFixed(1)}건`}</span>
+                      <span>일 평균: {dailyChartMetric === 'APE' || dailyChartMetric === 'MMP' ? formatCurrency(average * 10000) : `${average.toFixed(1)}건`}</span>
                     </div>
                   );
                 })()}
@@ -1685,7 +1754,7 @@ const Agent360Dashboard = () => {
                 {(() => {
                   const businessDayData = getDailyData().filter(d => !d.isWeekend);
                   const values = businessDayData.map(d => {
-                    if (dailyChartMetric === '실적') return d.apeAmount;
+                    if (dailyChartMetric === 'APE' || dailyChartMetric === 'MMP') return d.apeAmount;
                     if (dailyChartMetric === '청약') return d.contractCount;
                     return d.proposalCount;
                   });
@@ -1710,7 +1779,7 @@ const Agent360Dashboard = () => {
                   {/* 영업일만 표시 - 막대 그래프 */}
                   {getDailyData().filter(d => !d.isWeekend).map((data, index) => {
                     let value;
-                    if (dailyChartMetric === '실적') {
+                    if (dailyChartMetric === 'APE' || dailyChartMetric === 'MMP') {
                       value = data.apeAmount;
                     } else if (dailyChartMetric === '청약') {
                       value = data.contractCount;
@@ -1721,7 +1790,7 @@ const Agent360Dashboard = () => {
                     // 최대값 계산
                     const businessDayData = getDailyData().filter(d => !d.isWeekend);
                     const maxValue = Math.max(...businessDayData.map(d => {
-                      if (dailyChartMetric === '실적') return d.apeAmount;
+                      if (dailyChartMetric === 'APE' || dailyChartMetric === 'MMP') return d.apeAmount;
                       if (dailyChartMetric === '청약') return d.contractCount;
                       return d.proposalCount;
                     }));
@@ -1765,7 +1834,7 @@ const Agent360Dashboard = () => {
                       }}
                     >
                       <div>9월 {hoveredDayData.day}일 (영업 {hoveredDayData.businessDay}일차) - {selectedProduct}</div>
-                      {dailyChartMetric === '실적' ? (
+                      {dailyChartMetric === 'APE' || dailyChartMetric === 'MMP' ? (
                         <div>일 {performanceType}: {formatCurrency(hoveredDayData.value * 10000)}</div>
                       ) : dailyChartMetric === '청약' ? (
                         <div>청약: {hoveredDayData.value}건</div>
@@ -1916,6 +1985,87 @@ const Agent360Dashboard = () => {
                         </div>
                       </div>
                     ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+            {/* 당월 방문/교육 현황 */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-bold text-gray-900 flex items-center">
+                  <Users className="w-5 h-5 text-blue-500 mr-2" />
+                  당월 방문/교육 현황
+                </h2>
+              </div>
+
+              {/* 방문/교육 토글 및 카운트 */}
+              <div className="bg-white rounded-lg shadow-sm border p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex gap-1">
+                    {(['방문', '교육'] as const).map(type => (
+                      <button
+                        key={type}
+                        onClick={() => {
+                          setVisitEducationType(type);
+                          setShowVisitEducationList(false);
+                        }}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                          visitEducationType === type
+                            ? 'bg-blue-50 text-blue-600 border border-blue-200'
+                            : 'text-gray-600 hover:bg-gray-50'
+                        }`}
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-blue-600">
+                      {visitEducationData[visitEducationType].count}건
+                    </div>
+                    <div className="text-xs text-gray-500">이번 달 총 {visitEducationType}</div>
+                  </div>
+                </div>
+
+                {/* 세부 리스트 - 항상 펼쳐진 상태 */}
+                <div className="border-t pt-3 mt-3">
+                  <div className="text-xs text-gray-500 mb-3">
+                    {visitEducationType} 상세 내역
+                  </div>
+
+                  <div className="max-h-48 overflow-y-auto">
+                    {/* 컬럼 헤더 */}
+                    <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg mb-2 text-xs font-medium text-gray-700 border-b border-gray-200">
+                      <div className="min-w-[35px] shrink-0">날짜</div>
+                      <div className="min-w-[180px] shrink-0">대리점 {'>'} 지점</div>
+                      <div className="flex-1">활동 내용</div>
+                    </div>
+
+                    <div className="space-y-1">
+                      {visitEducationData[visitEducationType].data.map((item, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 text-xs border-l-2 border-transparent hover:border-blue-200 transition-all"
+                        >
+                          <div className="text-gray-500 min-w-[35px] shrink-0 font-mono">
+                            {item.date}
+                          </div>
+                          <div className="min-w-[180px] shrink-0 flex items-center">
+                            <span className="font-medium text-gray-900 truncate max-w-[85px]">
+                              {item.agency}
+                            </span>
+                            <ChevronRight className="w-3 h-3 text-gray-400 mx-1 shrink-0" />
+                            <span className="text-gray-700 truncate max-w-[85px]">
+                              {item.branch}
+                            </span>
+                          </div>
+                          <div className="text-gray-600 flex-1 truncate">
+                            {item.detail}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
