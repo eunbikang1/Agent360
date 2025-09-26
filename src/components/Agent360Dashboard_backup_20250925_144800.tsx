@@ -32,7 +32,7 @@ const Agent360Dashboard = () => {
 
   // 나의 KPI 데이터 (기본값 - 현재 월용)
   const myKPIDefault = {
-    // 목표달성률 (APE/MMP 기준)
+    // 목표달성률 (APE 기준)
     goalAchievement: {
       current: 62.0, // 현재 달성률 (%)
       target: 500000000, // 목표 (원)
@@ -124,7 +124,7 @@ const Agent360Dashboard = () => {
         { month: '2월', value: 97.2, hqAvg: 99.8, actual: 486, target: 500 },
         { month: '3월', value: 102.7, hqAvg: 101.2, actual: 411, target: 400 },
         { month: '4월', value: 98.2, hqAvg: 100.5, actual: 491, target: 500 },
-        { month: '5월', value: 103.8, hqAvg: 59.4, actual: 415, target: 400 },
+        { month: '5월', value: 103.8, hqAvg: 98.3, actual: 415, target: 400 },
         { month: '6월', value: 99.6, hqAvg: 102.2, actual: 498, target: 500 },
         { month: '7월', value: 106.3, hqAvg: 101.1, actual: 425, target: 400 },
         { month: '8월', value: 101.2, hqAvg: 99.5, actual: 506, target: 500 },
@@ -168,11 +168,11 @@ const Agent360Dashboard = () => {
         { month: '2월', value: 98.2, hqAvg: 100.8, actual: 491, target: 500 },
         { month: '3월', value: 102.7, hqAvg: 99.2, actual: 411, target: 400 },
         { month: '4월', value: 97.2, hqAvg: 101.5, actual: 486, target: 500 },
-        { month: '5월', value: 103.8, hqAvg: 59.4, actual: 415, target: 400 },
+        { month: '5월', value: 103.8, hqAvg: 98.3, actual: 415, target: 400 },
         { month: '6월', value: 99.6, hqAvg: 102.2, actual: 498, target: 500 },
         { month: '7월', value: 106.3, hqAvg: 101.1, actual: 425, target: 400 },
         { month: '8월', value: 101.2, hqAvg: 103.5, actual: 506, target: 500 },
-        { month: '9월', value: 62.0, hqAvg: 59.4, actual: 310, target: 500 }
+        { month: '9월', value: 62.0, hqAvg: 98.3, actual: 310, target: 500 }
       ],
       activity_plan: [
         { month: '1월', value: 76.5, hqAvg: 79.2, active: 383, target: 500 },
@@ -1133,7 +1133,7 @@ const Agent360Dashboard = () => {
             <div className="bg-white rounded-lg shadow-sm border p-6 relative">
               <div className="flex justify-between items-start mb-4 border-b border-gray-100 pb-2">
                 <h3 className="text-base font-bold text-gray-800">목표달성률</h3>
-                <span className="text-xs text-gray-500">{performanceType} 기준</span>
+                <span className="text-xs text-gray-500">APE 기준</span>
               </div>
               
               <div className="text-center mb-4">
@@ -1144,8 +1144,10 @@ const Agent360Dashboard = () => {
 
                 <div className="w-full bg-gray-200 rounded-full h-5 mb-2 relative group">
                   <div
-                    className="bg-blue-500 h-5 rounded-full transition-all"
+                    className="bg-blue-500 h-5 rounded-full transition-all cursor-pointer"
                     style={{width: `${myKPI.goalAchievement.current}%`}}
+                    onMouseEnter={() => setShowProgressTooltip(true)}
+                    onMouseLeave={() => setShowProgressTooltip(false)}
                   ></div>
                   {/* 프로그레스 바 툴팁 */}
                   {showProgressTooltip && (
@@ -1172,7 +1174,7 @@ const Agent360Dashboard = () => {
                       className="absolute top-6 bg-gray-800 text-white text-xs rounded px-3 py-2 whitespace-nowrap z-20 shadow-lg"
                       style={{left: `59%`, transform: 'translateX(-50%)'}}
                     >
-                      <div className="font-bold mb-1">전체 지점 평균 59.4%</div>
+                      <div className="font-bold mb-1">전체 지점 평균 59%</div>
                     </div>
                   )}
                 </div>
@@ -1219,6 +1221,13 @@ const Agent360Dashboard = () => {
                 </div>
               </div>
 
+              {/* 강남본부 평균 별도 표시 */}
+              <div className="bg-yellow-50 rounded-lg p-3 mb-4 border border-yellow-100">
+                <div className="text-center">
+                  <div className="text-xs text-yellow-600 font-medium mb-1">강남본부 평균</div>
+                  <div className="text-lg font-bold text-yellow-700">{myKPI.goalAchievement.hqAvg}%</div>
+                </div>
+              </div>
 
               {/* 하루 평균 필요 금액 안내 - 현재월에만 표시 */}
               {isCurrentMonth && (
@@ -1355,17 +1364,17 @@ const Agent360Dashboard = () => {
                             {selectedKPI === 'nb_plan' ? (
                               <div>
                                 <div>{data.value}% ({data.actual}/{data.target}백만원)</div>
-                                <div className="text-yellow-300">전체평균 {data.hqAvg}%</div>
+                                <div className="text-yellow-300">영업본부평균 {data.hqAvg}%</div>
                               </div>
                             ) : selectedKPI === 'activity_plan' ? (
                               <div>
                                 <div>{data.value}% ({data.active}/{data.target}명)</div>
-                                <div className="text-yellow-300">전체평균 {data.hqAvg}%</div>
+                                <div className="text-yellow-300">영업본부평균 {data.hqAvg}%</div>
                               </div>
                             ) : (
                               <div>
                                 <div>{data.value}% ({data.count}/{data.total}건)</div>
-                                <div className="text-yellow-300">전체평균 {data.hqAvg}%</div>
+                                <div className="text-yellow-300">영업본부평균 {data.hqAvg}%</div>
                               </div>
                             )}
                           </div>
@@ -1380,15 +1389,15 @@ const Agent360Dashboard = () => {
                 <div className="flex items-center gap-4 text-xs">
                   <div className="flex items-center">
                     <div className="w-3 h-3 bg-blue-500 mr-1 rounded"></div>
-                    <span>전체평균 이상</span>
+                    <span>본부평균 이상</span>
                   </div>
                   <div className="flex items-center">
                     <div className="w-3 h-3 bg-red-400 mr-1 rounded"></div>
-                    <span>전체평균 미달</span>
+                    <span>본부평균 미달</span>
                   </div>
                   <div className="flex items-center">
                     <div className="w-6 h-0.5 bg-yellow-500 border-t-2 border-yellow-500 border-dashed mr-1"></div>
-                    <span>전체평균</span>
+                    <span>본부평균</span>
                   </div>
                 </div>
               </div>
@@ -1424,9 +1433,9 @@ const Agent360Dashboard = () => {
             {/* 월누적 APE - 단독 카드 */}
             <div className="space-y-4">
               <div className="bg-white rounded-lg shadow-sm border p-4">
-                <h4 className="text-sm font-semibold text-gray-700 mb-3">{performanceType}</h4>
+                <h4 className="text-sm font-semibold text-gray-700 mb-3">APE</h4>
                 <div className="text-center mb-3">
-                  <div className="text-2xl font-bold text-blue-600">{formatCurrency(getFilteredData('ape') * 10000)}</div>
+                  <div className="text-2xl font-bold text-blue-600">{formatCurrency(getFilteredData('ape') * 10000)} <span className="text-xs text-gray-400">(일평균 {formatCurrency(getFilteredData('dailyApe') * 10000)})</span></div>
                 </div>
                 <div className="text-center">
                   <span className="text-xs text-gray-600">전월 동기 대비 ▲ </span>
@@ -1439,7 +1448,7 @@ const Agent360Dashboard = () => {
                 <div className="bg-white rounded-lg shadow-sm border p-4">
                   <h4 className="text-sm font-semibold text-gray-700 mb-3">설계</h4>
                   <div className="text-center mb-3">
-                    <div className="text-2xl font-bold text-blue-600">{getFilteredData('design')}<span className="text-base text-gray-500">건</span></div>
+                    <div className="text-2xl font-bold text-blue-600">{getFilteredData('design')}<span className="text-base text-gray-500">건</span> <span className="text-xs text-gray-400">(일평균 {getFilteredData('dailyDesign')}건)</span></div>
                   </div>
                   <div className="text-center">
                     <span className="text-xs text-gray-600">전월 동기 대비 ▼ </span>
@@ -1450,7 +1459,7 @@ const Agent360Dashboard = () => {
                 <div className="bg-white rounded-lg shadow-sm border p-4">
                   <h4 className="text-sm font-semibold text-gray-700 mb-3">청약</h4>
                   <div className="text-center mb-3">
-                    <div className="text-2xl font-bold text-blue-600">{getFilteredData('contract')}<span className="text-base text-gray-500">건</span></div>
+                    <div className="text-2xl font-bold text-blue-600">{getFilteredData('contract')}<span className="text-base text-gray-500">건</span> <span className="text-xs text-gray-400">(일평균 {getFilteredData('dailyContract')}건)</span></div>
                   </div>
                   <div className="text-center">
                     <span className="text-xs text-gray-600">전월 동기 대비 ▲ </span>
@@ -1497,7 +1506,7 @@ const Agent360Dashboard = () => {
                   return (
                     <div className="absolute top-2 right-2 text-xs font-medium flex items-center gap-1 z-20 text-gray-600">
                       <div className="w-4 h-0.5" style={{backgroundColor: '#facc15'}}></div>
-                      <span>일 평균: {dailyChartMetric === '실적' ? formatCurrency(average * 10000) : `${average.toFixed(1)}건`}</span>
+                      <span>일 평균: {dailyChartMetric === '실적' ? `${average.toFixed(0).toLocaleString()}만원` : `${average.toFixed(1)}건`}</span>
                     </div>
                   );
                 })()}
@@ -1581,7 +1590,7 @@ const Agent360Dashboard = () => {
                     >
                       <div>9월 {hoveredDayData.day}일 (영업 {hoveredDayData.businessDay}일차) - {selectedProduct}</div>
                       {dailyChartMetric === '실적' ? (
-                        <div>일 {performanceType}: {formatCurrency(hoveredDayData.value * 10000)}</div>
+                        <div>일 APE: {formatCurrency(hoveredDayData.value * 1000000)}</div>
                       ) : dailyChartMetric === '청약' ? (
                         <div>청약: {hoveredDayData.value}건</div>
                       ) : (
@@ -1681,7 +1690,7 @@ const Agent360Dashboard = () => {
                         productSortBy === 'amount' ? 'text-blue-600 font-bold' : 'text-gray-900'
                       }`}
                     >
-                      {performanceType}
+                      APE
                       {productSortBy === 'amount' && (
                         <ArrowDown className="w-3 h-3" />
                       )}
@@ -1765,7 +1774,7 @@ const Agent360Dashboard = () => {
                 </div>
                 <div className="h-6 w-px bg-gray-200"></div>
                 <div className="text-center">
-                  <span className="text-sm text-gray-500 mr-2">가동</span>
+                  <span className="text-sm text-gray-500 mr-2">실적 발생</span>
                   <span className="text-xl font-bold text-blue-600">95개</span>
                   <span className="text-sm font-normal text-gray-500 ml-1">(59.4%)</span>
                 </div>
@@ -1836,7 +1845,7 @@ const Agent360Dashboard = () => {
 
                     <div className="mb-2 font-semibold text-red-300">위험</div>
                     <div className="space-y-2 mb-4 text-sm">
-                      <div>• <strong>3개월 연속 실적 하락:</strong> 직전 3개월 연속 전월 대비 총 {performanceType} 하락 + 당월 누적 {performanceType}도 전월 동기보다 낮음</div>
+                      <div>• <strong>3개월 연속 실적 하락:</strong> 직전 3개월 연속 전월 대비 총 APE 하락 + 당월 누적 APE도 전월 동기보다 낮음</div>
                       <div>• <strong>목표달성 미달:</strong> 월 영업일 절반 이상 경과 시점에서 목표 페이스 대비 현재 실적 -30% 이상 부진</div>
                       <div>• <strong>핵심인력 해촉:</strong> 지난달 실적이 있었던 가동 설계사가 이번 달 퇴사</div>
                       <div>• <strong>계약 품질 이슈:</strong> 최근 3 영업일 동안 인수거절/청약철회 2건 이상 발생</div>
@@ -1844,7 +1853,7 @@ const Agent360Dashboard = () => {
 
                     <div className="mb-2 font-semibold text-green-300">기회</div>
                     <div className="space-y-2 mb-4 text-sm">
-                      <div>• <strong>실적 급상승:</strong> 전월 동기 대비 {performanceType} +30% 이상 급등</div>
+                      <div>• <strong>실적 급상승:</strong> 전월 동기 대비 APE +30% 이상 급등</div>
                       <div>• <strong>고액 계약 체결:</strong> 월 보험료 30만원 이상 계약 체결</div>
                       <div>• <strong>신규 가동:</strong> 위촉된 설계사가 당월 생애 첫 계약 성공</div>
                     </div>
@@ -1961,7 +1970,7 @@ const Agent360Dashboard = () => {
                       branchSortBy === 'ape' ? 'text-blue-600 font-bold' : 'text-gray-900'
                     }`}
                   >
-                    {performanceType}
+                    APE
                     {branchSortBy === 'ape' && (
                       branchSortOrder === 'desc' ? <ArrowDown className="w-3 h-3" /> : <ArrowUp className="w-3 h-3" />
                     )}
@@ -2072,7 +2081,7 @@ const Agent360Dashboard = () => {
                   <div className="row-span-2 flex items-center">순위</div>
                   <div className="row-span-2 flex items-center">대리점명</div>
                   <div className="row-span-2 flex items-center">지점명</div>
-                  <div className="text-center">{performanceType}</div>
+                  <div className="text-center">APE</div>
                   <div className="text-center">당월 Plan</div>
                 </div>
                 {/* 서브 헤더 */}
