@@ -240,14 +240,51 @@ const Agent360Dashboard = () => {
       const branchKey = branch.branch;
       const info = branchInfoMap[branchKey] || getDefaultInfo(index);
 
-      // 실적이 있는 지점만 설계사 수 계산, 없으면 '-'
+      // 설계사 수 고정 생성 (기준별 재계산 방지)
       let totalAgents, activeAgents;
-      if (branch.ape > 0) {
-        totalAgents = Math.max(15, Math.floor(branch.ape / 3) + (index % 10)); // APE 기반 계산
-        activeAgents = Math.floor(totalAgents * 0.6) + (index % 5); // 가동 설계사는 총 설계사의 약 60%
+      const branchHash = (branchKey || '').split('').reduce((acc, char) => acc + char.charCodeAt(0), index);
+
+      // 위촉설계사는 브랜치별로 고정된 값 (20~200 사이)
+      totalAgents = 20 + (branchHash % 181);
+
+      // 가동설계사 계산 (0이 될 수 있음)
+      const hasPerformance = (branch.ape || 0) > 0.5; // 0.5 이상일 때만 실적 있음
+      if (hasPerformance) {
+        activeAgents = Math.floor(totalAgents * 0.2) + ((branchHash + index) % 12); // 위촉설계사의 20~40% 정도가 가동
+        activeAgents = Math.min(activeAgents, totalAgents);
+        // 일부는 가동설계사가 0인 경우도 있음
+        if ((branchHash + index) % 15 === 0) activeAgents = 0;
       } else {
-        totalAgents = '-';
-        activeAgents = '-';
+        activeAgents = 0;
+      }
+
+      // 실적값 계산 (가동설계사가 0이면 실적도 0)
+      let performanceValue = 0;
+      if (activeAgents > 0 && hasPerformance) {
+        // 500원부터 300만원까지 다양한 범위, 500원 단위로 제한
+        const minValue = 500; // 500원
+        const maxValue = 3000000; // 300만원
+        const randomFactor1 = (branchHash % 100) / 100; // 0~1
+        const randomFactor2 = ((branchHash + index) % 100) / 100; // 0~1
+        const randomFactor3 = ((branchHash * 2 + index) % 100) / 100; // 0~1
+
+        // 더 다양한 분포를 위한 복합 계산
+        let baseValue;
+        if (randomFactor1 < 0.3) {
+          // 30% 확률로 작은 값들 (500원 ~ 10만원)
+          baseValue = minValue + Math.floor((100000 - minValue) * randomFactor2 * randomFactor3);
+        } else if (randomFactor1 < 0.7) {
+          // 40% 확률로 중간 값들 (10만원 ~ 100만원)
+          baseValue = 100000 + Math.floor((1000000 - 100000) * randomFactor2);
+        } else {
+          // 30% 확률로 큰 값들 (100만원 ~ 300만원)
+          baseValue = 1000000 + Math.floor((maxValue - 1000000) * randomFactor2 * randomFactor3);
+        }
+
+        // 500원 단위로 반올림
+        baseValue = Math.round(baseValue / 500) * 500;
+
+        performanceValue = modalKPI === 'MMP' ? Math.round(baseValue * 12) : baseValue;
       }
 
       return {
@@ -259,7 +296,7 @@ const Agent360Dashboard = () => {
         partnershipDate: info.partnershipDate,
         totalAgents: totalAgents,
         activeAgents: activeAgents,
-        currentMonthAPE: branch.ape || 0
+        currentMonthAPE: performanceValue
       };
     });
 
@@ -384,6 +421,54 @@ const Agent360Dashboard = () => {
       issue: '신규 위촉 발생',
       detail: '',
       type: 'change'
+    },
+    {
+      id: 10,
+      agency: '메가',
+      branch: '인슈에셋고양',
+      issue: '가동률 급하락',
+      detail: '',
+      type: 'risk'
+    },
+    {
+      id: 11,
+      agency: '글로벌금융판매',
+      branch: '브릿지재무설계',
+      issue: '고객 만족도 상승',
+      detail: '',
+      type: 'opportunity'
+    },
+    {
+      id: 12,
+      agency: '한국지에이금융서비스',
+      branch: '김포지사',
+      issue: '계약 품질 개선',
+      detail: '',
+      type: 'opportunity'
+    },
+    {
+      id: 13,
+      agency: '메타리치',
+      branch: '리치골드',
+      issue: '장기 미관리 상태',
+      detail: '',
+      type: 'risk'
+    },
+    {
+      id: 14,
+      agency: '어센틱금융그룹',
+      branch: '대구센터',
+      issue: '신입 설계사 급증',
+      detail: '',
+      type: 'change'
+    },
+    {
+      id: 15,
+      agency: '라이프파트너스',
+      branch: '대전센터',
+      issue: '실적 부진 지속',
+      detail: '',
+      type: 'risk'
     }
   ];
 
@@ -412,6 +497,7 @@ const Agent360Dashboard = () => {
   const [isResizing, setIsResizing] = useState(false);
   const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width: 0, height: 0 });
   const [branchPeriod, setBranchPeriod] = useState<'current' | 'previous'>('current');
+  const [showConversionTooltip, setShowConversionTooltip] = useState(false);
 
   // 잔여 영업일 계산 (9월 25일 기준 7일 남은 것으로 가정)
   const getRemainingBusinessDays = () => {
@@ -467,8 +553,9 @@ const Agent360Dashboard = () => {
   }, [performanceType, dailyChartMetric]);
   const [showAllBranchesModal, setShowAllBranchesModal] = useState(false);
   const [showBranchInfoModal, setBranchInfoModal] = useState(false);
-  const [branchInfoSortBy, setBranchInfoSortBy] = useState<'no' | 'agency' | 'branch' | 'address' | 'phone' | 'partnershipDate' | 'currentMonthAPE' | 'totalAgents' | 'activeAgents' | 'agencyBranch'>('agencyBranch');
-  const [branchInfoSortOrder, setBranchInfoSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [branchInfoSortBy, setBranchInfoSortBy] = useState<'no' | 'agency' | 'branch' | 'address' | 'phone' | 'partnershipDate' | 'currentMonthAPE' | 'totalAgents' | 'activeAgents' | 'agencyBranch'>('currentMonthAPE');
+  const [branchInfoSortOrder, setBranchInfoSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [modalKPI, setModalKPI] = useState<'APE' | 'MMP'>('APE'); // 모달용 KPI 상태
   const [modalSortBy, setModalSortBy] = useState('achievement');
   const [modalSortOrder, setModalSortOrder] = useState<'desc' | 'asc'>('desc');
   const [tempSelectedMonth, setTempSelectedMonth] = useState('2025-09'); // 드롭다운에서 선택한 월
@@ -1065,9 +1152,9 @@ const Agent360Dashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold text-gray-900 mb-1">통합 인사이트 뷰</h1>
-              <div className="text-sm text-gray-600">
-                <span className="font-medium">강남본부 김영수 지점장</span>
-                <span className="ml-3 text-gray-500">
+              <div className="text-sm text-black">
+                <span className="">강남본부 김영수 지점장</span>
+                <span className="ml-3 text-black">
                   {isCurrentMonth ? (
                     <>2025.09.19 마감 기준</>
                   ) : (
@@ -1079,7 +1166,7 @@ const Agent360Dashboard = () => {
             <div className="text-right">
               {isCurrentMonth && (
                 <>
-                  <div className="text-sm text-gray-500">2025.09.20(금)</div>
+                  <div className="text-sm text-black">2025.09.20(금)</div>
                   <div className="text-xs text-gray-400 mt-1">
                     9월 영업일: {businessDays.elapsed}일/{businessDays.total}일 (잔여 {businessDays.remaining}일)
                   </div>
@@ -1096,7 +1183,7 @@ const Agent360Dashboard = () => {
             <div className="flex items-center space-x-3">
               {/* 조회년월 선택 */}
               <div className="flex items-center space-x-3">
-                <span className="text-sm font-medium text-gray-700 min-w-0">조회년월</span>
+                <span className="text-sm  text-gray-700 min-w-0">조회년월</span>
                 <select
                   value={tempSelectedMonth}
                   onChange={(e) => setTempSelectedMonth(e.target.value)}
@@ -1113,7 +1200,7 @@ const Agent360Dashboard = () => {
               {/* 조회 버튼 */}
               <button
                 onClick={handleSearchClick}
-                className="px-3 py-1.5 bg-gray-400 hover:bg-gray-500 text-white text-sm font-medium rounded-lg flex items-center space-x-1.5 transition-colors"
+                className="px-3 py-1.5 bg-gray-400 hover:bg-gray-500 text-white text-sm  rounded-lg flex items-center space-x-1.5 transition-colors"
               >
                 <Search className="w-4 h-4" />
                 <span>조회</span>
@@ -1124,7 +1211,7 @@ const Agent360Dashboard = () => {
             <div className="flex items-center space-x-3">
               {/* 실적 기준 선택 */}
               <div className="flex items-center space-x-3">
-                <span className="text-sm font-medium text-gray-700">실적 기준</span>
+                <span className="text-sm  text-gray-700">실적 기준</span>
                 <div className="flex items-center bg-white border border-gray-300 rounded-lg">
                   <label className="flex items-center px-3 py-2 cursor-pointer">
                     <input
@@ -1152,7 +1239,7 @@ const Agent360Dashboard = () => {
                 </div>
               </div>
 
-              <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg flex items-center space-x-2 transition-colors">
+              <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm  rounded-lg flex items-center space-x-2 transition-colors">
                 <Download className="w-4 h-4" />
                 <span>원클릭 엑셀 다운로드</span>
               </button>
@@ -1175,12 +1262,12 @@ const Agent360Dashboard = () => {
             <div className="bg-white rounded-lg shadow-sm border p-6 relative">
               <div className="flex justify-between items-start mb-4 border-b border-gray-100 pb-2">
                 <h3 className="text-base font-bold text-gray-800">목표달성률</h3>
-                <span className="text-xs text-gray-500">{performanceType} 기준</span>
+                <span className="text-xs text-black">{performanceType} 기준</span>
               </div>
               
               <div className="text-center mb-4">
                 <div className="text-5xl font-black text-blue-600 mb-2">{myKPI.goalAchievement.current.toFixed(1)}%</div>
-                <div className="text-sm text-gray-600 font-medium mb-4">
+                <div className="text-sm text-black  mb-4">
                   {formatCurrency(myKPI.goalAchievement.actual).replace(' 백만원', '백만')} / {formatCurrency(myKPI.goalAchievement.target).replace(' 백만원', '백만')}
                 </div>
 
@@ -1229,13 +1316,13 @@ const Agent360Dashboard = () => {
               
               <div className="grid grid-cols-2 gap-3 mb-4">
                 <div className="text-left">
-                  <div className="text-xs text-gray-500 mb-1">전월 동기 대비</div>
+                  <div className="text-xs text-black mb-1">전월 동기 대비</div>
                   {shouldShowLastMonthComparison ? (
                     <>
-                      <div className={`font-semibold text-lg ${myKPI.goalAchievement.vsLastMonth > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      <div className={`font-semibold text-lg ${myKPI.goalAchievement.vsLastMonth > 0 ? 'text-black' : 'text-red-600'}`}>
                         {myKPI.goalAchievement.vsLastMonth > 0 ? '▲ ' : '▼ '}{Math.abs(myKPI.goalAchievement.vsLastMonth)}%p
                       </div>
-                      <div className={`text-xs ${myKPI.goalAchievement.vsLastMonth > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      <div className={`text-xs ${myKPI.goalAchievement.vsLastMonth > 0 ? 'text-black' : 'text-red-600'}`}>
                         {myKPI.goalAchievement.vsLastMonth > 0 ? '+' : ''}{formatCurrency((myKPI.goalAchievement.actual * myKPI.goalAchievement.vsLastMonth / 100))}
                       </div>
                     </>
@@ -1253,9 +1340,9 @@ const Agent360Dashboard = () => {
                   )}
                 </div>
                 <div className="text-right">
-                  <div className="text-xs text-gray-500 mb-1">목표까지</div>
+                  <div className="text-xs text-black mb-1">목표까지</div>
                   <div className="font-semibold text-lg text-gray-900">{formatCurrency(myKPI.goalAchievement.gap)}</div>
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-black">
                     {myKPI.goalAchievement.actual >= myKPI.goalAchievement.target ? '목표 달성!' : '남은 금액'}
                   </div>
                 </div>
@@ -1265,7 +1352,7 @@ const Agent360Dashboard = () => {
               {/* 하루 평균 필요 금액 안내 - 현재월에만 표시 */}
               {isCurrentMonth && (
                 <div className="bg-blue-50 rounded-lg p-4 border border-blue-200 shadow-sm">
-                  <div className="text-sm font-medium text-blue-800 text-center">
+                  <div className="text-sm  text-blue-800 text-center">
                     <div className="mb-1">이번달 목표 달성을 위해</div>
                     <div>
                       하루 평균
@@ -1280,12 +1367,12 @@ const Agent360Dashboard = () => {
               
               <div className="grid grid-cols-2 gap-3 mt-4 pt-3 border-t">
                 <div className="text-center">
-                  <div className="text-xs text-gray-500">본부 순위</div>
-                  <div className="font-semibold text-blue-600">{myKPI.goalAchievement.hqRankRegion.rank}위<span className="text-gray-500">/{myKPI.goalAchievement.hqRankRegion.total}명</span></div>
+                  <div className="text-xs text-black">본부 순위</div>
+                  <div className="font-semibold text-blue-600">{myKPI.goalAchievement.hqRankRegion.rank}위<span className="text-black">/{myKPI.goalAchievement.hqRankRegion.total}명</span></div>
                 </div>
                 <div className="text-center">
-                  <div className="text-xs text-gray-500">전체 순위</div>
-                  <div className="font-semibold text-blue-600">{myKPI.goalAchievement.hqRankTotal.rank}위<span className="text-gray-500">/{myKPI.goalAchievement.hqRankTotal.total}명</span></div>
+                  <div className="text-xs text-black">전체 순위</div>
+                  <div className="font-semibold text-blue-600">{myKPI.goalAchievement.hqRankTotal.rank}위<span className="text-black">/{myKPI.goalAchievement.hqRankTotal.total}명</span></div>
                 </div>
               </div>
             </div>
@@ -1296,11 +1383,11 @@ const Agent360Dashboard = () => {
                 <h4 className="text-sm font-semibold text-gray-700 mb-3">설계사 가동률</h4>
                 <div className="text-center mb-3">
                   <div className="text-2xl font-bold text-blue-600">{myKPI.designerActivity.current.toFixed(1)}%</div>
-                  <div className="text-xs text-gray-500">({myKPI.designerActivity.active}/{myKPI.designerActivity.total}명)</div>
+                  <div className="text-xs text-black">({myKPI.designerActivity.active}/{myKPI.designerActivity.total}명)</div>
                 </div>
                 <div className="text-center">
-                  <span className="text-xs text-gray-600">전월 동기 대비 </span>
-                  <span className="text-sm font-medium text-red-600">▼ 3명</span>
+                  <span className="text-xs text-black">전월 동기 대비 </span>
+                  <span className="text-sm  text-red-600">▼ 3명</span>
                 </div>
               </div>
 
@@ -1308,11 +1395,11 @@ const Agent360Dashboard = () => {
                 <h4 className="text-sm font-semibold text-gray-700 mb-3">모바일 청약률</h4>
                 <div className="text-center mb-3">
                   <div className="text-2xl font-bold text-blue-600">{myKPI.mobileContract.current.toFixed(1)}%</div>
-                  <div className="text-xs text-gray-500">({myKPI.mobileContract.count}/{myKPI.mobileContract.total}건)</div>
+                  <div className="text-xs text-black">({myKPI.mobileContract.count}/{myKPI.mobileContract.total}건)</div>
                 </div>
                 <div className="text-center">
-                  <span className="text-xs text-gray-600">전월 동기 대비 </span>
-                  <span className="text-sm font-medium text-green-600">▲ {myKPI.mobileContract.vsLastMonthPercent}%p</span>
+                  <span className="text-xs text-black">전월 동기 대비 </span>
+                  <span className="text-sm  text-black">▲ {myKPI.mobileContract.vsLastMonthPercent}%p</span>
                 </div>
               </div>
             </div>
@@ -1334,10 +1421,10 @@ const Agent360Dashboard = () => {
                       <button
                         key={kpi.key}
                         onClick={() => setSelectedKPI(kpi.key)}
-                        className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+                        className={`px-3 py-1 text-xs  rounded transition-colors ${
                           selectedKPI === kpi.key
                             ? 'bg-white text-gray-900 shadow-sm'
-                            : 'text-gray-600 hover:text-gray-900'
+                            : 'text-black hover:text-gray-900'
                         }`}
                       >
                         {kpi.label}
@@ -1348,21 +1435,21 @@ const Agent360Dashboard = () => {
                 </div>
               </div>
               
-              <div className="h-52 relative bg-gray-50 rounded-lg p-4" onMouseLeave={() => setHoveredData(null)}>
+              <div className="h-60 relative bg-gray-50 rounded-lg p-4" onMouseLeave={() => setHoveredData(null)}>
                 {/* % 표시 - 오른쪽 상단, 텍스트 겹침 방지 */}
-                <div className="absolute top-2 right-2 text-xs text-gray-500 bg-gray-50 px-1">(%)</div>
-                
+                <div className="absolute top-2 right-2 text-xs text-black bg-gray-50 px-1">(%)</div>
+
                 {/* 막대 그래프 */}
                 <div className="flex items-end justify-center gap-3 h-full relative" style={{paddingTop: '20px'}}>
                   {getKPIData().map((data: any, idx: number) => {
                     const maxScale = getMaxValue(getKPIData(), selectedKPI);
-                    const barHeight = Math.min((data.value / maxScale) * 120, 120); // 높이 줄여서 텍스트 공간 확보
-                    const avgHeight = Math.min((data.hqAvg / maxScale) * 120, 120);
-                    
+                    const barHeight = Math.min((data.value / maxScale) * 140, 140);
+                    const avgHeight = Math.min((data.hqAvg / maxScale) * 140, 140);
+
                     return (
-                      <div key={idx} className="flex flex-col items-center relative" style={{height: '160px', width: '50px'}}>
+                      <div key={idx} className="flex flex-col items-center relative" style={{height: '180px', width: '52px'}}>
                         {/* 차트 영역 */}
-                        <div className="relative flex justify-center" style={{height: '120px', width: '100%'}}>
+                        <div className="relative flex justify-center" style={{height: '140px', width: '100%'}}>
                           {/* 본부 평균 노란선 */}
                           <div 
                             className="absolute border-t border-yellow-500 border-dashed z-10"
@@ -1380,7 +1467,7 @@ const Agent360Dashboard = () => {
                           
                           {/* 막대 바로 위 수치 */}
                           <div 
-                            className="absolute text-xs text-gray-600 transform -translate-x-1/2 left-1/2"
+                            className="absolute text-xs text-black transform -translate-x-1/2 left-1/2"
                             style={{bottom: `${barHeight + 2}px`, fontSize: '10px'}}
                           >
                             {Math.round(data.value)}
@@ -1388,7 +1475,7 @@ const Agent360Dashboard = () => {
                         </div>
                         
                         {/* 월 라벨 */}
-                        <div className="text-xs text-gray-600 mt-2" style={{fontSize: '10px'}}>
+                        <div className="text-xs text-black mt-2" style={{fontSize: '10px'}}>
                           {data.month}
                         </div>
                         
@@ -1456,10 +1543,10 @@ const Agent360Dashboard = () => {
                       <button
                         key={kpi.key}
                         onClick={() => setYearlyKPI(kpi.key)}
-                        className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+                        className={`px-3 py-1 text-xs  rounded transition-colors ${
                           yearlyKPI === kpi.key
                             ? 'bg-white text-gray-900 shadow-sm'
-                            : 'text-gray-600 hover:text-gray-900'
+                            : 'text-black hover:text-gray-900'
                         }`}
                       >
                         {kpi.label}
@@ -1471,7 +1558,7 @@ const Agent360Dashboard = () => {
 
               <div className="h-52 relative bg-gray-50 rounded-lg p-4" onMouseLeave={() => setHoveredYearlyData(null)}>
                 {/* % 표시 - 오른쪽 상단, 텍스트 겹침 방지 */}
-                <div className="absolute top-2 right-2 text-xs text-gray-500 bg-gray-50 px-1">(%)</div>
+                <div className="absolute top-2 right-2 text-xs text-black bg-gray-50 px-1">(%)</div>
 
                 {/* 막대 그래프 */}
                 <div className="flex items-end justify-center gap-8 h-full relative" style={{paddingTop: '20px'}}>
@@ -1554,7 +1641,7 @@ const Agent360Dashboard = () => {
 
                             {/* 막대 바로 위 수치 */}
                             <div
-                              className="absolute text-xs text-gray-600 transform -translate-x-1/2 left-1/2"
+                              className="absolute text-xs text-black transform -translate-x-1/2 left-1/2"
                               style={{bottom: `${barHeight + 2}px`, fontSize: '10px'}}
                             >
                               {Math.round(value)}
@@ -1562,7 +1649,7 @@ const Agent360Dashboard = () => {
                           </div>
 
                           {/* 년도 라벨 */}
-                          <div className="text-xs text-gray-600 mt-2" style={{fontSize: '10px'}}>
+                          <div className="text-xs text-black mt-2" style={{fontSize: '10px'}}>
                             {data.year === '2025' ? '2025년(~9월)' : `${data.year}년`}
                           </div>
 
@@ -1631,10 +1718,10 @@ const Agent360Dashboard = () => {
                   <button
                     key={product}
                     onClick={() => setSelectedProduct(product)}
-                    className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+                    className={`px-3 py-1 text-xs  rounded transition-colors ${
                       selectedProduct === product
                         ? 'bg-white text-gray-900 shadow-sm'
-                        : 'text-gray-600 hover:text-gray-900'
+                        : 'text-black hover:text-gray-900'
                     }`}
                   >
                     {product}
@@ -1651,8 +1738,8 @@ const Agent360Dashboard = () => {
                   <div className="text-2xl font-bold text-blue-600">{formatCurrency(getFilteredData('ape') * 10000)}</div>
                 </div>
                 <div className="text-center">
-                  <span className="text-xs text-gray-600">전월 동기 대비 ▲ </span>
-                  <span className="text-sm font-medium text-green-600">{formatCurrency(getFilteredData('apeGrowthAmount') * 10000)}</span>
+                  <span className="text-xs text-black">전월 동기 대비 ▲ </span>
+                  <span className="text-sm  text-black">{formatCurrency(getFilteredData('apeGrowthAmount') * 10000)}</span>
                 </div>
               </div>
               
@@ -1662,11 +1749,11 @@ const Agent360Dashboard = () => {
                 <div className="bg-white rounded-lg shadow-sm border p-4 flex-1">
                   <h4 className="text-sm font-semibold text-gray-700 mb-3">설계</h4>
                   <div className="text-center mb-3">
-                    <div className="text-2xl font-bold text-blue-600">{getFilteredData('design')}<span className="text-base text-gray-500">건</span></div>
+                    <div className="text-2xl font-bold text-blue-600">{getFilteredData('design')}<span className="text-base text-black">건</span></div>
                   </div>
                   <div className="text-center">
-                    <span className="text-xs text-gray-600">전월 동기 대비 ▼ </span>
-                    <span className="text-sm font-medium text-red-600">{Math.abs(getFilteredData('designGrowth'))}건</span>
+                    <span className="text-xs text-black">전월 동기 대비 ▼ </span>
+                    <span className="text-sm  text-red-600">{Math.abs(getFilteredData('designGrowth'))}건</span>
                   </div>
                 </div>
 
@@ -1674,35 +1761,54 @@ const Agent360Dashboard = () => {
                 {(() => {
                   const designCount = getFilteredData('design');
                   const contractCount = getFilteredData('contract');
-                  const actualContractCount = Math.round(contractCount * 0.76); // 실제 계약 완료 건수
-                  const conversionRate = Math.round((actualContractCount / designCount) * 100);
+                  const conversionRate = Math.round((contractCount / designCount) * 100);
 
                   return (
                     <div className="flex flex-col items-center px-2">
                       <div className="text-2xl">→</div>
                       <div className="text-center">
                         <div className={`text-lg font-bold ${
-                          conversionRate >= 60 ? 'text-green-600' :
+                          conversionRate >= 60 ? 'text-black' :
                           conversionRate >= 40 ? 'text-yellow-600' :
                           'text-red-600'
                         }`}>
                           {conversionRate}%
                         </div>
-                        <div className="text-xs text-gray-500 whitespace-nowrap">계약률</div>
+                        <div className="text-xs text-black whitespace-nowrap">청약률</div>
                       </div>
                     </div>
                   );
                 })()}
 
                 {/* 청약 카드 */}
-                <div className="bg-white rounded-lg shadow-sm border p-4 flex-1">
+                <div
+                  className="bg-white rounded-lg shadow-sm border p-4 flex-1 relative cursor-pointer hover:shadow-md transition-shadow"
+                  onMouseEnter={() => setShowConversionTooltip(true)}
+                  onMouseLeave={() => setShowConversionTooltip(false)}
+                >
                   <h4 className="text-sm font-semibold text-gray-700 mb-3">청약</h4>
                   <div className="text-center mb-3">
-                    <div className="text-2xl font-bold text-blue-600">{getFilteredData('contract')}<span className="text-base text-gray-500">건</span></div>
+                    <div className="text-2xl font-bold text-blue-600">{getFilteredData('contract')}<span className="text-base text-black">건</span></div>
                   </div>
+
+                  {/* 호버 툴팁 */}
+                  {showConversionTooltip && (() => {
+                    const contractCount = getFilteredData('contract');
+                    const rejectedCount = 24; // 거절 24건
+                    const withdrawnCount = 8; // 철회 8건
+
+                    return (
+                      <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-800 text-white text-xs rounded px-3 py-2 whitespace-nowrap z-30 shadow-lg">
+                        <div className="mb-1">청약 {contractCount}건 중</div>
+                        <div>거절: {rejectedCount}건, 철회: {withdrawnCount}건</div>
+                        {/* 화살표 */}
+                        <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+                      </div>
+                    );
+                  })()}
                   <div className="text-center">
-                    <span className="text-xs text-gray-600">전월 동기 대비 ▲ </span>
-                    <span className="text-sm font-medium text-green-600">{getFilteredData('contractGrowth')}건</span>
+                    <span className="text-xs text-black">전월 동기 대비 ▲ </span>
+                    <span className="text-sm  text-black">{getFilteredData('contractGrowth')}건</span>
                   </div>
                 </div>
               </div>
@@ -1719,10 +1825,10 @@ const Agent360Dashboard = () => {
                     <button
                       key={metric}
                       onClick={() => setDailyChartMetric(metric as any)}
-                      className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
+                      className={`px-2 py-1 text-xs  rounded transition-colors ${
                         dailyChartMetric === metric
                           ? 'bg-white text-gray-900 shadow-sm'
-                          : 'text-gray-600 hover:text-gray-900'
+                          : 'text-black hover:text-gray-900'
                       }`}
                     >
                       {metric}
@@ -1743,7 +1849,7 @@ const Agent360Dashboard = () => {
                   const average = values.reduce((sum, val) => sum + val, 0) / values.length;
 
                   return (
-                    <div className="absolute top-2 right-2 text-xs font-medium flex items-center gap-1 z-20 text-gray-600">
+                    <div className="absolute top-2 right-2 text-xs  flex items-center gap-1 z-20 text-black">
                       <div className="w-4 h-0.5" style={{backgroundColor: '#facc15'}}></div>
                       <span>일 평균: {dailyChartMetric === 'APE' || dailyChartMetric === 'MMP' ? formatCurrency(average * 10000) : `${average.toFixed(1)}건`}</span>
                     </div>
@@ -1814,7 +1920,7 @@ const Agent360Dashboard = () => {
                         </div>
 
                         {/* 영업일자 */}
-                        <div className="text-xs text-gray-600 mt-2" style={{fontSize: '10px'}}>{businessDayNumber}</div>
+                        <div className="text-xs text-black mt-2" style={{fontSize: '10px'}}>{businessDayNumber}</div>
                       </div>
                     );
                   })}
@@ -1861,7 +1967,7 @@ const Agent360Dashboard = () => {
 
               {/* 가로축 레이블 */}
               <div className="flex justify-center mt-2">
-                <span className="text-xs text-gray-600">영업일차</span>
+                <span className="text-xs text-black">영업일차</span>
               </div>
             </div>
 
@@ -1900,7 +2006,7 @@ const Agent360Dashboard = () => {
                             />
                           )}
                         </div>
-                        <span className="text-xs font-medium text-gray-700 w-8 text-right flex-shrink-0">{item.value}%</span>
+                        <span className="text-xs  text-gray-700 w-8 text-right flex-shrink-0">{item.value}%</span>
                         
                       </div>
                     );
@@ -1913,7 +2019,7 @@ const Agent360Dashboard = () => {
                     <div className="flex items-center justify-center gap-4 text-xs">
                       <div className="flex items-center">
                         <div className="w-4 h-0.5 bg-orange-500 mr-2"></div>
-                        <span className="text-gray-600">전체 평균 (건강 60% / 종신정기 40%)</span>
+                        <span className="text-black">전체 평균 (건강 60% / 종신정기 40%)</span>
                       </div>
                     </div>
                   </div>
@@ -1922,16 +2028,16 @@ const Agent360Dashboard = () => {
 
               {/* Top 3 상품 - 테이블 형태 */}
               <div className="border-t pt-3">
-                <div className="text-xs font-medium text-gray-700 mb-3">Top 3 상품</div>
+                <div className="text-xs  text-gray-700 mb-3">Top 3 상품</div>
                 
                 <div className="overflow-hidden">
                   {/* 헤더 */}
                   <div className="grid gap-2 pb-2 border-b border-gray-200 mb-3" style={{gridTemplateColumns: '30px 1fr 80px 80px'}}>
-                    <div className="text-xs font-medium text-gray-500">순위</div>
-                    <div className="text-xs font-medium text-gray-500">상품명</div>
+                    <div className="text-xs  text-black">순위</div>
+                    <div className="text-xs  text-black">상품명</div>
                     <button
                       onClick={() => setProductSortBy(productSortBy === 'amount' ? 'count' : 'amount')}
-                      className={`text-xs font-medium hover:text-blue-600 transition-colors text-left flex items-center gap-1 ${
+                      className={`text-xs  hover:text-blue-600 transition-colors text-left flex items-center gap-1 ${
                         productSortBy === 'amount' ? 'text-blue-600 font-bold' : 'text-gray-900'
                       }`}
                     >
@@ -1942,7 +2048,7 @@ const Agent360Dashboard = () => {
                     </button>
                     <button
                       onClick={() => setProductSortBy(productSortBy === 'count' ? 'amount' : 'count')}
-                      className={`text-xs font-medium hover:text-blue-600 transition-colors text-left flex items-center gap-1 ${
+                      className={`text-xs  hover:text-blue-600 transition-colors text-left flex items-center gap-1 ${
                         productSortBy === 'count' ? 'text-blue-600 font-bold' : 'text-gray-900'
                       }`}
                     >
@@ -1963,13 +2069,13 @@ const Agent360Dashboard = () => {
                       >
                         <div className="flex items-center">
                           <div className={`w-4 h-4 rounded-full flex items-center justify-center text-xs font-bold ${
-                            idx < 3 ? 'bg-yellow-400 text-yellow-900' : 'bg-gray-200 text-gray-600'
+                            idx < 3 ? 'bg-yellow-400 text-yellow-900' : 'bg-gray-200 text-black'
                           }`}>
                             {product.rank}
                           </div>
                         </div>
                         <div className="flex items-center min-w-0">
-                          <div className="text-xs font-medium text-gray-900 truncate">
+                          <div className="text-xs  text-gray-900 truncate">
                             {product.name}
                           </div>
                         </div>
@@ -2009,10 +2115,10 @@ const Agent360Dashboard = () => {
                           setVisitEducationType(type);
                           setShowVisitEducationList(false);
                         }}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                        className={`px-4 py-2 rounded-lg text-sm  transition-all ${
                           visitEducationType === type
                             ? 'bg-blue-50 text-blue-600 border border-blue-200'
-                            : 'text-gray-600 hover:bg-gray-50'
+                            : 'text-black hover:bg-gray-50'
                         }`}
                       >
                         {type}
@@ -2024,19 +2130,19 @@ const Agent360Dashboard = () => {
                     <div className="text-2xl font-bold text-blue-600">
                       {visitEducationData[visitEducationType].count}건
                     </div>
-                    <div className="text-xs text-gray-500">이번 달 총 {visitEducationType}</div>
+                    <div className="text-xs text-black">이번 달 총 {visitEducationType}</div>
                   </div>
                 </div>
 
                 {/* 세부 리스트 - 항상 펼쳐진 상태 */}
                 <div className="border-t pt-3 mt-3">
-                  <div className="text-xs text-gray-500 mb-3">
+                  <div className="text-xs text-black mb-3">
                     {visitEducationType} 상세 내역
                   </div>
 
                   <div className="max-h-48 overflow-y-auto">
                     {/* 컬럼 헤더 */}
-                    <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg mb-2 text-xs font-medium text-gray-700 border-b border-gray-200">
+                    <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg mb-2 text-xs  text-gray-700 border-b border-gray-200">
                       <div className="min-w-[35px] shrink-0">날짜</div>
                       <div className="min-w-[180px] shrink-0">대리점 {'>'} 지점</div>
                       <div className="flex-1">활동 내용</div>
@@ -2048,11 +2154,11 @@ const Agent360Dashboard = () => {
                           key={index}
                           className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 text-xs border-l-2 border-transparent hover:border-blue-200 transition-all"
                         >
-                          <div className="text-gray-500 min-w-[35px] shrink-0 font-mono">
+                          <div className="text-black min-w-[35px] shrink-0 font-mono">
                             {item.date}
                           </div>
                           <div className="min-w-[180px] shrink-0 flex items-center">
-                            <span className="font-medium text-gray-900 truncate max-w-[85px]">
+                            <span className=" text-gray-900 truncate max-w-[85px]">
                               {item.agency}
                             </span>
                             <ChevronRight className="w-3 h-3 text-gray-400 mx-1 shrink-0" />
@@ -2060,7 +2166,7 @@ const Agent360Dashboard = () => {
                               {item.branch}
                             </span>
                           </div>
-                          <div className="text-gray-600 flex-1 truncate">
+                          <div className="text-black flex-1 truncate">
                             {item.detail}
                           </div>
                         </div>
@@ -2087,7 +2193,7 @@ const Agent360Dashboard = () => {
                 <h3 className="text-sm font-semibold text-gray-800">나의 관리 지점</h3>
                 <button
                   onClick={() => setBranchInfoModal(true)}
-                  className="text-xs text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded transition-colors flex items-center gap-1 px-2 py-1"
+                  className="text-xs text-black hover:text-gray-800 hover:bg-gray-100 rounded transition-colors flex items-center gap-1 px-2 py-1"
                 >
                   <span>전체 보기</span>
                   <ChevronRight className="w-3 h-3" />
@@ -2095,14 +2201,14 @@ const Agent360Dashboard = () => {
               </div>
               <div className="flex items-center justify-center gap-8">
                 <div className="text-center">
-                  <span className="text-sm text-gray-500 mr-2">전체</span>
+                  <span className="text-sm text-black mr-2">전체</span>
                   <span className="text-xl font-bold text-gray-900">160개</span>
                 </div>
                 <div className="h-6 w-px bg-gray-200"></div>
                 <div className="text-center">
-                  <span className="text-sm text-gray-500 mr-2">가동</span>
+                  <span className="text-sm text-black mr-2">가동</span>
                   <span className="text-xl font-bold text-blue-600">95개</span>
-                  <span className="text-sm font-normal text-gray-500 ml-1">(59.4%)</span>
+                  <span className="text-sm font-normal text-black ml-1">(59.4%)</span>
                 </div>
               </div>
             </div>
@@ -2111,7 +2217,7 @@ const Agent360Dashboard = () => {
             <div className="mt-3 flex gap-2">
               <button
                 onClick={handleBranchDetailClick}
-                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-3 rounded text-sm font-medium hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-3 rounded text-sm  hover:shadow-lg transition-all flex items-center justify-center gap-2"
               >
                 <Building className="w-4 h-4" />
                 지점별 상세 바로가기
@@ -2124,7 +2230,7 @@ const Agent360Dashboard = () => {
               <div className="flex items-center gap-2 mb-3 relative">
                 <h3 className="text-sm font-semibold text-gray-700">오늘 주목할 지점</h3>
                 <button
-                  className="ml-auto p-1 text-gray-400 hover:text-gray-600 relative"
+                  className="ml-auto p-1 text-gray-400 hover:text-black relative"
                   onClick={() => setShowCriteriaTooltip(!showCriteriaTooltip)}
                 >
                   <HelpCircle className="w-4 h-4" />
@@ -2200,9 +2306,9 @@ const Agent360Dashboard = () => {
               </div>
 
               <div className="space-y-3">
-                {/* 확장되지 않았을 때는 5개, 확장했을 때는 전체 표시 */}
+                {/* 확장되지 않았을 때는 8개, 확장했을 때는 전체 표시 */}
                 {managementFocus
-                  .slice(0, expandedRecommendations ? undefined : 5)
+                  .slice(0, expandedRecommendations ? undefined : 8)
                   .map((item) => (
                     <div
                       key={item.id}
@@ -2211,7 +2317,7 @@ const Agent360Dashboard = () => {
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
+                          <span className={`inline-flex items-center px-2 py-1 rounded text-xs  ${
                             item.type === 'risk'
                               ? 'bg-red-100 text-red-800'
                               : item.type === 'opportunity'
@@ -2224,7 +2330,7 @@ const Agent360Dashboard = () => {
                             <div className="text-sm font-semibold text-gray-900">
                               {item.agency} {'>'} {item.branch}
                             </div>
-                            <div className="text-sm text-gray-600">
+                            <div className="text-sm text-black">
                               {item.issue}
                             </div>
                           </div>
@@ -2236,11 +2342,11 @@ const Agent360Dashboard = () => {
               </div>
 
               {/* 더보기 버튼 */}
-              {managementFocus.length > 5 && (
+              {managementFocus.length > 8 && (
                 <div className="mt-3 text-center">
                   <button
                     onClick={() => setExpandedRecommendations(!expandedRecommendations)}
-                    className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center justify-center gap-1 mx-auto"
+                    className="text-blue-600 hover:text-blue-700 text-sm  flex items-center justify-center gap-1 mx-auto"
                   >
                     {expandedRecommendations ? '접기' : '더보기'}
                     <ChevronDown className={`w-4 h-4 transition-transform ${
@@ -2259,20 +2365,20 @@ const Agent360Dashboard = () => {
                 <div className="flex bg-gray-100 rounded-lg p-1">
                   <button
                     onClick={() => setBranchPeriod('current')}
-                    className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+                    className={`px-3 py-1 text-xs  rounded transition-colors ${
                       branchPeriod === 'current'
                         ? 'bg-white text-gray-900 shadow-sm'
-                        : 'text-gray-600 hover:text-gray-900'
+                        : 'text-black hover:text-gray-900'
                     }`}
                   >
                     당월
                   </button>
                   <button
                     onClick={() => setBranchPeriod('previous')}
-                    className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+                    className={`px-3 py-1 text-xs  rounded transition-colors ${
                       branchPeriod === 'previous'
                         ? 'bg-white text-gray-900 shadow-sm'
-                        : 'text-gray-600 hover:text-gray-900'
+                        : 'text-black hover:text-gray-900'
                     }`}
                   >
                     전월
@@ -2284,8 +2390,8 @@ const Agent360Dashboard = () => {
               <div className="overflow-hidden">
                 {/* 헤더 */}
                 <div className="grid gap-2 pb-2 border-b border-gray-200 mb-3" style={{gridTemplateColumns: '30px 1fr 80px 90px'}}>
-                  <div className="text-xs font-medium text-gray-500">순위</div>
-                  <div className="text-xs font-medium text-gray-500">지점명</div>
+                  <div className="text-xs  text-black">순위</div>
+                  <div className="text-xs  text-black">지점명</div>
                   <button
                     onClick={() => {
                       if (branchSortBy === 'ape') {
@@ -2295,7 +2401,7 @@ const Agent360Dashboard = () => {
                         setBranchSortOrder('desc');
                       }
                     }}
-                    className={`text-xs font-medium hover:text-blue-600 transition-colors text-left flex items-center gap-1 ${
+                    className={`text-xs  hover:text-blue-600 transition-colors text-left flex items-center gap-1 ${
                       branchSortBy === 'ape' ? 'text-blue-600 font-bold' : 'text-gray-900'
                     }`}
                   >
@@ -2313,7 +2419,7 @@ const Agent360Dashboard = () => {
                         setBranchSortOrder('desc');
                       }
                     }}
-                    className={`text-xs font-medium hover:text-blue-600 transition-colors text-left flex items-center gap-1 ${
+                    className={`text-xs  hover:text-blue-600 transition-colors text-left flex items-center gap-1 ${
                       branchSortBy === 'achievement' ? 'text-blue-600 font-bold' : 'text-gray-900'
                     }`}
                   >
@@ -2339,9 +2445,9 @@ const Agent360Dashboard = () => {
                         </div>
                       </div>
                       <div className="flex items-center min-w-0">
-                        <div className="text-xs font-medium text-gray-900 break-words">
+                        <div className="text-xs  text-gray-900 break-words">
                           <div>{branch.agency}</div>
-                          <div className="text-xs text-gray-600">{branch.branch}</div>
+                          <div className="text-xs text-black">{branch.branch}</div>
                         </div>
                       </div>
                       <div className="flex items-center">
@@ -2365,7 +2471,7 @@ const Agent360Dashboard = () => {
               <div className="mt-3 pt-3 border-t border-gray-200">
                 <button
                   onClick={() => setShowAllBranchesModal(true)}
-                  className="w-full text-center text-xs text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                  className="w-full text-center text-xs text-blue-600 hover:text-blue-800  transition-colors"
                 >
                   더보기 (전체 순위 보기)
                 </button>
@@ -2373,7 +2479,7 @@ const Agent360Dashboard = () => {
 
             </div>
 
-            <div className="text-xs text-gray-500 text-center p-2 bg-gray-50 rounded">
+            <div className="text-xs text-black text-center p-2 bg-gray-50 rounded">
               지점 클릭 시 해당 지점의 상세 분석 화면으로 이동합니다
             </div>
 
@@ -2392,7 +2498,7 @@ const Agent360Dashboard = () => {
               </h3>
               <button
                 onClick={() => setShowAllBranchesModal(false)}
-                className="text-gray-500 hover:text-gray-700 text-xl"
+                className="text-black hover:text-gray-700 text-xl"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -2400,7 +2506,7 @@ const Agent360Dashboard = () => {
 
             <div className="flex-1 overflow-y-auto">
               {/* 단위 표시 */}
-              <div className="px-3 py-2 text-xs text-gray-500 border-b border-gray-200 text-right">
+              <div className="px-3 py-2 text-xs text-black border-b border-gray-200 text-right">
                 <span>[단위: 만원, %]</span>
               </div>
               {/* 테이블 헤더 */}
@@ -2414,7 +2520,7 @@ const Agent360Dashboard = () => {
                   <div className="text-center">당월 Plan</div>
                 </div>
                 {/* 서브 헤더 */}
-                <div className="grid gap-2 px-3 pb-2 pt-1 text-xs font-semibold text-gray-600" style={{gridTemplateColumns: '40px 140px 1fr 80px 80px 80px 70px 70px'}}>
+                <div className="grid gap-2 px-3 pb-2 pt-1 text-xs font-semibold text-black" style={{gridTemplateColumns: '40px 140px 1fr 80px 80px 80px 70px 70px'}}>
                   <div></div>
                   <div></div>
                   <div></div>
@@ -2556,16 +2662,16 @@ const Agent360Dashboard = () => {
                     >
                       <div className="flex items-center">
                         <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                          idx < 5 ? 'bg-yellow-400 text-yellow-900' : 'bg-gray-200 text-gray-600'
+                          idx < 5 ? 'bg-yellow-400 text-yellow-900' : 'bg-gray-200 text-black'
                         }`}>
                           {idx + 1}
                         </div>
                       </div>
                       <div className="flex items-center">
-                        <div className="text-sm text-gray-600 truncate">{branch.agency}</div>
+                        <div className="text-sm text-black truncate">{branch.agency}</div>
                       </div>
                       <div className="flex items-center">
-                        <div className="text-sm font-medium text-gray-900 truncate">{branch.branch}</div>
+                        <div className="text-sm  text-gray-900 truncate">{branch.branch}</div>
                       </div>
                       {/* APE 섹션 */}
                       <div className="flex items-center justify-center">
@@ -2575,12 +2681,12 @@ const Agent360Dashboard = () => {
                       </div>
                       <div className="flex items-center justify-center">
                         <div className={`text-xs ${
-                          modalSortBy === 'previousApe' ? 'font-bold text-gray-600' : 'font-normal text-gray-600'
+                          modalSortBy === 'previousApe' ? 'font-bold text-black' : 'font-normal text-black'
                         }`}>{branch.ape === 0 ? '-' : (branch.previousApe || Math.round(branch.ape * 0.85)).toFixed(1)}</div>
                       </div>
                       <div className="flex items-center justify-center">
                         <div className={`text-xs ${
-                          modalSortBy === 'threeMonthAvg' ? 'font-bold text-gray-600' : 'font-normal text-gray-600'
+                          modalSortBy === 'threeMonthAvg' ? 'font-bold text-black' : 'font-normal text-black'
                         }`}>{branch.ape === 0 ? '-' : branch.threeMonthAvg.toFixed(1)}</div>
                       </div>
                       {/* 목표 섹션 */}
@@ -2592,8 +2698,8 @@ const Agent360Dashboard = () => {
                       <div className="flex items-center justify-center">
                         <div className={`text-xs ${
                           modalSortBy === 'achievement'
-                            ? `font-bold ${branch.ape === 0 ? 'text-gray-500' : 'text-black'}`
-                            : `font-normal ${branch.ape === 0 ? 'text-gray-500' : 'text-black'}`
+                            ? `font-bold ${branch.ape === 0 ? 'text-black' : 'text-black'}`
+                            : `font-normal ${branch.ape === 0 ? 'text-black' : 'text-black'}`
                         }`}>
                           {branch.ape === 0 ? '-' : branch.calculatedAchievement.toFixed(1)}
                         </div>
@@ -2617,16 +2723,50 @@ const Agent360Dashboard = () => {
               <h3 className="text-lg font-semibold text-gray-900">전체 관리 지점 목록</h3>
               <button
                 onClick={() => setBranchInfoModal(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-gray-400 hover:text-black transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
+            {/* KPI 선택 라디오 버튼 */}
+            <div className="mb-4">
+              <div className="flex items-center gap-6">
+                <span className="text-sm  text-gray-700">실적 기준:</span>
+                <div className="flex items-center gap-4">
+                  <label className="flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      name="modalKPI"
+                      value="APE"
+                      checked={modalKPI === 'APE'}
+                      onChange={(e) => setModalKPI(e.target.value as 'APE' | 'MMP')}
+                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">APE</span>
+                  </label>
+                  <label className="flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      name="modalKPI"
+                      value="MMP"
+                      checked={modalKPI === 'MMP'}
+                      onChange={(e) => setModalKPI(e.target.value as 'APE' | 'MMP')}
+                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">MMP</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
             <div className="flex-1 overflow-auto">
-              <div className="overflow-x-auto">
+              <div className="mb-2 text-right">
+                <span className="text-sm text-black">[단위: 원]</span>
+              </div>
+              <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
                 <table className="w-full">
-                  <thead>
+                  <thead className="sticky top-0 z-10 bg-white">
                     <tr className="border-b border-gray-200">
                       {/* 번호 */}
                       <th className="text-center py-3 px-2 bg-gray-50 text-xs font-semibold text-gray-800 border-r border-gray-200 cursor-pointer hover:bg-gray-100"
@@ -2679,7 +2819,76 @@ const Agent360Dashboard = () => {
                       </th>
 
                       {/* 기본 정보 */}
-                      <th className="text-left py-3 px-3 bg-blue-50 text-xs font-semibold text-blue-800 border-r border-blue-200 cursor-pointer hover:bg-blue-100"
+                      <th className="text-left py-3 px-3 bg-gray-50 text-xs font-semibold text-gray-800 border-r border-gray-200 cursor-pointer hover:bg-gray-100"
+                          onClick={() => {
+                            if (branchInfoSortBy === 'partnershipDate') {
+                              setBranchInfoSortOrder(branchInfoSortOrder === 'asc' ? 'desc' : 'asc');
+                            } else {
+                              setBranchInfoSortBy('partnershipDate');
+                              setBranchInfoSortOrder('asc');
+                            }
+                          }}>
+                        <div className="flex items-center gap-1">
+                          지점 개설일
+                          {branchInfoSortBy === 'partnershipDate' && (
+                            branchInfoSortOrder === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
+                          )}
+                        </div>
+                      </th>
+
+                      {/* 지점 실적 */}
+                      <th className="text-center py-3 px-2 bg-gray-50 text-xs font-semibold text-gray-800 border-r border-gray-200 cursor-pointer hover:bg-gray-100"
+                          onClick={() => {
+                            if (branchInfoSortBy === 'currentMonthAPE') {
+                              setBranchInfoSortOrder(branchInfoSortOrder === 'asc' ? 'desc' : 'asc');
+                            } else {
+                              setBranchInfoSortBy('currentMonthAPE');
+                              setBranchInfoSortOrder('desc');
+                            }
+                          }}>
+                        <div className="flex items-center justify-center gap-1">
+                          당월 {modalKPI}
+                          {branchInfoSortBy === 'currentMonthAPE' && (
+                            branchInfoSortOrder === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
+                          )}
+                        </div>
+                      </th>
+
+                      {/* 설계사 위촉 - 순서 변경: 가동설계사를 먼저 */}
+                      <th className="text-center py-3 px-2 bg-gray-50 text-xs font-semibold text-gray-800 border-r border-gray-200 cursor-pointer hover:bg-gray-100"
+                          onClick={() => {
+                            if (branchInfoSortBy === 'activeAgents') {
+                              setBranchInfoSortOrder(branchInfoSortOrder === 'asc' ? 'desc' : 'asc');
+                            } else {
+                              setBranchInfoSortBy('activeAgents');
+                              setBranchInfoSortOrder('desc');
+                            }
+                          }}>
+                        <div className="flex items-center justify-center gap-1">
+                          가동설계사수
+                          {branchInfoSortBy === 'activeAgents' && (
+                            branchInfoSortOrder === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
+                          )}
+                        </div>
+                      </th>
+                      <th className="text-center py-3 px-2 bg-gray-50 text-xs font-semibold text-gray-800 border-r border-gray-200 cursor-pointer hover:bg-gray-100"
+                          onClick={() => {
+                            if (branchInfoSortBy === 'totalAgents') {
+                              setBranchInfoSortOrder(branchInfoSortOrder === 'asc' ? 'desc' : 'asc');
+                            } else {
+                              setBranchInfoSortBy('totalAgents');
+                              setBranchInfoSortOrder('desc');
+                            }
+                          }}>
+                        <div className="flex items-center justify-center gap-1">
+                          위촉설계사수
+                          {branchInfoSortBy === 'totalAgents' && (
+                            branchInfoSortOrder === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
+                          )}
+                        </div>
+                      </th>
+                      {/* 주소를 마지막으로 이동 */}
+                      <th className="text-left py-3 px-3 bg-gray-50 text-xs font-semibold text-gray-800 cursor-pointer hover:bg-gray-100"
                           onClick={() => {
                             if (branchInfoSortBy === 'address') {
                               setBranchInfoSortOrder(branchInfoSortOrder === 'asc' ? 'desc' : 'asc');
@@ -2691,90 +2900,6 @@ const Agent360Dashboard = () => {
                         <div className="flex items-center gap-1">
                           주소
                           {branchInfoSortBy === 'address' && (
-                            branchInfoSortOrder === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
-                          )}
-                        </div>
-                      </th>
-                      <th className="text-left py-3 px-3 bg-blue-50 text-xs font-semibold text-blue-800 border-r border-blue-200 cursor-pointer hover:bg-blue-100"
-                          onClick={() => {
-                            if (branchInfoSortBy === 'phone') {
-                              setBranchInfoSortOrder(branchInfoSortOrder === 'asc' ? 'desc' : 'asc');
-                            } else {
-                              setBranchInfoSortBy('phone');
-                              setBranchInfoSortOrder('asc');
-                            }
-                          }}>
-                        <div className="flex items-center gap-1">
-                          연락처
-                          {branchInfoSortBy === 'phone' && (
-                            branchInfoSortOrder === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
-                          )}
-                        </div>
-                      </th>
-                      <th className="text-left py-3 px-3 bg-blue-50 text-xs font-semibold text-blue-800 border-r border-blue-200 cursor-pointer hover:bg-blue-100"
-                          onClick={() => {
-                            if (branchInfoSortBy === 'partnershipDate') {
-                              setBranchInfoSortOrder(branchInfoSortOrder === 'asc' ? 'desc' : 'asc');
-                            } else {
-                              setBranchInfoSortBy('partnershipDate');
-                              setBranchInfoSortOrder('asc');
-                            }
-                          }}>
-                        <div className="flex items-center gap-1">
-                          제휴일자
-                          {branchInfoSortBy === 'partnershipDate' && (
-                            branchInfoSortOrder === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
-                          )}
-                        </div>
-                      </th>
-
-                      {/* 지점 실적 */}
-                      <th className="text-center py-3 px-2 bg-orange-50 text-xs font-semibold text-orange-800 border-r border-orange-200 cursor-pointer hover:bg-orange-100"
-                          onClick={() => {
-                            if (branchInfoSortBy === 'currentMonthAPE') {
-                              setBranchInfoSortOrder(branchInfoSortOrder === 'asc' ? 'desc' : 'asc');
-                            } else {
-                              setBranchInfoSortBy('currentMonthAPE');
-                              setBranchInfoSortOrder('desc');
-                            }
-                          }}>
-                        <div className="flex items-center justify-center gap-1">
-                          당월 실적
-                          {branchInfoSortBy === 'currentMonthAPE' && (
-                            branchInfoSortOrder === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
-                          )}
-                        </div>
-                      </th>
-
-                      {/* 설계사 위촉 */}
-                      <th className="text-center py-3 px-2 bg-green-50 text-xs font-semibold text-green-800 border-r border-green-200 cursor-pointer hover:bg-green-100"
-                          onClick={() => {
-                            if (branchInfoSortBy === 'totalAgents') {
-                              setBranchInfoSortOrder(branchInfoSortOrder === 'asc' ? 'desc' : 'asc');
-                            } else {
-                              setBranchInfoSortBy('totalAgents');
-                              setBranchInfoSortOrder('desc');
-                            }
-                          }}>
-                        <div className="flex items-center justify-center gap-1">
-                          위촉설계사
-                          {branchInfoSortBy === 'totalAgents' && (
-                            branchInfoSortOrder === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
-                          )}
-                        </div>
-                      </th>
-                      <th className="text-center py-3 px-2 bg-green-50 text-xs font-semibold text-green-800 cursor-pointer hover:bg-green-100"
-                          onClick={() => {
-                            if (branchInfoSortBy === 'activeAgents') {
-                              setBranchInfoSortOrder(branchInfoSortOrder === 'asc' ? 'desc' : 'asc');
-                            } else {
-                              setBranchInfoSortBy('activeAgents');
-                              setBranchInfoSortOrder('desc');
-                            }
-                          }}>
-                        <div className="flex items-center justify-center gap-1">
-                          가동설계사
-                          {branchInfoSortBy === 'activeAgents' && (
                             branchInfoSortOrder === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
                           )}
                         </div>
@@ -2855,42 +2980,41 @@ const Agent360Dashboard = () => {
                             navigate(`/branch/${encodeURIComponent(branch.agency)}/${encodeURIComponent(branch.branch)}?${queryParams.toString()}`);
                           }}>
                         {/* 번호 */}
-                        <td className="py-3 px-2 text-center border-r border-gray-200 text-xs font-medium text-gray-900">
-                          {branch.no}
+                        <td className="py-3 px-2 text-center border-r border-gray-200 text-xs  text-gray-900">
+                          {idx + 1}
                         </td>
-                        <td className="py-3 px-3 border-r border-gray-200 text-xs text-gray-900 font-medium">
+                        <td className="py-3 px-3 border-r border-gray-200 text-xs text-black">
                           {branch.agency}
                         </td>
-                        <td className="py-3 px-3 border-r border-gray-200 text-xs text-gray-900 font-medium">
+                        <td className="py-3 px-3 border-r border-gray-200 text-xs text-black">
                           {branch.branch}
                         </td>
 
                         {/* 기본 정보 */}
-                        <td className="py-3 px-3 border-r border-gray-200 text-xs text-gray-600">
-                          {branch.address}
-                        </td>
-                        <td className="py-3 px-3 border-r border-gray-200 text-xs text-gray-700">
-                          {branch.phone}
-                        </td>
                         <td className="py-3 px-3 border-r border-gray-200 text-xs text-gray-700">
                           {branch.partnershipDate}
                         </td>
 
                         {/* 지점 실적 */}
                         <td className="py-3 px-2 text-center border-r border-gray-200">
-                          <span className={`text-xs font-bold ${
-                            branch.currentMonthAPE > 0 ? 'text-green-600' : 'text-red-600'
+                          <span className={`text-xs  ${
+                            branch.currentMonthAPE > 0 ? 'text-black' : 'text-black'
                           }`}>
-                            {branch.currentMonthAPE > 0 ? 'Y' : 'N'}
+                            {branch.currentMonthAPE > 0 ? branch.currentMonthAPE.toLocaleString() : '-'}
                           </span>
                         </td>
 
-                        {/* 설계사 위촉 */}
-                        <td className="py-3 px-2 text-center border-r border-gray-200 text-xs font-medium text-gray-900">
-                          {branch.totalAgents === '-' ? '-' : `${branch.totalAgents}명`}
+                        {/* 설계사 위촉 - 순서 변경: 가동설계사를 먼저 */}
+                        <td className="py-3 px-2 text-center border-r border-gray-200 text-xs  text-black">
+                          {branch.activeAgents === '-' || branch.activeAgents === 0 ? '-' : branch.activeAgents}
                         </td>
-                        <td className="py-3 px-2 text-center text-xs font-medium text-green-600">
-                          {branch.activeAgents === '-' ? '-' : `${branch.activeAgents}명`}
+                        <td className="py-3 px-2 text-center border-r border-gray-200 text-xs  text-gray-900">
+                          {branch.totalAgents === '-' ? '-' : branch.totalAgents}
+                        </td>
+
+                        {/* 주소를 마지막으로 이동 */}
+                        <td className="py-3 px-3 text-xs text-black">
+                          {branch.address}
                         </td>
                       </tr>
                     ));
@@ -2901,7 +3025,7 @@ const Agent360Dashboard = () => {
             </div>
 
             <div className="mt-4 pt-4 border-t border-gray-200 text-center">
-              <p className="text-xs text-gray-500">지점명 클릭 시 해당 지점의 상세 분석 화면으로 이동합니다</p>
+              <p className="text-xs text-black">지점명 클릭 시 해당 지점의 상세 분석 화면으로 이동합니다</p>
             </div>
           </div>
         </div>
