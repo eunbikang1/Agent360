@@ -2308,7 +2308,7 @@ const Branch360Dashboard = () => {
             {/* 전체 위촉 설계사 */}
             <div className="bg-white rounded-lg shadow-sm border p-4">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-semibold text-gray-700">전체 위촉 설계사</h3>
+                <h3 className="text-sm font-semibold text-gray-700">위촉 설계사</h3>
                 <button
                   onClick={() => handleShowAllAgents()}
                   className="text-xs text-gray-500 hover:text-gray-700 font-medium"
@@ -3217,7 +3217,7 @@ const Branch360Dashboard = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowAllAgentsModal(false)}>
           <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">전체 위촉 설계사</h3>
+              <h3 className="text-lg font-semibold text-gray-900">위촉 설계사</h3>
               <button 
                 onClick={() => setShowAllAgentsModal(false)}
                 className="text-gray-500 hover:text-gray-700 text-xl"

@@ -1328,27 +1328,12 @@ const Agent360Dashboard = () => {
                           
                           {/* 막대 */}
                           <div
-                            className={`w-6 rounded-t overflow-hidden hover:opacity-80 transition-opacity cursor-pointer absolute bottom-0 ${
-                              data.value >= data.hqAvg ? '' : 'opacity-90'
-                            }`}
+                            className={`w-6 ${
+                              data.value >= data.hqAvg ? 'bg-blue-500' : 'bg-red-400'
+                            } rounded-t hover:opacity-80 transition-opacity cursor-pointer absolute bottom-0`}
                             style={{height: `${barHeight}px`}}
                             onMouseEnter={() => setHoveredData({...data, idx})}
-                          >
-                            {/* 종신/정기 부분 (상단 35%) */}
-                            <div
-                              className={`w-full ${
-                                data.value >= data.hqAvg ? 'bg-green-500' : 'bg-green-400'
-                              }`}
-                              style={{height: `${barHeight * 0.35}px`}}
-                            />
-                            {/* 건강 부분 (하단 65%) */}
-                            <div
-                              className={`w-full ${
-                                data.value >= data.hqAvg ? 'bg-blue-500' : 'bg-red-400'
-                              }`}
-                              style={{height: `${barHeight * 0.65}px`}}
-                            />
-                          </div>
+                          />
                           
                           {/* 막대 바로 위 수치 */}
                           <div 
@@ -1567,21 +1552,21 @@ const Agent360Dashboard = () => {
 
                     return (
                       <div key={data.day} className="flex flex-col items-center relative" style={{width: '20px'}}>
-                        {/* 막대 */}
+                        {/* 막대 - 누적 구조 */}
                         <div
-                          className="w-4 rounded-t overflow-hidden hover:opacity-80 transition-opacity cursor-pointer relative"
+                          className="w-4 rounded-t overflow-hidden hover:opacity-80 transition-opacity cursor-pointer flex flex-col"
                           style={{height: `${barHeight}px`}}
                           onMouseEnter={() => setHoveredDayData({...data, idx: index, businessDay: businessDayNumber, value})}
                         >
-                          {/* 건강 부분 (하단 65%) */}
-                          <div
-                            className="absolute bottom-0 w-full bg-blue-500"
-                            style={{height: `${barHeight * 0.65}px`}}
-                          />
                           {/* 종신/정기 부분 (상단 35%) */}
                           <div
-                            className="absolute top-0 w-full bg-green-500"
-                            style={{height: `${barHeight * 0.35}px`}}
+                            className="w-full bg-green-500 flex-shrink-0"
+                            style={{height: `${Math.max(1, barHeight * 0.35)}px`}}
+                          />
+                          {/* 건강 부분 (하단 65%) */}
+                          <div
+                            className="w-full bg-blue-500 flex-grow"
+                            style={{minHeight: `${Math.max(1, barHeight * 0.65)}px`}}
                           />
                         </div>
 
