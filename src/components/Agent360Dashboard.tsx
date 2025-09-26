@@ -17,7 +17,7 @@ const Agent360Dashboard = () => {
       return millions % 1 === 0 ? `${millions.toFixed(0)} 백만원` : `${millions.toFixed(1)} 백만원`;
     } else if (amount >= 1000) { // 1천 원 이상
       const thousands = amount / 1000;
-      return thousands % 1 === 0 ? `${thousands.toLocaleString()} 천원` : `${thousands.toFixed(1)} 천원`;
+      return `${Math.round(thousands).toLocaleString()} 천원`;
     } else {
       return `${amount.toLocaleString()} 원`;
     }
@@ -753,74 +753,72 @@ const Agent360Dashboard = () => {
     } as any;
   };
   
-  // 일별 데이터 - 상품군별로 다른 패턴, APE/MMP 기준 적용
+  // 일별 데이터 - 월별로 다른 일수, APE/MMP 기준 적용
   const getDailyData = () => {
     const multiplier = performanceType === 'MMP' ? (1/12) : 1; // MMP = APE/12
-    const baseData = {
-      '전체': [
-        { day: 1, apeAmount: 15, contractCount: 12, proposalCount: 18, isWeekend: false },
-        { day: 2, apeAmount: 8, contractCount: 18, proposalCount: 25, isWeekend: false },
-        { day: 3, apeAmount: 24, contractCount: 7, proposalCount: 12, isWeekend: false },
-        { day: 4, apeAmount: 22, contractCount: 16, proposalCount: 22, isWeekend: false },
-        { day: 5, apeAmount: 6, contractCount: 14, proposalCount: 20, isWeekend: false },
-        { day: 6, apeAmount: 28, contractCount: 9, proposalCount: 15, isWeekend: false },
-        { day: 7, apeAmount: 0, contractCount: 0, proposalCount: 0, isWeekend: true },
-        { day: 8, apeAmount: 0, contractCount: 0, proposalCount: 0, isWeekend: true },
-        { day: 9, apeAmount: 20, contractCount: 14, proposalCount: 26, isWeekend: false },
-        { day: 10, apeAmount: 25, contractCount: 18, proposalCount: 32, isWeekend: false },
-        { day: 11, apeAmount: 22, contractCount: 16, proposalCount: 30, isWeekend: false },
-        { day: 12, apeAmount: 28, contractCount: 20, proposalCount: 35, isWeekend: false },
-        { day: 13, apeAmount: 26, contractCount: 19, proposalCount: 33, isWeekend: false },
-        { day: 14, apeAmount: 0, contractCount: 0, isWeekend: true },
-        { day: 15, apeAmount: 0, contractCount: 0, isWeekend: true },
-        { day: 16, apeAmount: 30, contractCount: 22, proposalCount: 38, isWeekend: false },
-        { day: 17, apeAmount: 32, contractCount: 24, proposalCount: 40, isWeekend: false },
-        { day: 18, apeAmount: 38, contractCount: 28, proposalCount: 45, isWeekend: false },
-        { day: 19, apeAmount: 35, contractCount: 26, proposalCount: 42, isWeekend: false }
-      ],
-      '건강': [
-        { day: 1, apeAmount: 8, contractCount: 9, isWeekend: false },
-        { day: 2, apeAmount: 5, contractCount: 12, isWeekend: false },
-        { day: 3, apeAmount: 12, contractCount: 5, isWeekend: false },
-        { day: 4, apeAmount: 15, contractCount: 11, isWeekend: false },
-        { day: 5, apeAmount: 4, contractCount: 10, isWeekend: false },
-        { day: 6, apeAmount: 18, contractCount: 6, isWeekend: false },
-        { day: 7, apeAmount: 0, contractCount: 0, proposalCount: 0, isWeekend: true },
-        { day: 8, apeAmount: 0, contractCount: 0, proposalCount: 0, isWeekend: true },
-        { day: 9, apeAmount: 9, contractCount: 14, isWeekend: false },
-        { day: 10, apeAmount: 22, contractCount: 5, isWeekend: false },
-        { day: 11, apeAmount: 6, contractCount: 15, isWeekend: false },
-        { day: 12, apeAmount: 16, contractCount: 8, isWeekend: false },
-        { day: 13, apeAmount: 3, contractCount: 11, isWeekend: false },
-        { day: 14, apeAmount: 0, contractCount: 0, isWeekend: true },
-        { day: 15, apeAmount: 0, contractCount: 0, isWeekend: true },
-        { day: 16, apeAmount: 11, contractCount: 9, isWeekend: false },
-        { day: 17, apeAmount: 2, contractCount: 13, isWeekend: false },
-        { day: 18, apeAmount: 25, contractCount: 7, isWeekend: false },
-        { day: 19, apeAmount: 9, contractCount: 12, isWeekend: false }
-      ],
-      '종신/정기': [
-        { day: 1, apeAmount: 7, contractCount: 3, isWeekend: false },
-        { day: 2, apeAmount: 3, contractCount: 6, isWeekend: false },
-        { day: 3, apeAmount: 12, contractCount: 2, isWeekend: false },
-        { day: 4, apeAmount: 7, contractCount: 5, isWeekend: false },
-        { day: 5, apeAmount: 2, contractCount: 4, isWeekend: false },
-        { day: 6, apeAmount: 10, contractCount: 3, isWeekend: false },
-        { day: 7, apeAmount: 0, contractCount: 0, proposalCount: 0, isWeekend: true },
-        { day: 8, apeAmount: 0, contractCount: 0, proposalCount: 0, isWeekend: true },
-        { day: 9, apeAmount: 3, contractCount: 6, isWeekend: false },
-        { day: 10, apeAmount: 10, contractCount: 3, isWeekend: false },
-        { day: 11, apeAmount: 3, contractCount: 7, isWeekend: false },
-        { day: 12, apeAmount: 10, contractCount: 3, isWeekend: false },
-        { day: 13, apeAmount: 2, contractCount: 4, isWeekend: false },
-        { day: 14, apeAmount: 0, contractCount: 0, isWeekend: true },
-        { day: 15, apeAmount: 0, contractCount: 0, isWeekend: true },
-        { day: 16, apeAmount: 7, contractCount: 4, isWeekend: false },
-        { day: 17, apeAmount: 2, contractCount: 6, isWeekend: false },
-        { day: 18, apeAmount: 10, contractCount: 3, isWeekend: false },
-        { day: 19, apeAmount: 5, contractCount: 4, isWeekend: false }
-      ]
+    const selectedMonth = parseInt(appliedMonth.split('-')[1]);
+    const selectedYear = parseInt(appliedMonth.split('-')[0]);
+
+    // 월별 총 일수 및 영업일 패턴 정의
+    const monthInfo = {
+      1: { totalDays: 31, weekends: [4,5,11,12,18,19,25,26] }, // 1월
+      2: { totalDays: 28, weekends: [1,2,8,9,15,16,22,23] }, // 2월
+      3: { totalDays: 31, weekends: [1,2,8,9,15,16,22,23,29,30] }, // 3월
+      4: { totalDays: 30, weekends: [5,6,12,13,19,20,26,27] }, // 4월
+      5: { totalDays: 31, weekends: [3,4,10,11,17,18,24,25,31] }, // 5월
+      6: { totalDays: 30, weekends: [1,7,8,14,15,21,22,28,29] }, // 6월
+      7: { totalDays: 31, weekends: [5,6,12,13,19,20,26,27] }, // 7월
+      8: { totalDays: 31, weekends: [2,3,9,10,16,17,23,24,30,31] }, // 8월
+      9: { totalDays: 30, weekends: [1,7,8,14,15,21,22,28,29] }, // 9월 (현재 월)
+      10: { totalDays: 31, weekends: [5,6,12,13,19,20,26,27] }, // 10월
+      11: { totalDays: 30, weekends: [2,3,9,10,16,17,23,24,30] }, // 11월
+      12: { totalDays: 31, weekends: [1,7,8,14,15,21,22,28,29] }  // 12월
     };
+
+    const currentMonthInfo = monthInfo[selectedMonth as keyof typeof monthInfo] || monthInfo[9];
+    const totalDays = currentMonthInfo.totalDays;
+    const weekendDays = new Set(currentMonthInfo.weekends);
+
+    // 현재 월인 경우 현재 날짜까지만, 과거/미래 월인 경우 전체 월
+    const maxDay = (selectedMonth === 9 && selectedYear === 2025) ? 20 : totalDays; // 현재는 9월 20일까지
+
+    // 동적으로 데이터 생성
+    const generateMonthData = (baseValues: {ape: number, contract: number, proposal: number}) => {
+      const data = [];
+      for (let day = 1; day <= maxDay; day++) {
+        const isWeekend = weekendDays.has(day);
+        if (isWeekend) {
+          data.push({
+            day,
+            apeAmount: 0,
+            contractCount: 0,
+            proposalCount: 0,
+            isWeekend: true
+          });
+        } else {
+          // 영업일 실적 생성 (약간의 랜덤성을 가지지만 일관성 있게)
+          const dayFactor = (day % 7) + 1; // 1-7 사이의 값
+          const weekFactor = Math.floor(day / 7) + 1; // 주차별 조정
+          const monthFactor = selectedMonth === 9 ? 1.1 : (selectedMonth / 10); // 월별 조정
+
+          data.push({
+            day,
+            apeAmount: Math.round(baseValues.ape * dayFactor * monthFactor / 4),
+            contractCount: Math.round(baseValues.contract * dayFactor * monthFactor / 4),
+            proposalCount: Math.round(baseValues.proposal * dayFactor * monthFactor / 4),
+            isWeekend: false
+          });
+        }
+      }
+      return data;
+    };
+
+    const baseData = {
+      '전체': generateMonthData({ape: 25, contract: 18, proposal: 30}),
+      '건강': generateMonthData({ape: 15, contract: 12, proposal: 20}),
+      '종신/정기': generateMonthData({ape: 10, contract: 6, proposal: 10})
+    };
+
     const data = (baseData as any)[selectedProduct] || baseData['전체'];
     // MMP일 때 apeAmount를 12로 나누기
     return data.map((item: any) => ({
@@ -1558,15 +1556,10 @@ const Agent360Dashboard = () => {
                           style={{height: `${barHeight}px`}}
                           onMouseEnter={() => setHoveredDayData({...data, idx: index, businessDay: businessDayNumber, value})}
                         >
-                          {/* 종신/정기 부분 (상단 35%) */}
+                          {/* 총 실적 (파란색으로만) */}
                           <div
-                            className="w-full bg-green-500 flex-shrink-0"
-                            style={{height: `${Math.max(1, barHeight * 0.35)}px`}}
-                          />
-                          {/* 건강 부분 (하단 65%) */}
-                          <div
-                            className="w-full bg-blue-500 flex-grow"
-                            style={{minHeight: `${Math.max(1, barHeight * 0.65)}px`}}
+                            className="w-full bg-blue-500 rounded"
+                            style={{height: `${barHeight}px`}}
                           />
                         </div>
 

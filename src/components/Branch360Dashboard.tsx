@@ -43,9 +43,11 @@ const Branch360Dashboard = () => {
   const [selectedProduct, setSelectedProduct] = useState<'전체' | '건강' | '종신/정기'>(searchParams.get('product') as '전체' | '건강' | '종신/정기' || '전체');
   const [performanceType, setPerformanceType] = useState<'APE' | 'MMP'>('APE');
 
-  // 테이블 정렬을 위한 state
-  const [tableSortBy, setTableSortBy] = useState<string>('');
-  const [tableSortOrder, setTableSortOrder] = useState<'asc' | 'desc'>('desc');
+  // 테이블 정렬을 위한 state - 가동/미가동 설계사 별도 상태
+  const [activeTableSortBy, setActiveTableSortBy] = useState<string>('');
+  const [activeTableSortOrder, setActiveTableSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [inactiveTableSortBy, setInactiveTableSortBy] = useState<string>('');
+  const [inactiveTableSortOrder, setInactiveTableSortOrder] = useState<'asc' | 'desc'>('desc');
 
   // 테이블 정렬 함수
   const sortTableData = (data: any[], sortBy: string, sortOrder: 'asc' | 'desc') => {
@@ -92,15 +94,27 @@ const Branch360Dashboard = () => {
     });
   };
 
-  // 테이블 정렬 핸들러 함수
-  const handleTableSort = (column: string) => {
-    if (tableSortBy === column) {
+  // 테이블 정렬 핸들러 함수 - 가동 설계사용
+  const handleActiveTableSort = (column: string) => {
+    if (activeTableSortBy === column) {
       // 같은 컬럼을 클릭하면 정렬 순서 변경
-      setTableSortOrder(tableSortOrder === 'asc' ? 'desc' : 'asc');
+      setActiveTableSortOrder(activeTableSortOrder === 'asc' ? 'desc' : 'asc');
     } else {
       // 다른 컬럼을 클릭하면 해당 컬럼으로 내림차순 정렬
-      setTableSortBy(column);
-      setTableSortOrder('desc');
+      setActiveTableSortBy(column);
+      setActiveTableSortOrder('desc');
+    }
+  };
+
+  // 테이블 정렬 핸들러 함수 - 미가동 설계사용
+  const handleInactiveTableSort = (column: string) => {
+    if (inactiveTableSortBy === column) {
+      // 같은 컬럼을 클릭하면 정렬 순서 변경
+      setInactiveTableSortOrder(inactiveTableSortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      // 다른 컬럼을 클릭하면 해당 컬럼으로 내림차순 정렬
+      setInactiveTableSortBy(column);
+      setInactiveTableSortOrder('desc');
     }
   };
 
@@ -522,13 +536,14 @@ const Branch360Dashboard = () => {
   const [hoveredDayData, setHoveredDayData] = useState<any>(null);
   const [selectedMetric, setSelectedMetric] = useState<string>(performanceType);
   const [productSortBy, setProductSortBy] = useState<'amount' | 'count'>('amount');
-  const [dailyMetric, setDailyMetric] = useState<'실적' | '청약' | '설계'>('실적'); // 일별 차트 지표
+  const [dailyMetric, setDailyMetric] = useState<'APE' | 'MMP' | '청약' | '설계'>(performanceType); // 일별 차트 지표
   const [hoveredAverage, setHoveredAverage] = useState<{type: 'daily' | 'monthly', value: number} | null>(null); // 평균선 호버
   const [showExpectedProgressTooltip, setShowExpectedProgressTooltip] = useState(false); // 기대진도 툴팁
 
-  // performanceType 변경 시 selectedMetric도 함께 업데이트
+  // performanceType 변경 시 selectedMetric과 dailyMetric도 함께 업데이트
   useEffect(() => {
     setSelectedMetric(performanceType);
+    setDailyMetric(performanceType);
   }, [performanceType]);
 
   // 관리 활동 이력 (최근 6개월, 마지막 활동일 포함)
@@ -593,7 +608,7 @@ const Branch360Dashboard = () => {
   const [showInactiveAgentsModal, setShowInactiveAgentsModal] = useState(false); // 미가동 설계사 모달
   const [activeSortBy, setActiveSortBy] = useState<'name' | 'code' | 'tenure' | 'commissionMonth' | 'currentMMP' | 'previousMMP' | 'M0' | 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M0건' | 'M1건' | 'M2건' | 'M3건' | 'M4건' | 'M5건'>('M0'); // 가동 설계사 정렬 기준
   const [activeSortOrder, setActiveSortOrder] = useState<'asc' | 'desc'>('desc'); // 가동 설계사 정렬 순서
-  const [inactiveSortBy, setInactiveSortBy] = useState<'name' | 'code' | 'tenure' | 'commissionMonth' | 'previousMMP' | 'M0' | 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M0건' | 'M1건' | 'M2건' | 'M3건' | 'M4건' | 'M5건'>('tenure'); // 미가동 설계사 정렬 기준
+  const [inactiveSortBy, setInactiveSortBy] = useState<'name' | 'code' | 'tenure' | 'commissionMonth' | 'previousMMP' | 'M0' | 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M0건' | 'M1건' | 'M2건' | 'M3건' | 'M4건' | 'M5건'>('commissionMonth'); // 미가동 설계사 정렬 기준
   const [inactiveSortOrder, setInactiveSortOrder] = useState<'asc' | 'desc'>('desc'); // 미가동 설계사 정렬 순서
   
   const currentAgentStatus = {
@@ -1564,7 +1579,7 @@ const Branch360Dashboard = () => {
                 <div className="text-right space-y-1">
                   {/* 지표 선택 */}
                   <div className="flex bg-gray-100 rounded-lg p-1">
-                    {['실적', '청약', '설계'].map(metric => (
+                    {[performanceType, '청약', '설계'].map(metric => (
                       <button
                         key={metric}
                         onClick={() => setDailyMetric(metric as any)}
@@ -1587,14 +1602,14 @@ const Branch360Dashboard = () => {
                   <div className="w-3 h-0.5 bg-yellow-400" style={{width: '12px'}}></div>
                   일 평균: {(() => {
                     const currentData = dailyPerformance.filter(d => !d.isWeekend);
-                    const values = dailyMetric === '실적'
+                    const values = dailyMetric === performanceType
                       ? currentData.map(d => d.apeAmount)
                       : dailyMetric === '청약'
                       ? currentData.map(d => d.contractCount)
                       : currentData.map(d => d.designCount);
                     const average = values.reduce((sum, val) => sum + val, 0) / values.length;
-                    return dailyMetric === '실적'
-                      ? formatCurrency(average * 10000)
+                    return dailyMetric === performanceType
+                      ? `${Math.round(average).toLocaleString()} 천원`
                       : `${average.toFixed(1)}건`;
                   })()} 
                 </div>
@@ -1602,7 +1617,7 @@ const Branch360Dashboard = () => {
                 <svg className="absolute inset-4 w-[calc(100%-2rem)] h-[calc(100%-2rem)]" viewBox="0 0 100 100" preserveAspectRatio="none" style={{zIndex: 1, pointerEvents: 'none'}}>
                   {(() => {
                     const currentData = dailyPerformance.filter(d => !d.isWeekend);
-                    const values = dailyMetric === '실적'
+                    const values = dailyMetric === performanceType
                       ? currentData.map(d => d.apeAmount)
                       : dailyMetric === '청약'
                       ? currentData.map(d => d.contractCount)
@@ -1637,7 +1652,7 @@ const Branch360Dashboard = () => {
                 {/* 평균값 툴팁 */}
                 {hoveredAverage && hoveredAverage.type === 'daily' && (
                   <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-white text-xs rounded px-2 py-1 z-30">
-                    일 평균: {dailyMetric === '실적'
+                    일 평균: {dailyMetric === performanceType
                       ? formatCurrency(hoveredAverage.value * 10000)
                       : `${hoveredAverage.value.toFixed(1)}건`
                     }
@@ -1647,9 +1662,9 @@ const Branch360Dashboard = () => {
                 {/* 막대 그래프 */}
                 <div className="flex items-end justify-between h-full relative" style={{paddingTop: '20px'}}>
                   {dailyPerformance.filter(d => !d.isWeekend).map((data, i) => {
-                    const currentValue = dailyMetric === '실적' ? data.apeAmount :
+                    const currentValue = dailyMetric === performanceType ? data.apeAmount :
                                        dailyMetric === '청약' ? data.contractCount : data.designCount;
-                    const maxValue = dailyMetric === '실적'
+                    const maxValue = dailyMetric === performanceType
                       ? Math.max(...dailyPerformance.filter(d => !d.isWeekend).map(d => d.apeAmount))
                       : dailyMetric === '청약'
                       ? Math.max(...dailyPerformance.filter(d => !d.isWeekend).map(d => d.contractCount))
@@ -1670,7 +1685,7 @@ const Branch360Dashboard = () => {
                         >
                           {/* 건강보험 (하단) */}
                           <div
-                            className="w-full0 rounded-b"
+                            className="w-full bg-blue-500 rounded-b"
                             style={{height: `${healthHeight}px`, position: 'absolute', bottom: 0}}
                           />
                           {/* 종신/정기 (상단) */}
@@ -1688,7 +1703,7 @@ const Branch360Dashboard = () => {
                           <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-20">
                             <div>9월 {data.day}일 ({i + 1} 영업일차)</div>
                             <div>
-                              {dailyMetric === '실적' ? `실적: ${formatCurrency(data.apeAmount * 10000)}` :
+                              {dailyMetric === performanceType ? `${performanceType}: ${Math.round(data.apeAmount).toLocaleString()} 천원` :
                                dailyMetric === '청약' ? `청약: ${data.contractCount}건` :
                                `설계: ${data.designCount}건`}
                             </div>
@@ -1707,7 +1722,7 @@ const Branch360Dashboard = () => {
               {/* 범례 */}
               <div className="flex items-center justify-center gap-4 mt-3 text-xs">
                 <div className="flex items-center">
-                  <div className="w-3 h-30 mr-1 rounded"></div>
+                  <div className="w-3 h-3 bg-blue-500 mr-1 rounded"></div>
                   <span className="text-xs text-gray-600">건강</span>
                 </div>
                 <div className="flex items-center">
@@ -1725,7 +1740,7 @@ const Branch360Dashboard = () => {
                 <div className="text-right space-y-1">
                   {/* 지표 선택 */}
                   <div className="flex bg-gray-100 rounded-lg p-1">
-                    {[performanceType, '청약 건수'].map(metric => (
+                    {[performanceType, '청약'].map(metric => (
                       <button
                         key={metric}
                         onClick={() => setSelectedMetric(metric)}
@@ -1758,10 +1773,14 @@ const Branch360Dashboard = () => {
                       '2024': [160, 170, 180, 155, 175, 165, 185, 170, 155, 145, 135, 125],
                       '2025': [155, 168, 152, 179, 164, 186, 171, 195, 178]
                     };
-                    const currentData = selectedMetric === performanceType ? yearData[selectedPeriodYear] : contractData[selectedPeriodYear];
-                    const average = currentData.reduce((sum, val) => sum + val, 0) / currentData.length;
+                    const allData = selectedMetric === performanceType ? yearData[selectedPeriodYear] : contractData[selectedPeriodYear];
+                    const currentMonth = getCurrentMonth();
+                    const dataExcludingCurrent = allData.slice(0, currentMonth - 1);
+                    const average = dataExcludingCurrent.length > 0
+                      ? dataExcludingCurrent.reduce((sum, val) => sum + val, 0) / dataExcludingCurrent.length
+                      : 0;
                     return selectedMetric === performanceType
-                      ? formatCurrency(average * 10000)
+                      ? `${Math.round(average).toLocaleString()} 천원`
                       : `${average.toFixed(0)}건`;
                   })()} 
                 </div>
@@ -1780,9 +1799,13 @@ const Branch360Dashboard = () => {
                       '2025': [155, 168, 152, 179, 164, 186, 171, 195, 178]
                     };
 
-                    const currentData = selectedMetric === performanceType ? yearData[selectedPeriodYear] : contractData[selectedPeriodYear];
-                    const average = currentData.reduce((sum, val) => sum + val, 0) / currentData.length;
-                    const maxValue = Math.max(...currentData);
+                    const allData = selectedMetric === performanceType ? yearData[selectedPeriodYear] : contractData[selectedPeriodYear];
+                    const currentMonth = getCurrentMonth();
+                    const dataExcludingCurrent = allData.slice(0, currentMonth - 1);
+                    const average = dataExcludingCurrent.length > 0
+                      ? dataExcludingCurrent.reduce((sum, val) => sum + val, 0) / dataExcludingCurrent.length
+                      : 0;
+                    const maxValue = Math.max(...allData.slice(0, currentMonth));
                     const avgY = 100 - ((average / maxValue) * 80);
                     
                     return (
@@ -1904,9 +1927,9 @@ const Branch360Dashboard = () => {
                               <div className="font-bold mb-1">{data.month} 실적</div>
                               {selectedMetric === performanceType ? (
                                 <>
-                                  <div>총 {performanceType}: {formatCurrency(data.ape * 10000)}</div>
-                                  <div className="text-blue-300">건강: {formatCurrency(data.healthApe * 10000)}</div>
-                                  <div className="text-green-300">종신/정기: {formatCurrency(data.lifeApe * 10000)}</div>
+                                  <div>총 {performanceType}: {Math.round(data.ape).toLocaleString()} 천원</div>
+                                  <div className="text-blue-300">건강: {Math.round(data.healthApe).toLocaleString()} 천원</div>
+                                  <div className="text-green-300">종신/정기: {Math.round(data.lifeApe).toLocaleString()} 천원</div>
                                 </>
                               ) : (
                                 <>
@@ -1926,7 +1949,7 @@ const Branch360Dashboard = () => {
                 {/* 범례 - 차트 내부 하단 가운데 */}
                 <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex items-center gap-3 text-xs">
                   <div className="flex items-center gap-1">
-                    <div className="w-3 h-30 rounded"></div>
+                    <div className="w-3 h-3 bg-blue-500 rounded"></div>
                     <span className="text-xs text-gray-600">건강</span>
                   </div>
                   <div className="flex items-center gap-1">
@@ -1941,7 +1964,7 @@ const Branch360Dashboard = () => {
             <div className="bg-white rounded-lg shadow-sm border p-4">
               <h3 className="text-sm font-semibold text-gray-700 mb-4">최근 관리 활동</h3>
               <div className="grid grid-cols-2 gap-3 mb-4">
-                <div className="flex items-center justify-between p-3 hover:bg-blue-100 rounded-lg border border-blue-200 transition-colors">
+                <div className="flex items-center justify-between py-0.5 px-2 hover:bg-blue-100 rounded-lg border border-blue-200 transition-colors min-h-0">
                   <div className="flex items-center">
                     <div className="w-2 h-20 rounded-full mr-3"></div>
                     <span className="text-sm font-medium text-blue-700">교육</span>
@@ -1949,7 +1972,7 @@ const Branch360Dashboard = () => {
                   <span className="text-sm font-bold text-blue-600">9/5 (8일전)</span>
                 </div>
                 
-                <div className="flex items-center justify-between p-3 bg-green-50 hover:bg-green-100 rounded-lg border border-green-200 transition-colors">
+                <div className="flex items-center justify-between py-0.5 px-2 bg-green-50 hover:bg-green-100 rounded-lg border border-green-200 transition-colors min-h-0">
                   <div className="flex items-center">
                     <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
                     <span className="text-sm font-medium text-green-700">방문</span>
@@ -2449,7 +2472,7 @@ const Branch360Dashboard = () => {
                 }
 
                 // 가동 설계사 정렬
-                const activeAgents = sortTableData(filteredActiveAgents, tableSortBy, tableSortOrder);
+                const activeAgents = sortTableData(filteredActiveAgents, activeTableSortBy, activeTableSortOrder);
 
                 // 미가동 설계사 (전체에서 가동이 아닌 설계사)
                 const inactiveAgents = allData.filter(agent => agent.currentMonth.premium === 0);
@@ -2468,65 +2491,65 @@ const Branch360Dashboard = () => {
                           <tr>
                             <th className="px-2 py-2 text-left font-medium text-gray-700 w-20">
                               <button
-                                onClick={() => handleTableSort('agentCode')}
+                                onClick={() => handleActiveTableSort('agentCode')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors"
                               >
                                 설계사코드
-                                {tableSortBy === 'agentCode' && (
+                                {activeTableSortBy === 'agentCode' && (
                                   <span className="text-gray-500">
-                                    {tableSortOrder === 'desc' ? '↓' : '↑'}
+                                    {activeTableSortOrder === 'desc' ? '↓' : '↑'}
                                   </span>
                                 )}
                               </button>
                             </th>
                             <th className="px-2 py-2 text-left font-medium text-gray-700">
                               <button
-                                onClick={() => handleTableSort('name')}
+                                onClick={() => handleActiveTableSort('name')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors"
                               >
                                 설계사명
-                                {tableSortBy === 'name' && (
+                                {activeTableSortBy === 'name' && (
                                   <span className="text-gray-500">
-                                    {tableSortOrder === 'desc' ? '↓' : '↑'}
+                                    {activeTableSortOrder === 'desc' ? '↓' : '↑'}
                                   </span>
                                 )}
                               </button>
                             </th>
                             <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap">
                               <button
-                                onClick={() => handleTableSort('commissionMonth')}
+                                onClick={() => handleActiveTableSort('commissionMonth')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors ml-auto"
                               >
                                 위촉차월
-                                {tableSortBy === 'commissionMonth' && (
+                                {activeTableSortBy === 'commissionMonth' && (
                                   <span className="text-gray-500">
-                                    {tableSortOrder === 'desc' ? '↓' : '↑'}
+                                    {activeTableSortOrder === 'desc' ? '↓' : '↑'}
                                   </span>
                                 )}
                               </button>
                             </th>
                             <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap">
                               <button
-                                onClick={() => handleTableSort('currentMMP')}
+                                onClick={() => handleActiveTableSort('currentMMP')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors ml-auto"
                               >
                                 당월 MMP
-                                {tableSortBy === 'currentMMP' && (
+                                {activeTableSortBy === 'currentMMP' && (
                                   <span className="text-gray-500">
-                                    {tableSortOrder === 'desc' ? '↓' : '↑'}
+                                    {activeTableSortOrder === 'desc' ? '↓' : '↑'}
                                   </span>
                                 )}
                               </button>
                             </th>
                             <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap">
                               <button
-                                onClick={() => handleTableSort('previousMMP')}
+                                onClick={() => handleActiveTableSort('previousMMP')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors ml-auto"
                               >
                                 전월 MMP
-                                {tableSortBy === 'previousMMP' && (
+                                {activeTableSortBy === 'previousMMP' && (
                                   <span className="text-gray-500">
-                                    {tableSortOrder === 'desc' ? '↓' : '↑'}
+                                    {activeTableSortOrder === 'desc' ? '↓' : '↑'}
                                   </span>
                                 )}
                               </button>
@@ -2592,8 +2615,8 @@ const Branch360Dashboard = () => {
                 const allData = getSortedAgents(true);
                 const inactiveAgents = sortTableData(
                   allData.filter(agent => agent.currentMonth.premium === 0),
-                  tableSortBy,
-                  tableSortOrder
+                  inactiveTableSortBy,
+                  inactiveTableSortOrder
                 );
 
                 return (
@@ -2610,65 +2633,65 @@ const Branch360Dashboard = () => {
                           <tr>
                             <th className="px-2 py-2 text-left font-medium text-gray-700 w-20">
                               <button
-                                onClick={() => handleTableSort('agentCode')}
+                                onClick={() => handleInactiveTableSort('agentCode')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors"
                               >
                                 설계사코드
-                                {tableSortBy === 'agentCode' && (
+                                {inactiveTableSortBy === 'agentCode' && (
                                   <span className="text-gray-500">
-                                    {tableSortOrder === 'desc' ? '↓' : '↑'}
+                                    {inactiveTableSortOrder === 'desc' ? '↓' : '↑'}
                                   </span>
                                 )}
                               </button>
                             </th>
                             <th className="px-2 py-2 text-left font-medium text-gray-700">
                               <button
-                                onClick={() => handleTableSort('name')}
+                                onClick={() => handleInactiveTableSort('name')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors"
                               >
                                 설계사명
-                                {tableSortBy === 'name' && (
+                                {inactiveTableSortBy === 'name' && (
                                   <span className="text-gray-500">
-                                    {tableSortOrder === 'desc' ? '↓' : '↑'}
+                                    {inactiveTableSortOrder === 'desc' ? '↓' : '↑'}
                                   </span>
                                 )}
                               </button>
                             </th>
                             <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap">
                               <button
-                                onClick={() => handleTableSort('commissionMonth')}
+                                onClick={() => handleInactiveTableSort('commissionMonth')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors ml-auto"
                               >
                                 위촉차월
-                                {tableSortBy === 'commissionMonth' && (
+                                {inactiveTableSortBy === 'commissionMonth' && (
                                   <span className="text-gray-500">
-                                    {tableSortOrder === 'desc' ? '↓' : '↑'}
+                                    {inactiveTableSortOrder === 'desc' ? '↓' : '↑'}
                                   </span>
                                 )}
                               </button>
                             </th>
                             <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap">
                               <button
-                                onClick={() => handleTableSort('currentMMP')}
+                                onClick={() => handleInactiveTableSort('currentMMP')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors ml-auto"
                               >
                                 당월 MMP
-                                {tableSortBy === 'currentMMP' && (
+                                {inactiveTableSortBy === 'currentMMP' && (
                                   <span className="text-gray-500">
-                                    {tableSortOrder === 'desc' ? '↓' : '↑'}
+                                    {inactiveTableSortOrder === 'desc' ? '↓' : '↑'}
                                   </span>
                                 )}
                               </button>
                             </th>
                             <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap">
                               <button
-                                onClick={() => handleTableSort('previousMMP')}
+                                onClick={() => handleInactiveTableSort('previousMMP')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors ml-auto"
                               >
                                 전월 MMP
-                                {tableSortBy === 'previousMMP' && (
+                                {inactiveTableSortBy === 'previousMMP' && (
                                   <span className="text-gray-500">
-                                    {tableSortOrder === 'desc' ? '↓' : '↑'}
+                                    {inactiveTableSortOrder === 'desc' ? '↓' : '↑'}
                                   </span>
                                 )}
                               </button>
@@ -3229,7 +3252,7 @@ const Branch360Dashboard = () => {
             <div className="flex-1 overflow-y-auto">
               {/* 단위 표시 */}
               <div className="flex justify-end mb-2">
-                <span className="text-xs text-gray-500">[단위: 천원/건수]</span>
+                <span className="text-xs text-gray-500">[단위: 천원/건]</span>
               </div>
 
               {/* 테이블 헤더 */}
@@ -3382,7 +3405,7 @@ const Branch360Dashboard = () => {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">가동 설계사</h3>
               <div className="flex items-center gap-4">
-                <span className="text-xs text-gray-500">[단위: 천원/건수]</span>
+                <span className="text-xs text-gray-500">[단위: 천원/건]</span>
                 <button
                   onClick={() => setShowActiveAgentsModal(false)}
                   className="text-gray-500 hover:text-gray-700 text-xl"
@@ -3657,21 +3680,39 @@ const Branch360Dashboard = () => {
                     const generateMonthlyData = (agent) => {
                       const baseValue = agent.currentMonth.premium;
                       const baseContracts = agent.currentMonth.contracts;
+
+                      // 각 월의 청약건수 먼저 계산
+                      const m1Contracts = Math.max(0, baseContracts + Math.floor(Math.random() * 7) - 3);
+                      const m2Contracts = Math.max(0, baseContracts + Math.floor(Math.random() * 5) - 2);
+                      const m3Contracts = Math.max(0, baseContracts + Math.floor(Math.random() * 7) - 3);
+                      const m4Contracts = Math.max(0, baseContracts + Math.floor(Math.random() * 5) - 2);
+                      const m5Contracts = Math.max(0, baseContracts + Math.floor(Math.random() * 7) - 3);
+
+                      // 청약이 있으면 MMP도 있어야 함, 청약이 없으면 MMP도 0
+                      const m1Mmp = m1Contracts > 0 ? Math.max(30, Math.round(baseValue * (0.85 + Math.random() * 0.3))) : 0;
+                      const m2Mmp = m2Contracts > 0 ? Math.max(30, Math.round(baseValue * (0.8 + Math.random() * 0.4))) : 0;
+                      const m3Mmp = m3Contracts > 0 ? Math.max(30, Math.round(baseValue * (0.85 + Math.random() * 0.3))) : 0;
+                      const m4Mmp = m4Contracts > 0 ? Math.max(30, Math.round(baseValue * (0.9 + Math.random() * 0.2))) : 0;
+                      const m5Mmp = m5Contracts > 0 ? Math.max(30, Math.round(baseValue * (0.8 + Math.random() * 0.4))) : 0;
+
                       return {
                         M0: baseValue,
-                        M1: Math.round(baseValue * (0.85 + Math.random() * 0.3)), // ±15% 변동
-                        M2: Math.round(baseValue * (0.8 + Math.random() * 0.4)), // ±20% 변동
-                        M3: Math.round(baseValue * (0.85 + Math.random() * 0.3)), // ±15% 변동
-                        M4: Math.round(baseValue * (0.9 + Math.random() * 0.2)), // ±10% 변동
-                        M5: Math.round(baseValue * (0.8 + Math.random() * 0.4)), // ±20% 변동
+                        M1: m1Mmp,
+                        M2: m2Mmp,
+                        M3: m3Mmp,
+                        M4: m4Mmp,
+                        M5: m5Mmp,
                         'M0건': baseContracts,
-                        'M1건': Math.max(0, baseContracts + Math.floor(Math.random() * 7) - 3), // ±3 변동
-                        'M2건': Math.max(0, baseContracts + Math.floor(Math.random() * 5) - 2), // ±2 변동
-                        'M3건': Math.max(0, baseContracts + Math.floor(Math.random() * 7) - 3), // ±3 변동
-                        'M4건': Math.max(0, baseContracts + Math.floor(Math.random() * 5) - 2), // ±2 변동
-                        'M5건': Math.max(0, baseContracts + Math.floor(Math.random() * 7) - 3), // ±3 변동
+                        'M1건': m1Contracts,
+                        'M2건': m2Contracts,
+                        'M3건': m3Contracts,
+                        'M4건': m4Contracts,
+                        'M5건': m5Contracts,
                       };
                     };
+
+                    // 0을 '-'로 표시하는 함수
+                    const formatValue = (value) => value === 0 ? '-' : value;
 
                     // 정렬 함수
                     const getSortedActiveAgents = () => {
@@ -3769,18 +3810,18 @@ const Branch360Dashboard = () => {
                           <td className="px-2 py-3 font-medium text-gray-900">{agent.name}</td>
                           <td className="px-2 py-3 text-gray-600">{agent.insuranceCareer}</td>
                           <td className="px-2 py-3 text-center text-gray-600 border-r-2 border-gray-200">{agent.commissionMonth}</td>
-                          <td className="px-2 py-3 text-center text-gray-900 font-medium">{monthlyData.M0}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{monthlyData.M1}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{monthlyData.M2}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{monthlyData.M3}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{monthlyData.M4}</td>
-                          <td className="px-2 py-3 text-center text-gray-600 border-r-2 border-gray-200">{monthlyData.M5}</td>
-                          <td className="px-2 py-3 text-center text-gray-900 font-medium">{monthlyData['M0건']}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{monthlyData['M1건']}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{monthlyData['M2건']}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{monthlyData['M3건']}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{monthlyData['M4건']}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{monthlyData['M5건']}</td>
+                          <td className="px-2 py-3 text-center text-gray-900 font-medium">{formatValue(monthlyData.M0)}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatValue(monthlyData.M1)}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatValue(monthlyData.M2)}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatValue(monthlyData.M3)}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatValue(monthlyData.M4)}</td>
+                          <td className="px-2 py-3 text-center text-gray-600 border-r-2 border-gray-200">{formatValue(monthlyData.M5)}</td>
+                          <td className="px-2 py-3 text-center text-gray-900 font-medium">{formatValue(monthlyData['M0건'])}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatValue(monthlyData['M1건'])}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatValue(monthlyData['M2건'])}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatValue(monthlyData['M3건'])}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatValue(monthlyData['M4건'])}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatValue(monthlyData['M5건'])}</td>
                         </tr>
                       );
                     });
@@ -3803,7 +3844,7 @@ const Branch360Dashboard = () => {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">미가동 설계사</h3>
               <div className="flex items-center gap-4">
-                <span className="text-xs text-gray-500">[단위: 천원/건수]</span>
+                <span className="text-xs text-gray-500">[단위: 천원/건]</span>
                 <button
                   onClick={() => setShowInactiveAgentsModal(false)}
                   className="text-gray-500 hover:text-gray-700 text-xl"
@@ -4080,21 +4121,39 @@ const Branch360Dashboard = () => {
                                        agent.threeMonthAverage.premium > 0 ? agent.threeMonthAverage.premium : 50;
                       const baseContracts = agent.previousMonth.contracts > 0 ? agent.previousMonth.contracts :
                                            agent.threeMonthAverage.contracts > 0 ? agent.threeMonthAverage.contracts : 2;
+
+                      // 각 월의 청약건수 먼저 계산
+                      const m1Contracts = Math.max(0, Math.floor(baseContracts * (0.3 + Math.random() * 0.4)));
+                      const m2Contracts = Math.max(0, Math.floor(baseContracts * (0.4 + Math.random() * 0.5)));
+                      const m3Contracts = Math.max(0, Math.floor(baseContracts * (0.2 + Math.random() * 0.6)));
+                      const m4Contracts = Math.max(0, Math.floor(baseContracts * (0.1 + Math.random() * 0.7)));
+                      const m5Contracts = Math.max(0, Math.floor(baseContracts * (0.3 + Math.random() * 0.4)));
+
+                      // 청약이 있으면 MMP도 있어야 함, 청약이 없으면 MMP도 0
+                      const m1Mmp = m1Contracts > 0 ? Math.max(20, Math.round(baseValue * (0.3 + Math.random() * 0.4))) : 0;
+                      const m2Mmp = m2Contracts > 0 ? Math.max(20, Math.round(baseValue * (0.4 + Math.random() * 0.5))) : 0;
+                      const m3Mmp = m3Contracts > 0 ? Math.max(20, Math.round(baseValue * (0.2 + Math.random() * 0.6))) : 0;
+                      const m4Mmp = m4Contracts > 0 ? Math.max(20, Math.round(baseValue * (0.1 + Math.random() * 0.7))) : 0;
+                      const m5Mmp = m5Contracts > 0 ? Math.max(20, Math.round(baseValue * (0.3 + Math.random() * 0.4))) : 0;
+
                       return {
                         M0: 0, // 당월은 미가동이므로 0
-                        M1: Math.round(baseValue * (0.3 + Math.random() * 0.4)), // 30-70% 수준
-                        M2: Math.round(baseValue * (0.4 + Math.random() * 0.5)), // 40-90% 수준
-                        M3: Math.round(baseValue * (0.2 + Math.random() * 0.6)), // 20-80% 수준
-                        M4: Math.round(baseValue * (0.1 + Math.random() * 0.7)), // 10-80% 수준
-                        M5: Math.round(baseValue * (0.3 + Math.random() * 0.4)), // 30-70% 수준
+                        M1: m1Mmp,
+                        M2: m2Mmp,
+                        M3: m3Mmp,
+                        M4: m4Mmp,
+                        M5: m5Mmp,
                         'M0건': 0, // 당월은 미가동이므로 0
-                        'M1건': Math.max(0, Math.floor(baseContracts * (0.3 + Math.random() * 0.4))), // 30-70% 수준
-                        'M2건': Math.max(0, Math.floor(baseContracts * (0.4 + Math.random() * 0.5))), // 40-90% 수준
-                        'M3건': Math.max(0, Math.floor(baseContracts * (0.2 + Math.random() * 0.6))), // 20-80% 수준
-                        'M4건': Math.max(0, Math.floor(baseContracts * (0.1 + Math.random() * 0.7))), // 10-80% 수준
-                        'M5건': Math.max(0, Math.floor(baseContracts * (0.3 + Math.random() * 0.4))), // 30-70% 수준
+                        'M1건': m1Contracts,
+                        'M2건': m2Contracts,
+                        'M3건': m3Contracts,
+                        'M4건': m4Contracts,
+                        'M5건': m5Contracts,
                       };
                     };
+
+                    // 0을 '-'로 표시하는 함수
+                    const formatInactiveValue = (value) => value === 0 ? '-' : value;
 
                     // 정렬 함수
                     const getSortedInactiveAgents = () => {
@@ -4192,18 +4251,18 @@ const Branch360Dashboard = () => {
                           <td className="px-2 py-3 font-medium text-gray-900">{agent.name}</td>
                           <td className="px-2 py-3 text-gray-600">{agent.insuranceCareer}</td>
                           <td className="px-2 py-3 text-center text-gray-600 border-r-2 border-gray-200">{agent.commissionMonth}</td>
-                          <td className="px-2 py-3 text-center text-red-600 font-medium">0</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{monthlyData.M1}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{monthlyData.M2}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{monthlyData.M3}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{monthlyData.M4}</td>
-                          <td className="px-2 py-3 text-center text-gray-600 border-r-2 border-gray-200">{monthlyData.M5}</td>
-                          <td className="px-2 py-3 text-center text-red-600 font-medium">{monthlyData['M0건']}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{monthlyData['M1건']}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{monthlyData['M2건']}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{monthlyData['M3건']}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{monthlyData['M4건']}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{monthlyData['M5건']}</td>
+                          <td className="px-2 py-3 text-center text-red-600 font-medium">{formatInactiveValue(monthlyData.M0)}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatInactiveValue(monthlyData.M1)}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatInactiveValue(monthlyData.M2)}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatInactiveValue(monthlyData.M3)}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatInactiveValue(monthlyData.M4)}</td>
+                          <td className="px-2 py-3 text-center text-gray-600 border-r-2 border-gray-200">{formatInactiveValue(monthlyData.M5)}</td>
+                          <td className="px-2 py-3 text-center text-red-600 font-medium">{formatInactiveValue(monthlyData['M0건'])}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatInactiveValue(monthlyData['M1건'])}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatInactiveValue(monthlyData['M2건'])}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatInactiveValue(monthlyData['M3건'])}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatInactiveValue(monthlyData['M4건'])}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatInactiveValue(monthlyData['M5건'])}</td>
                         </tr>
                       );
                     });
