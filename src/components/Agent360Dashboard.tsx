@@ -5,6 +5,7 @@ import { Trophy, Download, Building, ChevronRight, ChevronDown, ChevronUp, Arrow
 const Agent360Dashboard = () => {
   const navigate = useNavigate();
   const [selectedKPI, setSelectedKPI] = useState('nb_plan');
+  const [yearlyKPI, setYearlyKPI] = useState('nb_plan'); // 연간 차트용 KPI
   const [selectedYear] = useState('2025'); // eslint-disable-line @typescript-eslint/no-unused-vars
   const [selectedProduct, setSelectedProduct] = useState('전체');
   const [productSortBy, setProductSortBy] = useState('amount');
@@ -200,7 +201,8 @@ const Agent360Dashboard = () => {
   };
 
 
-
+  // 월별 데이터만 사용 (헤더와 연동 가능하도록)
+  const kpiData = monthlyTrend[2025][selectedKPI as keyof typeof monthlyTrend[2025]] || [];
 
   // 지점 기본정보 데이터 함수
   const getBranchInfoData = () => {
@@ -386,11 +388,9 @@ const Agent360Dashboard = () => {
   ];
 
   const getKPIData = () => {
-    const fullData = (monthlyTrend as any)[selectedYear][selectedKPI];
+    // 월별 데이터는 선택된 월까지만 표시 (헤더와 연동)
     const selectedMonthNumber = parseInt(appliedMonth.split('-')[1]);
-
-    // 선택된 월까지의 데이터만 반환
-    return fullData.slice(0, selectedMonthNumber);
+    return kpiData.slice(0, selectedMonthNumber);
   };
   
   const getMaxValue = (data: any[], kpi: string) => {
@@ -401,6 +401,7 @@ const Agent360Dashboard = () => {
   };
   
   const [hoveredData, setHoveredData] = useState<any>(null);
+  const [hoveredYearlyData, setHoveredYearlyData] = useState<any>(null);
   const [showExpectedProgressTooltip, setShowExpectedProgressTooltip] = useState(false);
   const [showProgressTooltip, setShowProgressTooltip] = useState(false);
   const [hoveredDayData, setHoveredDayData] = useState<any>(null);
@@ -1273,11 +1274,12 @@ const Agent360Dashboard = () => {
               </div>
             </div>
 
-            {/* 월별 성과 추이 */}
-            <div className="bg-white rounded-lg shadow-sm border p-4">
+
+            {/* 월별 성과 추이 (이번 달까지) */}
+            <div className="bg-white rounded-lg shadow-sm border p-4 mb-4">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-semibold text-gray-700">2025년 월별 성과</h3>
-                
+                <h3 className="text-sm font-semibold text-gray-700">{appliedMonth.split('-')[0]}년 월별 성과</h3>
+
                 <div className="space-y-2">
                   {/* KPI 선택 - 토글 버튼 스타일 */}
                   <div className="flex bg-gray-100 rounded-lg p-1">
@@ -1352,17 +1354,20 @@ const Agent360Dashboard = () => {
                           <div className="absolute top-0 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-20">
                             {selectedKPI === 'nb_plan' ? (
                               <div>
-                                <div>{data.value}% ({data.actual}/{data.target}백만원)</div>
+                                <div>{data.month}</div>
+                                <div>{data.value.toFixed(1)}% ({data.actual}/{data.target}백만원)</div>
                                 <div className="text-yellow-300">전체평균 {data.hqAvg}%</div>
                               </div>
                             ) : selectedKPI === 'activity_plan' ? (
                               <div>
-                                <div>{data.value}% ({data.active}/{data.target}명)</div>
+                                <div>{data.month}</div>
+                                <div>{data.value.toFixed(1)}% ({data.active}/{data.target}명)</div>
                                 <div className="text-yellow-300">전체평균 {data.hqAvg}%</div>
                               </div>
                             ) : (
                               <div>
-                                <div>{data.value}% ({data.count}/{data.total}건)</div>
+                                <div>{data.month}</div>
+                                <div>{data.value.toFixed(1)}% ({data.count}/{data.total}건)</div>
                                 <div className="text-yellow-300">전체평균 {data.hqAvg}%</div>
                               </div>
                             )}
@@ -1374,6 +1379,182 @@ const Agent360Dashboard = () => {
                 </div>
               </div>
               
+              <div className="flex items-center justify-center mt-4">
+                <div className="flex items-center gap-4 text-xs">
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 bg-blue-500 mr-1 rounded"></div>
+                    <span>전체평균 이상</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 bg-red-400 mr-1 rounded"></div>
+                    <span>전체평균 미달</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-6 h-0.5 bg-yellow-500 border-t-2 border-yellow-500 border-dashed mr-1"></div>
+                    <span>전체평균</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 최근 3개년 연간 성과 추이 */}
+            <div className="bg-white rounded-lg shadow-sm border p-4 mt-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-semibold text-gray-700">최근 3개년 연도별 성과</h3>
+
+                <div className="space-y-2">
+                  {/* KPI 선택 - 토글 버튼 스타일 */}
+                  <div className="flex bg-gray-100 rounded-lg p-1">
+                    {[
+                      { key: 'nb_plan', label: '목표달성률' },
+                      { key: 'activity_plan', label: '설계사 가동률' },
+                      { key: 'mobile_contract', label: '모바일 청약률' }
+                    ].map(kpi => (
+                      <button
+                        key={kpi.key}
+                        onClick={() => setYearlyKPI(kpi.key)}
+                        className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+                          yearlyKPI === kpi.key
+                            ? 'bg-white text-gray-900 shadow-sm'
+                            : 'text-gray-600 hover:text-gray-900'
+                        }`}
+                      >
+                        {kpi.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="h-52 relative bg-gray-50 rounded-lg p-4" onMouseLeave={() => setHoveredYearlyData(null)}>
+                {/* % 표시 - 오른쪽 상단, 텍스트 겹침 방지 */}
+                <div className="absolute top-2 right-2 text-xs text-gray-500 bg-gray-50 px-1">(%)</div>
+
+                {/* 막대 그래프 */}
+                <div className="flex items-end justify-center gap-8 h-full relative" style={{paddingTop: '20px'}}>
+                  {(() => {
+                    // 연간 성과 데이터 생성 (달성/전체로 %를 계산)
+                    const yearlyData = [
+                      {
+                        year: '2023',
+                        nb_plan: 89.5,     // 목표달성률
+                        activity_plan: 82.3,  // 설계사 가동률
+                        mobile_contract: 67.8, // 모바일 청약률
+                        nb_plan_achieved: 4250,
+                        nb_plan_target: 4750,
+                        activity_achieved: 82,
+                        activity_total: 100,
+                        mobile_achieved: 678,
+                        mobile_total: 1000,
+                        nb_plan_avg: 85.2,      // 전체 평균
+                        activity_plan_avg: 80.5,
+                        mobile_contract_avg: 71.3
+                      },
+                      {
+                        year: '2024',
+                        nb_plan: 92.1,
+                        activity_plan: 85.6,
+                        mobile_contract: 74.2,
+                        nb_plan_achieved: 4605,
+                        nb_plan_target: 5000,
+                        activity_achieved: 86,
+                        activity_total: 100,
+                        mobile_achieved: 742,
+                        mobile_total: 1000,
+                        nb_plan_avg: 87.3,
+                        activity_plan_avg: 82.1,
+                        mobile_contract_avg: 73.8
+                      },
+                      {
+                        year: '2025',
+                        nb_plan: 76.8,    // 진행중인 올해 (9월까지)
+                        activity_plan: 78.4,
+                        mobile_contract: 81.5,
+                        nb_plan_achieved: 3456,
+                        nb_plan_target: 4500,
+                        activity_achieved: 78,
+                        activity_total: 100,
+                        mobile_achieved: 815,
+                        mobile_total: 1000,
+                        nb_plan_avg: 80.5,
+                        activity_plan_avg: 79.2,
+                        mobile_contract_avg: 76.4
+                      }
+                    ];
+
+                    const maxValue = Math.max(...yearlyData.map(d => d[yearlyKPI]));
+
+                    return yearlyData.map((data, idx) => {
+                      const value = data[yearlyKPI];
+                      const avgValue = data[`${yearlyKPI}_avg`];
+                      const barHeight = Math.min((value / maxValue) * 120, 120);
+                      const avgHeight = Math.min((avgValue / maxValue) * 120, 120);
+
+                      return (
+                        <div key={idx} className="flex flex-col items-center relative" style={{height: '160px', width: '80px'}}>
+                          {/* 차트 영역 */}
+                          <div className="relative flex justify-center" style={{height: '120px', width: '100%'}}>
+                            {/* 전체 평균 노란선 */}
+                            <div
+                              className="absolute border-t border-yellow-500 border-dashed z-10"
+                              style={{bottom: `${avgHeight}px`, left: '-10px', right: '-10px'}}
+                            />
+
+                            {/* 막대 - 평균 이상/미달에 따른 색상 */}
+                            <div
+                              className={`w-8 ${
+                                value >= avgValue ? 'bg-blue-500' : 'bg-red-400'
+                              } rounded-t hover:opacity-80 transition-opacity cursor-pointer absolute bottom-0`}
+                              style={{height: `${barHeight}px`}}
+                              onMouseEnter={() => setHoveredYearlyData({...data, idx, value, avgValue})}
+                            />
+
+                            {/* 막대 바로 위 수치 */}
+                            <div
+                              className="absolute text-xs text-gray-600 transform -translate-x-1/2 left-1/2"
+                              style={{bottom: `${barHeight + 2}px`, fontSize: '10px'}}
+                            >
+                              {Math.round(value)}
+                            </div>
+                          </div>
+
+                          {/* 년도 라벨 */}
+                          <div className="text-xs text-gray-600 mt-2" style={{fontSize: '10px'}}>
+                            {data.year === '2025' ? '2025년(~9월)' : `${data.year}년`}
+                          </div>
+
+                          {/* 툴팁 */}
+                          {hoveredYearlyData && hoveredYearlyData.idx === idx && (
+                            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-20">
+                              {yearlyKPI === 'nb_plan' ? (
+                                <div>
+                                  <div>{data.year === '2025' ? '2025년(~9월)' : `${data.year}년`}</div>
+                                  <div>{value.toFixed(1)}% ({data.nb_plan_achieved.toLocaleString()}/{data.nb_plan_target.toLocaleString()}백만원)</div>
+                                  <div className="text-yellow-300">전체평균 {avgValue.toFixed(1)}%</div>
+                                </div>
+                              ) : yearlyKPI === 'activity_plan' ? (
+                                <div>
+                                  <div>{data.year === '2025' ? '2025년(~9월)' : `${data.year}년`}</div>
+                                  <div>{value.toFixed(1)}% ({data.activity_achieved}/{data.activity_total}명)</div>
+                                  <div className="text-yellow-300">전체평균 {avgValue.toFixed(1)}%</div>
+                                </div>
+                              ) : (
+                                <div>
+                                  <div>{data.year === '2025' ? '2025년(~9월)' : `${data.year}년`}</div>
+                                  <div>{value.toFixed(1)}% ({data.mobile_achieved}/{data.mobile_total}건)</div>
+                                  <div className="text-yellow-300">전체평균 {avgValue.toFixed(1)}%</div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
+              </div>
+
+              {/* 범례 */}
               <div className="flex items-center justify-center mt-4">
                 <div className="flex items-center gap-4 text-xs">
                   <div className="flex items-center">
@@ -1840,24 +2021,27 @@ const Agent360Dashboard = () => {
 
                     <div className="mb-2 font-semibold text-red-300">위험</div>
                     <div className="space-y-2 mb-4 text-sm">
-                      <div>• <strong>3개월 연속 실적 하락:</strong> 직전 3개월 연속 전월 대비 총 {performanceType} 하락 + 당월 누적 {performanceType}도 전월 동기보다 낮음</div>
-                      <div>• <strong>목표달성 미달:</strong> 월 영업일 절반 이상 경과 시점에서 목표 페이스 대비 현재 실적 -30% 이상 부진</div>
-                      <div>• <strong>핵심인력 해촉:</strong> 지난달 실적이 있었던 가동 설계사가 이번 달 퇴사</div>
-                      <div>• <strong>계약 품질 이슈:</strong> 최근 3 영업일 동안 인수거절/청약철회 2건 이상 발생</div>
+                      <div>• <strong>실적 급하락:</strong> 전월 동기 대비 APE -30% 이상</div>
+                      <div>• <strong>진도율 저조:</strong> 현재 목표 달성률 → 업권 중 기대 진도율 -20%p</div>
+                      <div>• <strong>핵심설계사 해촉:</strong> 지점 3개월 평균 APE 상위 20%에 해당했던 설계사가 최근 3영업일 내에 해촉한 경우</div>
+                      <div>• <strong>핵심설계사 미가동:</strong> 지점 3개월 평균 APE 상위 20%에 해당하는 설계사가 당월 활동을 멈춘 경우</div>
+                      <div>• <strong>계약 품질 이슈:</strong> 최근 3영업일 청약철회 또는 청약불완료가 2건 이상 발생한 경우</div>
+                      <div>• <strong>신입 이상 계약:</strong> 설계사 처음 청약 상품이 종신/정기보험인 경우 (건강보험 아님)</div>
+                      <div>• <strong>장기 미관리:</strong> 타깃은 있지만 6개월 이상 방문/교육 없고 실적도 없는 지점</div>
                     </div>
 
                     <div className="mb-2 font-semibold text-green-300">기회</div>
                     <div className="space-y-2 mb-4 text-sm">
-                      <div>• <strong>실적 급상승:</strong> 전월 동기 대비 {performanceType} +30% 이상 급등</div>
-                      <div>• <strong>고액 계약 체결:</strong> 월 보험료 30만원 이상 계약 체결</div>
-                      <div>• <strong>신규 가동:</strong> 위촉된 설계사가 당월 생애 첫 계약 성공</div>
+                      <div>• <strong>실적 급상승:</strong> 전월 동기 대비 APE +30% 이상</div>
+                      <div>• <strong>진도율 우수:</strong> 현재 목표 달성률 → 업권 중 기대 진도율 +20%p</div>
+                      <div>• <strong>고객계좌 체결:</strong> 보장 보험료 30만 원 이상 계약 체결</div>
+                      <div>• <strong>생애 첫 계약:</strong> 위촉 설계사가 당월 내 첫 계약 성공</div>
                     </div>
 
                     <div className="mb-2 font-semibold text-blue-300">변화</div>
                     <div className="space-y-2 mb-3 text-sm">
-                      <div>• <strong>연속 가동자 이탈:</strong> 직전 3개월 연속 가동 상태였던 설계사가 당월 활동 없음</div>
-                      <div>• <strong>신규 위촉 발생:</strong> 당월 신규 위촉 인원 1명 이상</div>
-                      <div>• <strong>포트폴리오 급변:</strong> 건강 vs 종신/정기 비중이 직전 3개월 평균 대비 ±20%p 이상 변동</div>
+                      <div>• <strong>신규 설계사 유입:</strong> 당월 신규 위촉 인원 1명 이상 발생</div>
+                      <div>• <strong>포트폴리오 급변화:</strong> '건강' vs '종신/정기' 보험 기준 직전 3개월 평균 대비 당월 ±20% 이상 변동</div>
                     </div>
 
                     <div className="absolute -top-2 right-4 w-0 h-0 border-l-4 border-r-4 border-b-4 border-l-transparent border-r-transparent border-b-gray-800"></div>
