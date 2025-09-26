@@ -1595,7 +1595,7 @@ const Branch360Dashboard = () => {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-white rounded-lg p-3 text-center border border-blue-200 relative group cursor-help">
-                      <div className="text-xs text-gray-500 mb-2">목표 담당</div>
+                      <div className="text-xs text-gray-500 mb-2">목표 비중</div>
                       <div className="text-2xl font-bold text-blue-600 mb-1">{corePerformance.managerPlanContribution}%</div>
                       <div className="text-xs text-blue-600">{formatCurrency(corePerformance.branchTargetApe * 10000)} / {formatCurrency(corePerformance.managerPersonalTarget * 10000)}</div>
 
@@ -1606,7 +1606,7 @@ const Branch360Dashboard = () => {
                       </div>
                     </div>
                     <div className="bg-white rounded-lg p-3 text-center border border-green-200 relative group cursor-help">
-                      <div className="text-xs text-gray-500 mb-2">실적 담당</div>
+                      <div className="text-xs text-gray-500 mb-2">실적 비중</div>
                       <div className="text-2xl font-bold text-green-600 mb-1">{corePerformance.managerContributionRate}%</div>
                       <div className="text-xs text-green-600">{formatCurrency(corePerformance.currentApe * 10000)} / {formatCurrency(corePerformance.managerApe * 10000)}</div>
 

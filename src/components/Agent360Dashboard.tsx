@@ -556,6 +556,7 @@ const Agent360Dashboard = () => {
   const [branchInfoSortBy, setBranchInfoSortBy] = useState<'no' | 'agency' | 'branch' | 'address' | 'phone' | 'partnershipDate' | 'currentMonthAPE' | 'totalAgents' | 'activeAgents' | 'agencyBranch'>('currentMonthAPE');
   const [branchInfoSortOrder, setBranchInfoSortOrder] = useState<'asc' | 'desc'>('desc');
   const [modalKPI, setModalKPI] = useState<'APE' | 'MMP'>('APE'); // 모달용 KPI 상태
+  const [branchRankingKPI, setBranchRankingKPI] = useState<'APE' | 'MMP'>('APE'); // 지점 순위 모달용 KPI 상태
   const [modalSortBy, setModalSortBy] = useState('achievement');
   const [modalSortOrder, setModalSortOrder] = useState<'desc' | 'asc'>('desc');
   const [tempSelectedMonth, setTempSelectedMonth] = useState('2025-09'); // 드롭다운에서 선택한 월
@@ -642,7 +643,7 @@ const Agent360Dashboard = () => {
   }
 
   // 지점 순위 데이터
-  const getBranchRankings = (getAllData = false) => {
+  const getBranchRankings = (getAllData = false, kpi = 'APE') => {
     const currentMonthData = [
       { agency: '글로벌금융판매', branch: '글로벌화이브스타', achievement: 115.2, ape: 145.7, previousApe: 132.3, isActive: true },
       { agency: '글로벌금융판매', branch: '하나돔', achievement: 112.8, ape: 138.2, previousApe: 95.8, isActive: true },
@@ -873,9 +874,16 @@ const Agent360Dashboard = () => {
     
     const result = getAllData ? sorted : sorted.slice(0, 5);
 
+    // KPI에 따른 데이터 변환 (MMP일 때 12배)
+    const transformedResult = result.map(branch => ({
+      ...branch,
+      ape: kpi === 'MMP' ? Math.round(branch.ape * 12) : branch.ape,
+      previousApe: branch.previousApe ? (kpi === 'MMP' ? Math.round(branch.previousApe * 12) : branch.previousApe) : branch.previousApe
+    }));
+
     // 가동 현황 정보와 함께 반환
     return {
-      data: result,
+      data: transformedResult,
       branchStats: {
         total: totalBranchesForStats,
         active: activeBranchesCountForStats,
@@ -2492,7 +2500,7 @@ const Agent360Dashboard = () => {
       {showAllBranchesModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowAllBranchesModal(false)}>
           <div className="bg-white rounded-lg p-6 max-w-6xl w-full mx-4 max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-2">
               <h3 className="text-lg font-semibold text-gray-900">
                 전체 지점 순위
               </h3>
@@ -2504,26 +2512,58 @@ const Agent360Dashboard = () => {
               </button>
             </div>
 
+            {/* 실적 기준 선택 */}
+            <div className="mb-4">
+              <div className="flex items-center space-x-3">
+                <span className="text-sm font-medium text-gray-700">실적 기준:</span>
+                <div className="flex">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="branchRankingKPI"
+                      value="APE"
+                      checked={branchRankingKPI === 'APE'}
+                      onChange={(e) => setBranchRankingKPI('APE')}
+                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
+                    />
+                    <span className="ml-2 text-sm font-medium text-gray-900">APE</span>
+                  </label>
+                  <label className="flex items-center ml-6">
+                    <input
+                      type="radio"
+                      name="branchRankingKPI"
+                      value="MMP"
+                      checked={branchRankingKPI === 'MMP'}
+                      onChange={(e) => setBranchRankingKPI('MMP')}
+                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
+                    />
+                    <span className="ml-2 text-sm font-medium text-gray-900">MMP</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
             <div className="flex-1 overflow-y-auto">
               {/* 단위 표시 */}
               <div className="px-3 py-2 text-xs text-black border-b border-gray-200 text-right">
-                <span>[단위: 만원, %]</span>
+                <span>[단위: 원]</span>
               </div>
               {/* 테이블 헤더 */}
               <div className="bg-gray-100 border-b sticky top-0">
                 {/* 메인 헤더 */}
-                <div className="grid gap-2 p-3 pb-1 text-xs font-semibold text-gray-700 border-b border-gray-200" style={{gridTemplateColumns: '40px 140px 1fr 240px 140px'}}>
-                  <div className="row-span-2 flex items-center">순위</div>
-                  <div className="row-span-2 flex items-center">대리점명</div>
-                  <div className="row-span-2 flex items-center">지점명</div>
-                  <div className="text-center">{performanceType}</div>
-                  <div className="text-center">당월 Plan</div>
+                <div className="grid gap-2 p-3 pb-1 text-xs font-semibold text-gray-700 border-b border-gray-200" style={{gridTemplateColumns: '40px 140px 1fr 160px 180px 200px'}}>
+                  <div className="row-span-2 flex items-center border-r border-gray-300">순위</div>
+                  <div className="row-span-2 flex items-center border-r border-gray-300">대리점명</div>
+                  <div className="row-span-2 flex items-center border-r border-gray-300">지점명</div>
+                  <div className="text-center border-r border-gray-300">실적({branchRankingKPI})</div>
+                  <div className="text-center border-r border-gray-300">당월 목표관리</div>
+                  <div className="text-center">나의 성과 기여도</div>
                 </div>
                 {/* 서브 헤더 */}
-                <div className="grid gap-2 px-3 pb-2 pt-1 text-xs font-semibold text-black" style={{gridTemplateColumns: '40px 140px 1fr 80px 80px 80px 70px 70px'}}>
-                  <div></div>
-                  <div></div>
-                  <div></div>
+                <div className="grid gap-2 px-3 pb-2 pt-1 text-xs font-semibold text-black" style={{gridTemplateColumns: '40px 140px 1fr 80px 80px 90px 90px 100px 100px'}}>
+                  <div className="border-r border-gray-300"></div>
+                  <div className="border-r border-gray-300"></div>
+                  <div className="border-r border-gray-300"></div>
                   <button
                     onClick={() => {
                       if (modalSortBy === 'ape') {
@@ -2533,7 +2573,7 @@ const Agent360Dashboard = () => {
                         setModalSortOrder('desc');
                       }
                     }}
-                    className={`text-center hover:text-blue-600 transition-colors ${
+                    className={`text-center hover:text-blue-600 transition-colors border-r border-gray-300 ${
                       modalSortBy === 'ape' ? 'text-black font-bold' : 'text-black font-normal'
                     }`}
                   >
@@ -2551,30 +2591,12 @@ const Agent360Dashboard = () => {
                         setModalSortOrder('desc');
                       }
                     }}
-                    className={`text-center hover:text-blue-600 transition-colors ${
+                    className={`text-center hover:text-blue-600 transition-colors border-r border-gray-300 ${
                       modalSortBy === 'previousApe' ? 'text-black font-bold' : 'text-black font-normal'
                     }`}
                   >
                     전월
                     {modalSortBy === 'previousApe' && (
-                      modalSortOrder === 'desc' ? ' ↓' : ' ↑'
-                    )}
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (modalSortBy === 'threeMonthAvg') {
-                        setModalSortOrder(modalSortOrder === 'desc' ? 'asc' : 'desc');
-                      } else {
-                        setModalSortBy('threeMonthAvg');
-                        setModalSortOrder('desc');
-                      }
-                    }}
-                    className={`text-center hover:text-blue-600 transition-colors ${
-                      modalSortBy === 'threeMonthAvg' ? 'text-black font-bold' : 'text-black font-normal'
-                    }`}
-                  >
-                    3개월평균
-                    {modalSortBy === 'threeMonthAvg' && (
                       modalSortOrder === 'desc' ? ' ↓' : ' ↑'
                     )}
                   </button>
@@ -2587,7 +2609,7 @@ const Agent360Dashboard = () => {
                         setModalSortOrder('desc');
                       }
                     }}
-                    className={`text-center hover:text-blue-600 transition-colors ${
+                    className={`text-center hover:text-blue-600 transition-colors border-r border-gray-300 ${
                       modalSortBy === 'target' ? 'text-black font-bold' : 'text-black font-normal'
                     }`}
                   >
@@ -2605,12 +2627,48 @@ const Agent360Dashboard = () => {
                         setModalSortOrder('desc');
                       }
                     }}
-                    className={`text-center hover:text-blue-600 transition-colors ${
+                    className={`text-center hover:text-blue-600 transition-colors border-r border-gray-300 ${
                       modalSortBy === 'achievement' ? 'text-black font-bold' : 'text-black font-normal'
                     }`}
                   >
                     달성률
                     {modalSortBy === 'achievement' && (
+                      modalSortOrder === 'desc' ? ' ↓' : ' ↑'
+                    )}
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (modalSortBy === 'targetContributor') {
+                        setModalSortOrder(modalSortOrder === 'desc' ? 'asc' : 'desc');
+                      } else {
+                        setModalSortBy('targetContributor');
+                        setModalSortOrder('desc');
+                      }
+                    }}
+                    className={`text-center hover:text-blue-600 transition-colors border-r border-gray-300 ${
+                      modalSortBy === 'targetContributor' ? 'text-black font-bold' : 'text-black font-normal'
+                    }`}
+                  >
+                    목표담당
+                    {modalSortBy === 'targetContributor' && (
+                      modalSortOrder === 'desc' ? ' ↓' : ' ↑'
+                    )}
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (modalSortBy === 'performanceContributor') {
+                        setModalSortOrder(modalSortOrder === 'desc' ? 'asc' : 'desc');
+                      } else {
+                        setModalSortBy('performanceContributor');
+                        setModalSortOrder('desc');
+                      }
+                    }}
+                    className={`text-center hover:text-blue-600 transition-colors ${
+                      modalSortBy === 'performanceContributor' ? 'text-black font-bold' : 'text-black font-normal'
+                    }`}
+                  >
+                    실적담당
+                    {modalSortBy === 'performanceContributor' && (
                       modalSortOrder === 'desc' ? ' ↓' : ' ↑'
                     )}
                   </button>
@@ -2620,11 +2678,65 @@ const Agent360Dashboard = () => {
               {/* 테이블 내용 */}
               <div className="space-y-0">
                 {(() => {
-                  const sortedData = getBranchRankings(true).data.slice(0, 160).map(branch => ({
-                    ...branch,
-                    threeMonthAvg: branch.ape === 0 ? 0 : Math.round((branch.ape + (branch.previousApe || Math.round(branch.ape * 0.75)) + Math.round(branch.ape * 0.65)) / 3),
-                    calculatedAchievement: branch.ape === 0 ? 0 : (branch.target ? Math.round((branch.ape / (branch.target || 120)) * 100 * 10) / 10 : branch.achievement)
-                  })).sort((a, b) => {
+                  const branchInfoData = getBranchInfoData();
+                  const sortedData = getBranchRankings(true, branchRankingKPI).data.slice(0, 160).map((branch, idx) => {
+                    // 전체보기 모달에서 해당 지점 데이터 찾기
+                    const branchInfo = branchInfoData.find(info =>
+                      info.agency === branch.agency && info.branch === branch.branch
+                    );
+
+                    // 당월 실적은 전체보기 모달의 currentMonthAPE 사용
+                    const currentApe = branchInfo ? branchInfo.currentMonthAPE : branch.ape;
+
+                    // 전월 실적 로직 - 당월이 없어도 전월은 있을 수 있음
+                    let previousApe = 0;
+                    const branchHash = (branch.branch || '').split('').reduce((acc, char) => acc + char.charCodeAt(0), idx);
+                    const hasCurrentPerformance = currentApe > 0;
+
+                    // 전월 실적 존재 여부 결정 (70% 확률)
+                    const shouldHavePrevious = (branchHash % 10) < 7;
+
+                    if (shouldHavePrevious) {
+                      if (hasCurrentPerformance) {
+                        // 당월이 있으면 전월은 50-150% 범위
+                        const multiplier = 0.5 + ((branchHash % 100) / 100); // 0.5 ~ 1.5
+                        previousApe = Math.round(currentApe * multiplier);
+                      } else {
+                        // 당월이 없어도 전월은 있을 수 있음 (독립적인 값)
+                        // 더 강제적으로 전월 실적 생성
+                        if ((branchHash % 3) === 0) { // 33% 확률로 당월 0, 전월 있음 케이스 생성
+                          const baseAmount = 10000 + (branchHash % 500) * 1000; // 10,000원 ~ 510,000원
+                          previousApe = baseAmount;
+                        }
+                      }
+                    }
+
+                    // 목표값 생성 (원 단위)
+                    const targetAmount = currentApe > 0
+                      ? Math.round(currentApe / (0.2 + (branchHash % 100) / 100)) // 당월 실적 기준으로 20%~120% 달성률이 되도록 목표 설정
+                      : 50000 + (branchHash % 200) * 5000; // 당월 실적이 없으면 50,000원~1,050,000원 목표
+
+                    // 달성률 계산: (당월 실적 / 목표) * 100
+                    const calculatedAchievement = currentApe === 0 ? 0 : Math.round((currentApe / targetAmount) * 100);
+
+                    // 목표담당 비율 계산 (목표액에 비례, 합계 100%)
+                    const totalTarget = 10000000; // 전체 목표 가정값 (1천만원)
+                    const targetPercentage = Math.round((targetAmount / totalTarget) * 100);
+
+                    // 실적담당 비율 계산 (내 전체 실적 중 이 지점의 기여도)
+                    const totalMyPerformance = 5000000; // 내 전체 실적 가정값 (500만원)
+                    const performancePercentage = currentApe > 0 ? Math.round((currentApe / totalMyPerformance) * 100) : 0;
+
+                    return {
+                      ...branch,
+                      ape: currentApe,
+                      previousApe: previousApe,
+                      target: targetAmount,
+                      calculatedAchievement: calculatedAchievement,
+                      targetContributor: `${Math.min(targetPercentage, 100)}%`, // 최대 100%로 제한
+                      performanceContributor: `${Math.min(performancePercentage, 100)}%` // 최대 100%로 제한
+                    };
+                  }).sort((a, b) => {
                     let aValue, bValue;
                     switch(modalSortBy) {
                       case 'ape':
@@ -2635,18 +2747,22 @@ const Agent360Dashboard = () => {
                         aValue = a.previousApe || (a.ape * 0.85);
                         bValue = b.previousApe || (b.ape * 0.85);
                         break;
-                      case 'threeMonthAvg':
-                        aValue = a.threeMonthAvg;
-                        bValue = b.threeMonthAvg;
-                        break;
                       case 'target':
                         aValue = a.target || 120;
                         bValue = b.target || 120;
                         break;
                       case 'achievement':
-                      default:
                         aValue = a.calculatedAchievement;
                         bValue = b.calculatedAchievement;
+                        break;
+                      case 'targetContributor':
+                        aValue = parseInt(a.targetContributor);
+                        bValue = parseInt(b.targetContributor);
+                        break;
+                      case 'performanceContributor':
+                      default:
+                        aValue = parseInt(a.performanceContributor);
+                        bValue = parseInt(b.performanceContributor);
                         break;
                     }
                     return modalSortOrder === 'desc' ? bValue - aValue : aValue - bValue;
@@ -2657,52 +2773,57 @@ const Agent360Dashboard = () => {
                     <div
                       key={idx}
                       className="grid gap-2 p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
-                      style={{gridTemplateColumns: '40px 140px 1fr 80px 80px 80px 70px 70px'}}
+                      style={{gridTemplateColumns: '40px 140px 1fr 80px 80px 90px 90px 100px 100px'}}
                       onClick={() => handleBranchClick(branch.agency, branch.branch)}
                     >
-                      <div className="flex items-center">
+                      <div className="flex items-center border-r border-gray-200">
                         <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
                           idx < 5 ? 'bg-yellow-400 text-yellow-900' : 'bg-gray-200 text-black'
                         }`}>
                           {idx + 1}
                         </div>
                       </div>
-                      <div className="flex items-center">
+                      <div className="flex items-center border-r border-gray-200">
                         <div className="text-sm text-black truncate">{branch.agency}</div>
                       </div>
-                      <div className="flex items-center">
+                      <div className="flex items-center border-r border-gray-200">
                         <div className="text-sm  text-gray-900 truncate">{branch.branch}</div>
                       </div>
                       {/* APE 섹션 */}
-                      <div className="flex items-center justify-center">
+                      <div className="flex items-center justify-center border-r border-gray-200">
                         <div className={`text-xs ${
                           modalSortBy === 'ape' ? 'font-bold text-gray-900' : 'font-normal text-gray-900'
-                        }`}>{branch.ape === 0 ? '-' : branch.ape.toFixed(1)}</div>
+                        }`}>{branch.ape === 0 ? '-' : branch.ape.toLocaleString()}</div>
                       </div>
-                      <div className="flex items-center justify-center">
+                      <div className="flex items-center justify-center border-r border-gray-200">
                         <div className={`text-xs ${
                           modalSortBy === 'previousApe' ? 'font-bold text-black' : 'font-normal text-black'
-                        }`}>{branch.ape === 0 ? '-' : (branch.previousApe || Math.round(branch.ape * 0.85)).toFixed(1)}</div>
-                      </div>
-                      <div className="flex items-center justify-center">
-                        <div className={`text-xs ${
-                          modalSortBy === 'threeMonthAvg' ? 'font-bold text-black' : 'font-normal text-black'
-                        }`}>{branch.ape === 0 ? '-' : branch.threeMonthAvg.toFixed(1)}</div>
+                        }`}>{branch.previousApe === 0 ? '-' : branch.previousApe.toLocaleString()}</div>
                       </div>
                       {/* 목표 섹션 */}
-                      <div className="flex items-center justify-center">
+                      <div className="flex items-center justify-center border-r border-gray-200">
                         <div className={`text-xs ${
                           modalSortBy === 'target' ? 'font-bold text-gray-900' : 'font-normal text-gray-900'
-                        }`}>{(branch.target || 120).toFixed(1)}</div>
+                        }`}>{(branch.target || 120).toLocaleString()}</div>
                       </div>
-                      <div className="flex items-center justify-center">
+                      <div className="flex items-center justify-center border-r border-gray-200">
                         <div className={`text-xs ${
                           modalSortBy === 'achievement'
                             ? `font-bold ${branch.ape === 0 ? 'text-black' : 'text-black'}`
                             : `font-normal ${branch.ape === 0 ? 'text-black' : 'text-black'}`
                         }`}>
-                          {branch.ape === 0 ? '-' : branch.calculatedAchievement.toFixed(1)}
+                          {branch.ape === 0 ? '-' : `${branch.calculatedAchievement}%`}
                         </div>
+                      </div>
+                      <div className="flex items-center justify-center border-r border-gray-200">
+                        <div className={`text-xs ${
+                          modalSortBy === 'targetContributor' ? 'font-bold text-gray-900' : 'font-normal text-gray-700'
+                        }`}>{branch.targetContributor}</div>
+                      </div>
+                      <div className="flex items-center justify-center">
+                        <div className={`text-xs ${
+                          modalSortBy === 'performanceContributor' ? 'font-bold text-gray-900' : 'font-normal text-gray-700'
+                        }`}>{branch.performanceContributor}</div>
                       </div>
                     </div>
                   );
