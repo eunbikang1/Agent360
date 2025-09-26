@@ -1885,8 +1885,8 @@ const Branch360Dashboard = () => {
                                 style={{height: `${lifeHeight}px`}}
                               />
                               {/* 건강 부분 (하단) */}
-                              <div 
-                                className="w-full0"
+                              <div
+                                className="w-full bg-blue-500"
                                 style={{height: `${healthHeight}px`}}
                               />
                             </div>
