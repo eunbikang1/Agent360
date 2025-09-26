@@ -1569,19 +1569,19 @@ const Agent360Dashboard = () => {
                       <div key={data.day} className="flex flex-col items-center relative" style={{width: '20px'}}>
                         {/* 막대 */}
                         <div
-                          className="w-4 rounded-t overflow-hidden hover:opacity-80 transition-opacity cursor-pointer"
+                          className="w-4 rounded-t overflow-hidden hover:opacity-80 transition-opacity cursor-pointer relative"
                           style={{height: `${barHeight}px`}}
                           onMouseEnter={() => setHoveredDayData({...data, idx: index, businessDay: businessDayNumber, value})}
                         >
-                          {/* 종신/정기 부분 (상단 35%) */}
-                          <div
-                            className="w-full bg-green-500"
-                            style={{height: `${barHeight * 0.35}px`}}
-                          />
                           {/* 건강 부분 (하단 65%) */}
                           <div
-                            className="w-full bg-blue-500"
+                            className="absolute bottom-0 w-full bg-blue-500"
                             style={{height: `${barHeight * 0.65}px`}}
+                          />
+                          {/* 종신/정기 부분 (상단 35%) */}
+                          <div
+                            className="absolute top-0 w-full bg-green-500"
+                            style={{height: `${barHeight * 0.35}px`}}
                           />
                         </div>
 
