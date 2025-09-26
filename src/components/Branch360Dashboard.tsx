@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { Building, Users, Phone, MapPin, Calendar, TrendingUp, ChevronDown, User, ArrowDown, Download, Briefcase, AlertTriangle, TrendingDown, UserPlus, Search } from 'lucide-react';
+import { Building, Users, Phone, MapPin, Calendar, TrendingUp, ChevronDown, User, ArrowDown, Download, Briefcase, AlertTriangle, TrendingDown, UserPlus, Search, ChevronRight } from 'lucide-react';
 
 const Branch360Dashboard = () => {
   const { agency, branchName } = useParams<{ agency?: string; branchName: string }>();
@@ -129,6 +129,68 @@ const Branch360Dashboard = () => {
   const [tempSelectedPeriod, setTempSelectedPeriod] = useState(selectedPeriod);
   const [tempSelectedAgency, setTempSelectedAgency] = useState(selectedAgency);
   const [tempSelectedBranch, setTempSelectedBranch] = useState(selectedBranch);
+
+  // 방문/교육 상태 관리 (통합)
+  const [visitEducationType, setVisitEducationType] = useState<'방문' | '교육'>('방문');
+  const [showVisitEducationList, setShowVisitEducationList] = useState(false);
+  const [showActivityDetails, setShowActivityDetails] = useState(false);
+  const [expandedEducation, setExpandedEducation] = useState(false);
+  const [expandedVisit, setExpandedVisit] = useState(false);
+  const [selectedActivityType, setSelectedActivityType] = useState<'최근' | '교육' | '방문'>('최근');
+  const [showConversionTooltip, setShowConversionTooltip] = useState(false);
+
+  // 상세 활동 데이터
+  const detailedEducationData = [
+    { date: '2025-09-05', content: 'FIDO 종신보험 상품 교육', participants: 12, location: '강남지점 회의실' },
+    { date: '2025-08-28', content: '디지털 영업 툴 활용법', participants: 8, location: '온라인' },
+    { date: '2025-08-15', content: '고객 상담 스킬 향상', participants: 15, location: '강남지점 회의실' },
+  ];
+
+  const detailedVisitData = [
+    { date: '2025-08-28', content: '김○○ 설계사 개별 상담', purpose: '실적 부진 원인 분석 및 개선방안', result: '9월 목표 설정' },
+    { date: '2025-08-12', content: '신입 설계사 현장 동행', purpose: '고객 상담 실습 및 피드백', result: '상담 스킬 향상' },
+    { date: '2025-08-05', content: '우수 설계사 격려 방문', purpose: '성과 축하 및 노하우 공유', result: '팀 분위기 향상' },
+  ];
+
+  // 통합 관리 활동 목록 (최신 순, 10개)
+  const recentActivityList = [
+    { date: '2025-09-13', type: '교육', content: 'FIDO 종신보험 상품 교육', manager: '교육 매니저' },
+    { date: '2025-09-12', type: '방문', content: '김○○ 설계사 개별 상담', manager: '설계 매니저' },
+    { date: '2025-09-11', type: '교육', content: '디지털 영업 툴 활용법 세미나', manager: '교육 매니저' },
+    { date: '2025-09-10', type: '방문', content: '신입 설계사 현장 동행', manager: '지점장' },
+    { date: '2025-09-09', type: '교육', content: '고객 상담 스킬 향상 교육', manager: '교육 매니저' },
+    { date: '2025-09-06', type: '방문', content: '우수 설계사 격려 방문', manager: '지점장' },
+    { date: '2025-09-05', type: '교육', content: '보험 상품 업데이트 안내', manager: '교육 매니저' },
+    { date: '2025-09-04', type: '방문', content: '지점 실적 점검 및 피드백', manager: '설계 매니저' },
+    { date: '2025-09-03', type: '교육', content: '컴플라이언스 교육', manager: '교육 매니저' },
+    { date: '2025-09-02', type: '방문', content: '설계사 개별 면담 및 상담', manager: '설계 매니저' },
+  ];
+
+  const educationActivityList = [
+    { date: '2025-09-13', content: 'FIDO 종신보험 상품 교육', manager: '교육 매니저' },
+    { date: '2025-09-11', content: '디지털 영업 툴 활용법 세미나', manager: '교육 매니저' },
+    { date: '2025-09-09', content: '고객 상담 스킬 향상 교육', manager: '교육 매니저' },
+    { date: '2025-09-05', content: '보험 상품 업데이트 안내', manager: '교육 매니저' },
+    { date: '2025-09-03', content: '컴플라이언스 교육', manager: '교육 매니저' },
+    { date: '2025-08-28', content: '마케팅 전략 워크샵', manager: '교육 매니저' },
+    { date: '2025-08-25', content: '신상품 출시 설명회', manager: '교육 매니저' },
+    { date: '2025-08-20', content: '고객관리 시스템 사용법', manager: '교육 매니저' },
+    { date: '2025-08-15', content: '영업 프로세스 개선 교육', manager: '교육 매니저' },
+    { date: '2025-08-10', content: '보험 법규 업데이트 교육', manager: '교육 매니저' },
+  ];
+
+  const visitActivityList = [
+    { date: '2025-06-25', content: '김○○ 설계사 개별 상담', manager: '설계 매니저' },
+    { date: '2025-06-22', content: '신입 설계사 현장 동행', manager: '지점장' },
+    { date: '2025-06-18', content: '우수 설계사 격려 방문', manager: '지점장' },
+    { date: '2025-06-15', content: '지점 실적 점검 및 피드백', manager: '설계 매니저' },
+    { date: '2025-06-12', content: '설계사 개별 면담 및 상담', manager: '설계 매니저' },
+    { date: '2025-06-08', content: '고객 불만 처리 지원', manager: '설계 매니저' },
+    { date: '2025-06-05', content: '신규 고객 발굴 지원', manager: '설계 매니저' },
+    { date: '2025-06-02', content: '계약 체결 과정 지원', manager: '설계 매니저' },
+    { date: '2025-05-30', content: '설계사 개인 목표 설정 상담', manager: '설계 매니저' },
+    { date: '2025-05-28', content: '팀 빌딩 활동 참여', manager: '지점장' },
+  ];
 
   // 지능형 단위 포매팅 함수
   const formatCurrency = (amount: number) => {
@@ -1187,6 +1249,38 @@ const Branch360Dashboard = () => {
     }
   };
 
+  // 방문/교육 데이터 생성
+  const visitEducationData = {
+    방문: {
+      count: 18,
+      data: [
+        { date: '9/25', agency: '글로벌금융판매', branch: '입주지점', detail: '주력상품 홍보 및 업무 지원' },
+        { date: '9/24', agency: '메타리치', branch: '금강지점', detail: '신상품 설명 및 판매 도구 전달' },
+        { date: '9/24', agency: '지금용코리아', branch: '동탄지점', detail: '분기별 실적 점검 및 개선방안 논의' },
+        { date: '9/23', agency: '글로벌금융판매', branch: '리더스에이치비', detail: '설계사 교육프로그램 안내' },
+        { date: '9/22', agency: '지에이스타금융서비스', branch: '부천코어', detail: '마케팅 지원 및 홍보물 제공' },
+        { date: '9/22', agency: '한국지에이금융서비스', branch: '일산지사', detail: '신규 위촉 설계사 면담' },
+        { date: '9/21', agency: '메가', branch: '인슈에셋고양', detail: '월별 목표 설정 및 달성 전략 수립' },
+        { date: '9/20', agency: '글로벌금융판매', branch: '브리지재무설계', detail: '고객 서비스 품질 개선 방안 논의' },
+        { date: '9/20', agency: '메타리치', branch: '리치골드', detail: '상품 포트폴리오 다양화 컸설팅' }
+      ]
+    },
+    교육: {
+      count: 12,
+      data: [
+        { date: '9/25', agency: '글로벌금융판매', branch: '하나돔강북', detail: '신상품 교육: 건강보험 2.0 출시 설명' },
+        { date: '9/24', agency: '메타리치', branch: '보험스토어', detail: '디지털 영업도구 활용법 교육' },
+        { date: '9/23', agency: '지금용코리아', branch: '서울A', detail: '고객 상담 스킬 향상 교육' },
+        { date: '9/23', agency: '더블유에셋', branch: '기업금융본부', detail: '법인 영업 전략 교육' },
+        { date: '9/22', agency: '글로벌금융판매', branch: '케이엘아이케이베스트', detail: '종신보험 상품 설명 및 판매 기법' },
+        { date: '9/21', agency: '지에이스타금융서비스', branch: '부천코어', detail: '고객 니즈 분석 및 맞춤 제안 교육' },
+        { date: '9/20', agency: '한국지에이금융서비스', branch: '일산지사', detail: '신입 설계사 기초 교육' },
+        { date: '9/20', agency: '메가', branch: '인슈에셋고양', detail: '정기보험 상품 교육' },
+        { date: '9/19', agency: '메타리치', branch: '골드자산관리센터', detail: '고객 관리 시스템 사용법 교육' },
+        { date: '9/18', agency: '글로벌금융판매', branch: '굿브즈스카이', detail: '영업 프로세스 개선 교육' }
+      ]
+    }
+  };
 
   const handleExcelDownload = () => {
     downloadCSV();
@@ -1547,8 +1641,8 @@ const Branch360Dashboard = () => {
 
               {/* 체결률 화살표 */}
               {(() => {
-                const actualContractCount = 73; // 실제 계약 완료 건수 (73건)
-                const conversionRate = Math.round((actualContractCount / corePerformance.proposalCount) * 100);
+                const contractCount = 96; // 청약 건수 (96건)
+                const conversionRate = Math.round((contractCount / corePerformance.proposalCount) * 100);
 
                 return (
                   <div className="flex flex-col items-center px-2">
@@ -1561,15 +1655,35 @@ const Branch360Dashboard = () => {
                       }`}>
                         {conversionRate}%
                       </div>
-                      <div className="text-xs text-gray-500 whitespace-nowrap">계약률</div>
+                      <div className="text-xs text-gray-500 whitespace-nowrap">청약률</div>
                     </div>
                   </div>
                 );
               })()}
 
               {/* 청약 카드 */}
-              <div className="bg-white rounded-lg shadow-sm border p-4 flex-1">
+              <div
+                className="bg-white rounded-lg shadow-sm border p-4 flex-1 relative cursor-pointer hover:shadow-md transition-shadow"
+                onMouseEnter={() => setShowConversionTooltip(true)}
+                onMouseLeave={() => setShowConversionTooltip(false)}
+              >
                 <h4 className="text-sm font-semibold text-gray-700 mb-3">청약</h4>
+
+                {/* 호버 툴팁 */}
+                {showConversionTooltip && (() => {
+                  const contractCount = 96;
+                  const rejectedCount = 18; // 거절 18건
+                  const withdrawnCount = 6; // 철회 6건
+
+                  return (
+                    <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-800 text-white text-xs rounded px-3 py-2 whitespace-nowrap z-30 shadow-lg">
+                      <div className="mb-1">청약 {contractCount}건 중</div>
+                      <div>거절: {rejectedCount}건, 철회: {withdrawnCount}건</div>
+                      {/* 화살표 */}
+                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+                    </div>
+                  );
+                })()}
 
                 {/* 메인 수치 영역 */}
                 <div className="text-center mb-3">
@@ -1589,7 +1703,7 @@ const Branch360Dashboard = () => {
             <div className="bg-white rounded-lg shadow-sm border p-4">
               <div className="flex items-start justify-between mb-4">
                 <h3 className="text-sm font-semibold text-gray-700">{getCurrentMonth()}월 일별 실적</h3>
-                
+
                 <div className="text-right space-y-1">
                   {/* 지표 선택 */}
                   <div className="flex bg-gray-100 rounded-lg p-1">
@@ -1609,10 +1723,10 @@ const Branch360Dashboard = () => {
                   </div>
                 </div>
               </div>
-              
-              <div className="h-48 relative bg-gray-50 rounded-lg p-4" onMouseLeave={() => setHoveredDayData(null)}>
+
+              <div className="h-48 relative bg-gray-50 rounded-lg pb-8 pt-8 px-4" onMouseLeave={() => setHoveredDayData(null)}>
                 {/* 평균값 라벨 */}
-                <div className="absolute top-2 right-2 text-xs text-gray-600 flex items-center gap-1">
+                <div className="absolute top-1 right-2 text-xs text-gray-600 flex items-center gap-1">
                   <div className="w-3 h-0.5 bg-yellow-400" style={{width: '12px'}}></div>
                   일 평균: {(() => {
                     const currentData = dailyPerformance.filter(d => !d.isWeekend);
@@ -1729,8 +1843,8 @@ const Branch360Dashboard = () => {
                   })}
                 </div>
 
-                {/* 영업일자 라벨 */}
-                <div className="text-center text-xs text-gray-600 mt-2">영업일자</div>
+                {/* 영업일차 라벨 - 회색 영역 내부 */}
+                <div className="text-center text-xs text-gray-600 mt-2 mb-2">영업일차</div>
               </div>
 
               {/* 범례 */}
@@ -1974,94 +2088,6 @@ const Branch360Dashboard = () => {
               </div>
             </div>
 
-            {/* 최근 관리 활동 */}
-            <div className="bg-white rounded-lg shadow-sm border p-4">
-              <h3 className="text-sm font-semibold text-gray-700 mb-4">최근 관리 활동</h3>
-              <div className="grid grid-cols-2 gap-3 mb-4">
-                <div className="flex items-center justify-between py-0.5 px-2 hover:bg-blue-100 rounded-lg border border-blue-200 transition-colors min-h-0">
-                  <div className="flex items-center">
-                    <div className="w-2 h-20 rounded-full mr-3"></div>
-                    <span className="text-sm font-medium text-blue-700">교육</span>
-                  </div>
-                  <span className="text-sm font-bold text-blue-600">9/5 (8일전)</span>
-                </div>
-                
-                <div className="flex items-center justify-between py-0.5 px-2 bg-green-50 hover:bg-green-100 rounded-lg border border-green-200 transition-colors min-h-0">
-                  <div className="flex items-center">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
-                    <span className="text-sm font-medium text-green-700">방문</span>
-                  </div>
-                  <span className="text-sm font-bold text-green-600">8/28 (16일전)</span>
-                </div>
-              </div>
-              
-              {/* 구분선 */}
-              <div className="border-t border-gray-200 my-4"></div>
-              
-              {/* 월별 요약 */}
-              <div className="text-sm font-semibold text-gray-700 mb-3">월별 요약</div>
-              <div className="bg-gray-50 rounded-lg p-3">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-gray-300">
-                      <th className="pb-2 text-left text-xs font-medium text-gray-600">월</th>
-                      <th className="pb-2 text-center text-xs font-medium text-gray-600">교육</th>
-                      <th className="pb-2 text-center text-xs font-medium text-gray-600">방문</th>
-                      <th className="pb-2 text-center text-xs font-medium text-gray-600">App Push</th>
-                      <th className="pb-2 text-center text-xs font-medium text-gray-600">SMS</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {/* 기본: 당월만 표시 */}
-                    {!showManagementHistoryModal && (
-                      <tr className="hover:bg-gray-50">
-                        <td className="py-2 text-xs font-medium text-gray-700">{managementHistory[0].month}</td>
-                        <td className="py-2 text-center text-sm font-bold text-gray-900">{managementHistory[0].education.count === 0 ? '-' : managementHistory[0].education.count}</td>
-                        <td className="py-2 text-center text-sm font-bold text-gray-900">{managementHistory[0].visit.count === 0 ? '-' : managementHistory[0].visit.count}</td>
-                        <td className="py-2 text-center text-sm font-bold text-gray-900">{managementHistory[0].appPush.count === 0 ? '-' : managementHistory[0].appPush.count}</td>
-                        <td className="py-2 text-center text-sm font-bold text-gray-900">{managementHistory[0].sms.count === 0 ? '-' : managementHistory[0].sms.count}</td>
-                      </tr>
-                    )}
-
-                    {/* 펼침: 전체 6개월 표시 */}
-                    {showManagementHistoryModal && managementHistory.map((month, idx) => (
-                      <tr key={idx} className="hover:bg-gray-50">
-                        <td className="py-2 text-xs font-medium text-gray-700">{month.month}</td>
-                        <td className="py-2 text-center text-sm font-bold text-gray-900">{month.education.count === 0 ? '-' : month.education.count}</td>
-                        <td className="py-2 text-center text-sm font-bold text-gray-900">{month.visit.count === 0 ? '-' : month.visit.count}</td>
-                        <td className="py-2 text-center text-sm font-bold text-gray-900">{month.appPush.count === 0 ? '-' : month.appPush.count}</td>
-                        <td className="py-2 text-center text-sm font-bold text-gray-900">{month.sms.count === 0 ? '-' : month.sms.count}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                <div className="mt-3 text-center">
-                  <button
-                    onClick={() => setShowManagementHistoryModal(!showManagementHistoryModal)}
-                    className="text-xs text-blue-600 hover:text-blue-800 font-medium transition-all flex items-center justify-center mx-auto"
-                  >
-                    {showManagementHistoryModal
-                      ? (
-                        <>
-                          <span>접기</span>
-                          <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                          </svg>
-                        </>
-                      )
-                      : (
-                        <>
-                          <span>더보기 ({managementHistory.length - 1}개월)</span>
-                          <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </>
-                      )
-                    }
-                  </button>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* 가운데: 지점 특성 */}
@@ -2117,21 +2143,41 @@ const Branch360Dashboard = () => {
                     <div className="text-xs text-gray-500">평균 36.5세</div>
                   </div>
 
-                  {/* 성별 분포 - 시각적 바 */}
-                  <div className="border-t pt-3">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs text-gray-600">여성</span>
-                      <span className="text-xs font-medium">52%</span>
+                  {/* 성별 분포 - 파이차트 */}
+                  <div className="border-t pt-4 flex flex-col items-center">
+                    <div className="relative w-24 h-24 mb-3">
+                      <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 32 32">
+                        <circle
+                          cx="16"
+                          cy="16"
+                          r="12"
+                          fill="none"
+                          stroke="#f472b6"
+                          strokeWidth="6"
+                          strokeDasharray="39.12 75.36"
+                          strokeDashoffset="0"
+                        />
+                        <circle
+                          cx="16"
+                          cy="16"
+                          r="12"
+                          fill="none"
+                          stroke="#60a5fa"
+                          strokeWidth="6"
+                          strokeDasharray="36.24 75.36"
+                          strokeDashoffset="-39.12"
+                        />
+                      </svg>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
-                      <div className="bg-pink-400 h-2 rounded-full" style={{width: '52%'}}></div>
-                    </div>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs text-gray-600">남성</span>
-                      <span className="text-xs font-medium">48%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-blue-400 h-2 rounded-full" style={{width: '48%'}}></div>
+                    <div className="flex items-center gap-4 text-xs">
+                      <div className="flex items-center gap-1">
+                        <div className="w-3 h-3 bg-blue-400 rounded-sm"></div>
+                        <span className="text-gray-600">남성 48%</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <div className="w-3 h-3 bg-pink-400 rounded-sm"></div>
+                        <span className="text-gray-600">여성 52%</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -2158,21 +2204,41 @@ const Branch360Dashboard = () => {
                     </div>
                   </div>
 
-                  {/* 주계약/특약 비율 */}
-                  <div className="border-t pt-3">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs text-gray-600">주계약</span>
-                      <span className="text-xs font-medium">62%</span>
+                  {/* 주계약/특약 비율 - 파이차트 */}
+                  <div className="border-t pt-4 flex flex-col items-center">
+                    <div className="relative w-24 h-24 mb-3">
+                      <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 32 32">
+                        <circle
+                          cx="16"
+                          cy="16"
+                          r="12"
+                          fill="none"
+                          stroke="#3b82f6"
+                          strokeWidth="6"
+                          strokeDasharray="46.76 75.36"
+                          strokeDashoffset="0"
+                        />
+                        <circle
+                          cx="16"
+                          cy="16"
+                          r="12"
+                          fill="none"
+                          stroke="#fb923c"
+                          strokeWidth="6"
+                          strokeDasharray="28.60 75.36"
+                          strokeDashoffset="-46.76"
+                        />
+                      </svg>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
-                      <div className="bg-blue-500 h-2 rounded-full" style={{width: '62%'}}></div>
-                    </div>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs text-gray-600">특약</span>
-                      <span className="text-xs font-medium">38%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-orange-400 h-2 rounded-full" style={{width: '38%'}}></div>
+                    <div className="flex items-center gap-4 text-xs">
+                      <div className="flex items-center gap-1">
+                        <div className="w-3 h-3 bg-blue-500 rounded-sm"></div>
+                        <span className="text-gray-600">주계약 62%</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <div className="w-3 h-3 bg-orange-400 rounded-sm"></div>
+                        <span className="text-gray-600">특약 38%</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -2331,6 +2397,115 @@ const Branch360Dashboard = () => {
               </div>
             </div>
 
+            {/* 관리 활동 내역 */}
+            <div className="mb-4">
+              <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                </svg>
+                관리 활동 내역
+              </h2>
+            </div>
+
+            {/* 최근 관리 활동 */}
+            <div className="bg-white rounded-lg shadow-sm border p-4">
+              <h3 className="text-sm font-semibold text-gray-700 mb-4">최근 활동</h3>
+
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                {/* 교육 카드 */}
+                <div className={`border rounded-lg overflow-hidden transition-all ${
+                  selectedActivityType === '교육'
+                    ? 'border-blue-400 shadow-md'
+                    : 'border-blue-200 hover:border-blue-300'
+                }`}>
+                  <div
+                    className="flex items-center justify-between py-3 px-4 bg-blue-50 hover:bg-blue-100 transition-colors cursor-pointer"
+                    onClick={() => setSelectedActivityType('교육')}
+                  >
+                    <div className="flex items-center">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
+                      <span className="text-sm font-medium text-blue-700">교육</span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="text-sm font-bold text-blue-600 mr-2">9/8 (5일전)</span>
+                      <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* 방문 카드 */}
+                <div className={`border rounded-lg overflow-hidden transition-all ${
+                  selectedActivityType === '방문'
+                    ? 'border-green-400 shadow-md'
+                    : 'border-green-200 hover:border-green-300'
+                }`}>
+                  <div
+                    className="flex items-center justify-between py-3 px-4 bg-green-50 hover:bg-green-100 transition-colors cursor-pointer"
+                    onClick={() => setSelectedActivityType('방문')}
+                  >
+                    <div className="flex items-center">
+                      <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
+                      <span className="text-sm font-medium text-green-700">방문</span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="text-sm font-bold text-green-600 mr-2">6/25 (93일전)</span>
+                      <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              {/* 활동 목록 */}
+              <div className="mt-4">
+                {/* 선택된 활동 소제목 */}
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-xs text-gray-500">
+                    {selectedActivityType === '교육' ? '교육 상세 내역' :
+                     selectedActivityType === '방문' ? '방문 상세 내역' : '최근 활동 내역'}
+                  </span>
+                  <span className="text-xs text-gray-400">* 최대 30개까지 표시</span>
+                </div>
+
+                <div className="bg-white border border-gray-200 rounded-lg h-32 overflow-y-auto">
+                  {/* 헤더 */}
+                  <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-t-lg text-xs font-medium text-gray-700 border-b border-gray-200 sticky top-0">
+                    <div className="min-w-[35px] shrink-0">날짜</div>
+                    <div className="flex-1">활동 내용</div>
+                    <div className="min-w-[70px] shrink-0">담당</div>
+                  </div>
+
+                  {/* 활동 목록 - 선택에 따라 변경 */}
+                  <div className="divide-y divide-gray-100">
+                    {(() => {
+                      let activityList;
+                      if (selectedActivityType === '교육') {
+                        activityList = educationActivityList;
+                      } else if (selectedActivityType === '방문') {
+                        activityList = visitActivityList;
+                      } else {
+                        activityList = recentActivityList;
+                      }
+
+                      return activityList.map((activity, index) => (
+                        <div key={index} className="flex items-center gap-3 p-2 hover:bg-gray-50 transition-colors text-xs">
+                          <div className="min-w-[35px] shrink-0 text-gray-600 font-medium">
+                            {activity.date.split('-')[1]}/{activity.date.split('-')[2]}
+                          </div>
+                          <div className="flex-1 text-gray-800 truncate">{activity.content}</div>
+                          <div className="min-w-[70px] shrink-0 text-gray-600">{activity.manager}</div>
+                        </div>
+                      ));
+                    })()}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* 오른쪽: 설계사 현황 */}
