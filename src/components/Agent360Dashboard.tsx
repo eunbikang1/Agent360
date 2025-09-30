@@ -271,28 +271,40 @@ const Agent360Dashboard = () => {
       // 실적값 계산 (가동설계사가 0이면 실적도 0)
       let performanceValue = 0;
       if (activeAgents > 0 && hasPerformance) {
-        // 5만원부터 200만원까지 현실적인 지점별 실적 범위, 1만원 단위로 제한
-        const minValue = 50000; // 5만원
-        const maxValue = 2000000; // 200만원
         const randomFactor1 = (branchHash % 100) / 100; // 0~1
         const randomFactor2 = ((branchHash + index) % 100) / 100; // 0~1
         const randomFactor3 = ((branchHash * 2 + index) % 100) / 100; // 0~1
 
-        // 더 현실적인 지점별 실적 분포
+        // 목표에 비례한 실적 분포 (목표의 60~120% 사이)
         let baseValue;
-        if (randomFactor1 < 0.3) {
-          // 30% 확률로 작은 값들 (5만원 ~ 30만원)
-          baseValue = minValue + Math.floor((300000 - minValue) * randomFactor2 * randomFactor3);
-        } else if (randomFactor1 < 0.8) {
-          // 50% 확률로 중간 값들 (30만원 ~ 120만원) - 대부분 여기에 분포
-          baseValue = 300000 + Math.floor((1200000 - 300000) * randomFactor2);
-        } else {
-          // 20% 확률로 큰 값들 (120만원 ~ 200만원)
-          baseValue = 1200000 + Math.floor((maxValue - 1200000) * randomFactor2 * randomFactor3);
+
+        // 상위 10개: 큰 실적 (800만~2500만)
+        if (index < 10) {
+          baseValue = 8000000 + Math.floor(17000000 * randomFactor1);
+        }
+        // 다음 20개: 중상위 실적 (400만~800만)
+        else if (index < 30) {
+          baseValue = 4000000 + Math.floor(4000000 * randomFactor1);
+        }
+        // 다음 30개: 중간 실적 (150만~400만)
+        else if (index < 60) {
+          baseValue = 1500000 + Math.floor(2500000 * randomFactor1);
+        }
+        // 다음 70개: 작은 실적 (30만~150만)
+        else if (index < 130) {
+          baseValue = 300000 + Math.floor(1200000 * randomFactor1);
+        }
+        // 나머지 30개: 매우 작거나 0인 실적
+        else {
+          if (randomFactor1 < 0.5) {
+            baseValue = 0; // 50%는 실적 0
+          } else {
+            baseValue = 50000 + Math.floor(250000 * randomFactor2);
+          }
         }
 
-        // 1만원 단위로 반올림
-        baseValue = Math.round(baseValue / 10000) * 10000;
+        // 10만원 단위로 반올림
+        baseValue = Math.round(baseValue / 100000) * 100000;
 
         performanceValue = kpi === 'MMP' ? Math.round(baseValue * 12) : baseValue;
       }
@@ -2554,329 +2566,393 @@ const Agent360Dashboard = () => {
       {/* 전체 지점 목록 모달 */}
       {showAllBranchesModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowAllBranchesModal(false)}>
-          <div className="bg-white rounded-lg p-6 max-w-[90vw] w-full mx-4 max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white rounded-lg p-6 max-w-6xl w-full mx-4 max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-lg font-semibold text-gray-900">
                 전체 지점 순위
               </h3>
               <button
                 onClick={() => setShowAllBranchesModal(false)}
-                className="text-black hover:text-gray-700 text-xl"
+                className="text-gray-500 hover:text-gray-700 text-xl"
               >
                 <X className="w-6 h-6" />
               </button>
             </div>
 
-            {/* 실적 기준 선택 */}
+            {/* KPI 선택 라디오 버튼 */}
             <div className="mb-4">
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center gap-6">
                 <span className="text-sm font-medium text-gray-700">실적 기준:</span>
-                <div className="flex">
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      name="branchRankingKPI"
-                      value="APE"
-                      checked={branchRankingKPI === 'APE'}
-                      onChange={(e) => setBranchRankingKPI('APE')}
-                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
-                    />
-                    <span className="ml-2 text-sm font-medium text-gray-900">APE</span>
-                  </label>
-                  <label className="flex items-center ml-6">
-                    <input
-                      type="radio"
-                      name="branchRankingKPI"
-                      value="MMP"
-                      checked={branchRankingKPI === 'MMP'}
-                      onChange={(e) => setBranchRankingKPI('MMP')}
-                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
-                    />
-                    <span className="ml-2 text-sm font-medium text-gray-900">MMP</span>
-                  </label>
-                </div>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    checked={modalKPI === 'APE'}
+                    onChange={() => setModalKPI('APE')}
+                    className="w-4 h-4 text-blue-600"
+                  />
+                  <span className="text-sm text-gray-700">APE</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    checked={modalKPI === 'MMP'}
+                    onChange={() => setModalKPI('MMP')}
+                    className="w-4 h-4 text-blue-600"
+                  />
+                  <span className="text-sm text-gray-700">MMP</span>
+                </label>
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto">
-              {/* 단위 표시 */}
-              <div className="px-3 py-2 text-xs text-black border-b border-gray-200 text-right">
-                <span>[단위: 원]</span>
+            <div className="flex-1 overflow-auto">
+              <div className="mb-2 text-right">
+                <span className="text-sm text-black">[단위: 원]</span>
               </div>
-              {/* 테이블 헤더 */}
-              <div className="bg-gray-100 border-b sticky top-0">
-                {/* 메인 헤더 */}
-                <div className="grid gap-2 p-3 pb-1 text-xs font-semibold text-gray-700 border-b border-gray-200" style={{gridTemplateColumns: '60px 1.5fr 1.5fr 1fr 1fr 1fr'}}>
-                  <div className="row-span-2 flex items-center border-r border-gray-300">번호</div>
-                  <div className="row-span-2 flex items-center border-r border-gray-300">대리점명</div>
-                  <div className="row-span-2 flex items-center border-r border-gray-300">지점명</div>
-                  <div className="text-center border-r border-gray-300">실적({branchRankingKPI})</div>
-                  <div className="text-center border-r border-gray-300">당월 목표관리</div>
-                  <div className="text-center">나의 성과 기여도</div>
-                </div>
-                {/* 서브 헤더 */}
-                <div className="grid gap-2 px-3 pb-2 pt-1 text-xs font-semibold text-black" style={{gridTemplateColumns: '60px 1.5fr 1.5fr 1fr 1fr 1fr'}}>
-                  <div className="border-r border-gray-300"></div>
-                  <div className="border-r border-gray-300"></div>
-                  <div className="border-r border-gray-300"></div>
-                  <button
-                    onClick={() => {
-                      if (modalSortBy === 'ape') {
-                        setModalSortOrder(modalSortOrder === 'desc' ? 'asc' : 'desc');
-                      } else {
-                        setModalSortBy('ape');
-                        setModalSortOrder('desc');
-                      }
-                    }}
-                    className={`text-center hover:text-blue-600 transition-colors border-r border-gray-300 ${
-                      modalSortBy === 'ape' ? 'text-black font-bold' : 'text-black font-normal'
-                    }`}
-                  >
-                    당월
-                    {modalSortBy === 'ape' && (
-                      modalSortOrder === 'desc' ? ' ↓' : ' ↑'
-                    )}
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (modalSortBy === 'previousApe') {
-                        setModalSortOrder(modalSortOrder === 'desc' ? 'asc' : 'desc');
-                      } else {
-                        setModalSortBy('previousApe');
-                        setModalSortOrder('desc');
-                      }
-                    }}
-                    className={`text-center hover:text-blue-600 transition-colors border-r border-gray-300 ${
-                      modalSortBy === 'previousApe' ? 'text-black font-bold' : 'text-black font-normal'
-                    }`}
-                  >
-                    전월
-                    {modalSortBy === 'previousApe' && (
-                      modalSortOrder === 'desc' ? ' ↓' : ' ↑'
-                    )}
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (modalSortBy === 'target') {
-                        setModalSortOrder(modalSortOrder === 'desc' ? 'asc' : 'desc');
-                      } else {
-                        setModalSortBy('target');
-                        setModalSortOrder('desc');
-                      }
-                    }}
-                    className={`text-center hover:text-blue-600 transition-colors border-r border-gray-300 ${
-                      modalSortBy === 'target' ? 'text-black font-bold' : 'text-black font-normal'
-                    }`}
-                  >
-                    목표
-                    {modalSortBy === 'target' && (
-                      modalSortOrder === 'desc' ? ' ↓' : ' ↑'
-                    )}
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (modalSortBy === 'achievement') {
-                        setModalSortOrder(modalSortOrder === 'desc' ? 'asc' : 'desc');
-                      } else {
-                        setModalSortBy('achievement');
-                        setModalSortOrder('desc');
-                      }
-                    }}
-                    className={`text-center hover:text-blue-600 transition-colors border-r border-gray-300 ${
-                      modalSortBy === 'achievement' ? 'text-black font-bold' : 'text-black font-normal'
-                    }`}
-                  >
-                    달성률
-                    {modalSortBy === 'achievement' && (
-                      modalSortOrder === 'desc' ? ' ↓' : ' ↑'
-                    )}
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (modalSortBy === 'targetContributor') {
-                        setModalSortOrder(modalSortOrder === 'desc' ? 'asc' : 'desc');
-                      } else {
-                        setModalSortBy('targetContributor');
-                        setModalSortOrder('desc');
-                      }
-                    }}
-                    className={`text-center hover:text-blue-600 transition-colors border-r border-gray-300 ${
-                      modalSortBy === 'targetContributor' ? 'text-black font-bold' : 'text-black font-normal'
-                    }`}
-                  >
-                    목표담당
-                    {modalSortBy === 'targetContributor' && (
-                      modalSortOrder === 'desc' ? ' ↓' : ' ↑'
-                    )}
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (modalSortBy === 'performanceContributor') {
-                        setModalSortOrder(modalSortOrder === 'desc' ? 'asc' : 'desc');
-                      } else {
-                        setModalSortBy('performanceContributor');
-                        setModalSortOrder('desc');
-                      }
-                    }}
-                    className={`text-center hover:text-blue-600 transition-colors ${
-                      modalSortBy === 'performanceContributor' ? 'text-black font-bold' : 'text-black font-normal'
-                    }`}
-                  >
-                    실적담당
-                    {modalSortBy === 'performanceContributor' && (
-                      modalSortOrder === 'desc' ? ' ↓' : ' ↑'
-                    )}
-                  </button>
-                </div>
-              </div>
+              <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+                <table className="w-full">
+                  <thead className="sticky top-0 z-10 bg-white">
+                    {/* 첫 번째 헤더 행 - 그룹 헤더 */}
+                    <tr className="border-b border-gray-200">
+                      <th rowSpan={2} className="text-center py-3 px-2 bg-gray-50 text-xs font-semibold text-gray-800 border-r border-gray-200 cursor-pointer hover:bg-gray-100"
+                          onClick={() => {
+                            if (modalSortBy === 'no') {
+                              setModalSortOrder(modalSortOrder === 'asc' ? 'desc' : 'asc');
+                            } else {
+                              setModalSortBy('no');
+                              setModalSortOrder('asc');
+                            }
+                          }}>
+                        <div className="flex items-center justify-center gap-1">
+                          번호
+                          {modalSortBy === 'no' && (
+                            modalSortOrder === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
+                          )}
+                        </div>
+                      </th>
+                      <th rowSpan={2} className="text-left py-3 px-3 bg-gray-50 text-xs font-semibold text-gray-800 border-r border-gray-200 cursor-pointer hover:bg-gray-100"
+                          onClick={() => {
+                            if (modalSortBy === 'agency') {
+                              setModalSortOrder(modalSortOrder === 'asc' ? 'desc' : 'asc');
+                            } else {
+                              setModalSortBy('agency');
+                              setModalSortOrder('asc');
+                            }
+                          }}>
+                        <div className="flex items-center gap-1">
+                          대리점명
+                          {modalSortBy === 'agency' && (
+                            modalSortOrder === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
+                          )}
+                        </div>
+                      </th>
+                      <th rowSpan={2} className="text-left py-3 px-3 bg-gray-50 text-xs font-semibold text-gray-800 border-r border-gray-200 cursor-pointer hover:bg-gray-100"
+                          onClick={() => {
+                            if (modalSortBy === 'branch') {
+                              setModalSortOrder(modalSortOrder === 'asc' ? 'desc' : 'asc');
+                            } else {
+                              setModalSortBy('branch');
+                              setModalSortOrder('asc');
+                            }
+                          }}>
+                        <div className="flex items-center gap-1">
+                          지점명
+                          {modalSortBy === 'branch' && (
+                            modalSortOrder === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
+                          )}
+                        </div>
+                      </th>
+                      <th colSpan={2} className="text-center py-2 px-2 bg-gray-50 text-xs font-semibold text-gray-800 border-r border-gray-200">
+                        실적({modalKPI})
+                      </th>
+                      <th colSpan={2} className="text-center py-2 px-2 bg-gray-50 text-xs font-semibold text-gray-800 border-r border-gray-200">
+                        당월 목표관리
+                      </th>
+                      <th colSpan={2} className="text-center py-2 px-2 bg-gray-50 text-xs font-semibold text-gray-800">
+                        나의 성과 기여도
+                      </th>
+                    </tr>
+                    {/* 두 번째 헤더 행 - 세부 컬럼 */}
+                    <tr className="border-b border-gray-200">
+                      <th className="text-center py-2 px-2 bg-gray-50 text-xs font-semibold text-gray-800 border-r border-gray-200 cursor-pointer hover:bg-gray-100"
+                          onClick={() => {
+                            if (modalSortBy === 'currentMonth') {
+                              setModalSortOrder(modalSortOrder === 'asc' ? 'desc' : 'asc');
+                            } else {
+                              setModalSortBy('currentMonth');
+                              setModalSortOrder('desc');
+                            }
+                          }}>
+                        <div className="flex items-center justify-center gap-1">
+                          당월
+                          {modalSortBy === 'currentMonth' && (
+                            modalSortOrder === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
+                          )}
+                        </div>
+                      </th>
+                      <th className="text-center py-2 px-2 bg-gray-50 text-xs font-semibold text-gray-800 border-r border-gray-200 cursor-pointer hover:bg-gray-100"
+                          onClick={() => {
+                            if (modalSortBy === 'previousMonth') {
+                              setModalSortOrder(modalSortOrder === 'asc' ? 'desc' : 'asc');
+                            } else {
+                              setModalSortBy('previousMonth');
+                              setModalSortOrder('desc');
+                            }
+                          }}>
+                        <div className="flex items-center justify-center gap-1">
+                          전월
+                          {modalSortBy === 'previousMonth' && (
+                            modalSortOrder === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
+                          )}
+                        </div>
+                      </th>
+                      <th className="text-center py-2 px-2 bg-gray-50 text-xs font-semibold text-gray-800 border-r border-gray-200 cursor-pointer hover:bg-gray-100"
+                          onClick={() => {
+                            if (modalSortBy === 'target') {
+                              setModalSortOrder(modalSortOrder === 'asc' ? 'desc' : 'asc');
+                            } else {
+                              setModalSortBy('target');
+                              setModalSortOrder('desc');
+                            }
+                          }}>
+                        <div className="flex items-center justify-center gap-1">
+                          목표
+                          {modalSortBy === 'target' && (
+                            modalSortOrder === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
+                          )}
+                        </div>
+                      </th>
+                      <th className="text-center py-2 px-2 bg-gray-50 text-xs font-semibold text-gray-800 border-r border-gray-200 cursor-pointer hover:bg-gray-100"
+                          onClick={() => {
+                            if (modalSortBy === 'achievement') {
+                              setModalSortOrder(modalSortOrder === 'asc' ? 'desc' : 'asc');
+                            } else {
+                              setModalSortBy('achievement');
+                              setModalSortOrder('desc');
+                            }
+                          }}>
+                        <div className="flex items-center justify-center gap-1">
+                          달성률
+                          {modalSortBy === 'achievement' && (
+                            modalSortOrder === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
+                          )}
+                        </div>
+                      </th>
+                      <th className="text-center py-2 px-2 bg-gray-50 text-xs font-semibold text-gray-800 border-r border-gray-200 cursor-pointer hover:bg-gray-100"
+                          onClick={() => {
+                            if (modalSortBy === 'targetContribution') {
+                              setModalSortOrder(modalSortOrder === 'asc' ? 'desc' : 'asc');
+                            } else {
+                              setModalSortBy('targetContribution');
+                              setModalSortOrder('desc');
+                            }
+                          }}>
+                        <div className="flex items-center justify-center gap-1">
+                          목표담당
+                          {modalSortBy === 'targetContribution' && (
+                            modalSortOrder === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
+                          )}
+                        </div>
+                      </th>
+                      <th className="text-center py-2 px-2 bg-gray-50 text-xs font-semibold text-gray-800 cursor-pointer hover:bg-gray-100"
+                          onClick={() => {
+                            if (modalSortBy === 'performanceContribution') {
+                              setModalSortOrder(modalSortOrder === 'asc' ? 'desc' : 'asc');
+                            } else {
+                              setModalSortBy('performanceContribution');
+                              setModalSortOrder('desc');
+                            }
+                          }}>
+                        <div className="flex items-center justify-center gap-1">
+                          실적담당
+                          {modalSortBy === 'performanceContribution' && (
+                            modalSortOrder === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
+                          )}
+                        </div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(() => {
+                      const data = getBranchInfoData();
 
-              {/* 테이블 내용 */}
-              <div className="space-y-0">
-                {(() => {
-                  const branchInfoData = getBranchInfoData();
-                  const sortedData = getBranchRankings(true, branchRankingKPI).data.slice(0, 160).map((branch, idx) => {
-                    // 전체보기 모달에서 해당 지점 데이터 찾기
-                    const branchInfo = branchInfoData.find(info =>
-                      info.agency === branch.agency && info.branch === branch.branch
-                    );
+                      // 목표 및 기여도 계산
+                      const totalTarget = data.reduce((sum, b) => sum + (b.target || 0), 0);
+                      const totalPerformance = data.reduce((sum, b) => sum + b.currentMonthAPE, 0);
 
-                    // 당월 실적은 전체보기 모달의 currentMonthAPE 사용
-                    const currentApe = branchInfo ? branchInfo.currentMonthAPE : branch.ape;
+                      const enrichedData = data.map((branch, idx) => {
+                        const branchHash = (branch.branch || '').split('').reduce((acc, char) => acc + char.charCodeAt(0), idx);
 
-                    // 전월 실적 로직 - 당월이 없어도 전월은 있을 수 있음
-                    let previousApe = 0;
-                    const branchHash = (branch.branch || '').split('').reduce((acc, char) => acc + char.charCodeAt(0), idx);
-                    const hasCurrentPerformance = currentApe > 0;
+                        // 30개 정도의 지점은 목표가 0 (전월 실적도 없음)
+                        const hasTarget = idx >= 30; // 처음 30개는 목표 0
 
-                    // 전월 실적 존재 여부 결정 (70% 확률)
-                    const shouldHavePrevious = (branchHash % 10) < 7;
+                        // 전월 실적 먼저 계산 (목표가 있는 지점만)
+                        let previousMonth = 0;
+                        if (hasTarget) {
+                          const randomFactor1 = (branchHash % 100) / 100;
+                          const randomFactor2 = ((branchHash + idx) % 100) / 100;
+                          const position = idx - 30; // 0~129
 
-                    if (shouldHavePrevious) {
-                      if (hasCurrentPerformance) {
-                        // 당월이 있으면 전월은 50-150% 범위
-                        const multiplier = 0.5 + ((branchHash % 100) / 100); // 0.5 ~ 1.5
-                        previousApe = Math.round(currentApe * multiplier);
-                      } else {
-                        // 당월이 없어도 전월은 있을 수 있음 (독립적인 값)
-                        // 더 강제적으로 전월 실적 생성
-                        if ((branchHash % 3) === 0) { // 33% 확률로 당월 0, 전월 있음 케이스 생성
-                          const baseAmount = 10000 + (branchHash % 500) * 1000; // 10,000원 ~ 510,000원
-                          previousApe = baseAmount;
+                          // 전월 실적은 목표와 비슷한 패턴으로 생성
+                          if (position < 10) {
+                            previousMonth = 8000000 + Math.floor(17000000 * randomFactor1);
+                          } else if (position < 30) {
+                            previousMonth = 4000000 + Math.floor(4000000 * randomFactor1);
+                          } else if (position < 60) {
+                            previousMonth = 1500000 + Math.floor(2500000 * randomFactor1);
+                          } else {
+                            previousMonth = 300000 + Math.floor(1200000 * randomFactor1);
+                          }
+                          previousMonth = Math.round(previousMonth / 100000) * 100000;
                         }
-                      }
-                    }
 
-                    // 목표값 생성 (원 단위)
-                    const targetAmount = currentApe > 0
-                      ? Math.round(currentApe / (0.2 + (branchHash % 100) / 100)) // 당월 실적 기준으로 20%~120% 달성률이 되도록 목표 설정
-                      : 50000 + (branchHash % 200) * 5000; // 당월 실적이 없으면 50,000원~1,050,000원 목표
+                        // 목표: 전월 실적을 기반으로 설정 (전월의 80~120%)
+                        let target = 0;
+                        if (hasTarget && previousMonth > 0) {
+                          const targetRatio = 0.8 + ((branchHash % 40) / 100); // 0.8 ~ 1.2
+                          target = Math.round((previousMonth * targetRatio) / 100000) * 100000;
+                        }
 
-                    // 달성률 계산: (당월 실적 / 목표) * 100
-                    const calculatedAchievement = currentApe === 0 ? 0 : Math.round((currentApe / targetAmount) * 100);
+                        // 달성률 = (실적 / 목표) * 100
+                        const achievement = target > 0 ? (branch.currentMonthAPE / target) * 100 : 0;
 
-                    // 목표담당 비율 계산 (목표액에 비례, 합계 100%)
-                    const totalTarget = 10000000; // 전체 목표 가정값 (1천만원)
-                    const targetPercentage = Math.round((targetAmount / totalTarget) * 100);
+                        return {
+                          ...branch,
+                          target,
+                          previousMonth,
+                          achievement
+                        };
+                      });
 
-                    // 실적담당 비율 계산 (내 전체 실적 중 이 지점의 기여도)
-                    const totalMyPerformance = 5000000; // 내 전체 실적 가정값 (500만원)
-                    const performancePercentage = currentApe > 0 ? Math.round((currentApe / totalMyPerformance) * 100) : 0;
+                      // 전체 목표 및 실적 합계
+                      const totalTargetFinal = enrichedData.reduce((sum, b) => sum + b.target, 0);
+                      const totalPerformanceFinal = enrichedData.reduce((sum, b) => sum + b.currentMonthAPE, 0);
 
-                    return {
-                      ...branch,
-                      ape: currentApe,
-                      previousApe: previousApe,
-                      target: targetAmount,
-                      calculatedAchievement: calculatedAchievement,
-                      targetContributor: `${Math.min(targetPercentage, 100)}%`, // 최대 100%로 제한
-                      performanceContributor: `${Math.min(performancePercentage, 100)}%` // 최대 100%로 제한
-                    };
-                  }).sort((a, b) => {
-                    let aValue, bValue;
-                    switch(modalSortBy) {
-                      case 'ape':
-                        aValue = a.ape;
-                        bValue = b.ape;
-                        break;
-                      case 'previousApe':
-                        aValue = a.previousApe || (a.ape * 0.85);
-                        bValue = b.previousApe || (b.ape * 0.85);
-                        break;
-                      case 'target':
-                        aValue = a.target || 120;
-                        bValue = b.target || 120;
-                        break;
-                      case 'achievement':
-                        aValue = a.calculatedAchievement;
-                        bValue = b.calculatedAchievement;
-                        break;
-                      case 'targetContributor':
-                        aValue = parseInt(a.targetContributor);
-                        bValue = parseInt(b.targetContributor);
-                        break;
-                      case 'performanceContributor':
-                      default:
-                        aValue = parseInt(a.performanceContributor);
-                        bValue = parseInt(b.performanceContributor);
-                        break;
-                    }
-                    return modalSortOrder === 'desc' ? bValue - aValue : aValue - bValue;
-                  });
+                      // 목표담당률 및 실적담당률 계산
+                      const finalData = enrichedData.map(branch => {
+                        const targetContribution = totalTargetFinal > 0
+                          ? (branch.target / totalTargetFinal) * 100
+                          : 0;
+                        const performanceContribution = totalPerformanceFinal > 0
+                          ? (branch.currentMonthAPE / totalPerformanceFinal) * 100
+                          : 0;
 
-                  return sortedData.map((branch, idx) => {
-                  return (
-                    <div
-                      key={idx}
-                      className="grid gap-2 p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
-                      style={{gridTemplateColumns: '60px 1.5fr 1.5fr 1fr 1fr 1fr'}}
-                      onClick={() => handleBranchClick(branch.agency, branch.branch)}
-                    >
-                      <div className="flex items-center justify-center border-r border-gray-200">
-                        <div className="text-xs font-bold text-black">
+                        return {
+                          ...branch,
+                          targetContribution,
+                          performanceContribution
+                        };
+                      });
+
+                      const sortedData = [...finalData].sort((a, b) => {
+                        let aVal, bVal;
+
+                        switch(modalSortBy) {
+                          case 'no':
+                            aVal = a.no;
+                            bVal = b.no;
+                            break;
+                          case 'agency':
+                            aVal = a.agency;
+                            bVal = b.agency;
+                            break;
+                          case 'branch':
+                            aVal = a.branch;
+                            bVal = b.branch;
+                            break;
+                          case 'currentMonth':
+                            aVal = a.currentMonthAPE;
+                            bVal = b.currentMonthAPE;
+                            break;
+                          case 'previousMonth':
+                            aVal = a.previousMonth;
+                            bVal = b.previousMonth;
+                            break;
+                          case 'target':
+                            aVal = a.target;
+                            bVal = b.target;
+                            break;
+                          case 'achievement':
+                            aVal = a.achievement;
+                            bVal = b.achievement;
+                            break;
+                          case 'targetContribution':
+                            aVal = a.targetContribution;
+                            bVal = b.targetContribution;
+                            break;
+                          case 'performanceContribution':
+                            aVal = a.performanceContribution;
+                            bVal = b.performanceContribution;
+                            break;
+                          default:
+                            aVal = a.no;
+                            bVal = b.no;
+                            break;
+                        }
+
+                        if (typeof aVal === 'string' && typeof bVal === 'string') {
+                          return modalSortOrder === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+                        }
+                        return modalSortOrder === 'asc' ? aVal - bVal : bVal - aVal;
+                      });
+
+                      return sortedData.map((branch, idx) => (
+                        <tr key={idx}
+                          className="border-b border-gray-100 hover:bg-blue-50 cursor-pointer transition-colors"
+                          onClick={() => {
+                            const queryParams = new URLSearchParams({
+                              period: appliedMonth,
+                              year: selectedYear,
+                              kpi: selectedKPI,
+                              product: selectedProduct
+                            });
+                            navigate(`/branch/${encodeURIComponent(branch.agency)}/${encodeURIComponent(branch.branch)}?${queryParams.toString()}`);
+                          }}>
+                        {/* 번호 */}
+                        <td className="py-3 px-2 text-center border-r border-gray-200 text-xs text-gray-900">
                           {idx + 1}
-                        </div>
-                      </div>
-                      <div className="flex items-center border-r border-gray-200">
-                        <div className="text-sm text-black truncate">{branch.agency}</div>
-                      </div>
-                      <div className="flex items-center border-r border-gray-200">
-                        <div className="text-sm  text-gray-900 truncate">{branch.branch}</div>
-                      </div>
-                      {/* 실적 컬럼 - 당월/전월 합쳐서 표시 */}
-                      <div className="flex flex-col items-center justify-center border-r border-gray-200">
-                        <div className={`text-xs ${
-                          modalSortBy === 'ape' ? 'font-bold text-gray-900' : 'font-normal text-gray-900'
-                        }`}>당월: {branch.ape === 0 ? '-' : `${branch.ape.toLocaleString()}`}</div>
-                        <div className={`text-xs ${
-                          modalSortBy === 'previousApe' ? 'font-bold text-black' : 'font-normal text-black'
-                        }`}>전월: {branch.previousApe === 0 ? '-' : `${branch.previousApe.toLocaleString()}`}</div>
-                      </div>
-                      {/* 목표관리 컬럼 - 목표/달성률 합쳐서 표시 */}
-                      <div className="flex flex-col items-center justify-center border-r border-gray-200">
-                        <div className={`text-xs ${
-                          modalSortBy === 'target' ? 'font-bold text-gray-900' : 'font-normal text-gray-900'
-                        }`}>목표: {`${((branch.target || 120) * 10000).toLocaleString()}`}</div>
-                        <div className={`text-xs ${
-                          modalSortBy === 'achievement'
-                            ? `font-bold ${branch.ape === 0 ? 'text-black' : 'text-black'}`
-                            : `font-normal ${branch.ape === 0 ? 'text-black' : 'text-black'}`
-                        }`}>
-                          달성률: {branch.ape === 0 ? '-' : `${branch.calculatedAchievement}%`}
-                        </div>
-                      </div>
-                      {/* 성과기여도 컬럼 - 목표담당/실적담당 합쳐서 표시 */}
-                      <div className="flex flex-col items-center justify-center">
-                        <div className={`text-xs ${
-                          modalSortBy === 'targetContributor' ? 'font-bold text-gray-900' : 'font-normal text-gray-700'
-                        }`}>목표: {branch.targetContributor}</div>
-                        <div className={`text-xs ${
-                          modalSortBy === 'performanceContributor' ? 'font-bold text-gray-900' : 'font-normal text-gray-700'
-                        }`}>실적: {branch.performanceContributor}</div>
-                      </div>
-                    </div>
-                  );
-                });
-                })()}
+                        </td>
+                        <td className="py-3 px-3 border-r border-gray-200 text-xs text-black">
+                          {branch.agency}
+                        </td>
+                        <td className="py-3 px-3 border-r border-gray-200 text-xs text-black">
+                          {branch.branch}
+                        </td>
+
+                        {/* 실적 - 당월 */}
+                        <td className="py-3 px-2 text-center border-r border-gray-200 text-xs text-black">
+                          {branch.currentMonthAPE > 0
+                            ? `${(modalKPI === 'MMP' ? Math.round(branch.currentMonthAPE / 12) : branch.currentMonthAPE).toLocaleString()}`
+                            : '-'}
+                        </td>
+                        {/* 실적 - 전월 */}
+                        <td className="py-3 px-2 text-center border-r border-gray-200 text-xs text-gray-600">
+                          {branch.previousMonth > 0
+                            ? `${(modalKPI === 'MMP' ? Math.round(branch.previousMonth / 12) : branch.previousMonth).toLocaleString()}`
+                            : '-'}
+                        </td>
+
+                        {/* 당월 목표관리 - 목표 */}
+                        <td className="py-3 px-2 text-center border-r border-gray-200 text-xs text-black">
+                          {branch.target > 0 ? (modalKPI === 'MMP' ? Math.round(branch.target / 12) : branch.target).toLocaleString() : '-'}
+                        </td>
+                        {/* 당월 목표관리 - 달성률 */}
+                        <td className="py-3 px-2 text-center border-r border-gray-200 text-xs text-black">
+                          {branch.target > 0 && branch.achievement > 0 ? `${branch.achievement.toFixed(1)}%` : '-'}
+                        </td>
+
+                        {/* 나의 성과 기여도 - 목표담당 */}
+                        <td className="py-3 px-2 text-center border-r border-gray-200 text-xs text-black">
+                          {branch.target > 0 ? `${branch.targetContribution.toFixed(1)}%` : '-'}
+                        </td>
+                        {/* 나의 성과 기여도 - 실적담당 */}
+                        <td className="py-3 px-2 text-center text-xs text-black">
+                          {branch.performanceContribution > 0 ? `${branch.performanceContribution.toFixed(1)}%` : '-'}
+                        </td>
+                      </tr>
+                    ));
+                    })()}
+                  </tbody>
+                </table>
               </div>
             </div>
 
@@ -2898,10 +2974,6 @@ const Agent360Dashboard = () => {
               </button>
             </div>
 
-            {/* 단위 안내 */}
-            <div className="mb-4">
-              <div className="text-xs text-gray-500">단위: 원, 명</div>
-            </div>
 
 
             {/* KPI 선택 라디오 버튼 */}
@@ -3175,7 +3247,7 @@ const Agent360Dashboard = () => {
                           <span className={`text-xs  ${
                             branch.currentMonthAPE > 0 ? 'text-black' : 'text-black'
                           }`}>
-                            {branch.currentMonthAPE > 0 ? `${branch.currentMonthAPE.toLocaleString()}` : '-'}
+                            {branch.currentMonthAPE > 0 ? `${(modalKPI === 'MMP' ? Math.round(branch.currentMonthAPE / 12) : branch.currentMonthAPE).toLocaleString()}` : '-'}
                           </span>
                         </td>
 
