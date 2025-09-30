@@ -12,15 +12,15 @@ const Agent360Dashboard = () => {
   const [performanceType, setPerformanceType] = useState<'APE' | 'MMP'>('APE');
 
   // 지능형 단위 포매팅 함수
-  const formatCurrency = (amount: number) => {
-    if (amount >= 1000000) { // 100만 원 이상
-      const millions = amount / 1000000;
-      return millions % 1 === 0 ? `${millions.toFixed(0)} 백만원` : `${millions.toFixed(1)} 백만원`;
-    } else if (amount >= 1000) { // 1천 원 이상
-      const thousands = amount / 1000;
-      return `${Math.round(thousands).toLocaleString()} 천원`;
+  const formatCurrency = (amount: number, kpi: 'APE' | 'MMP' = 'APE') => {
+    // 지점장 지표는 모두 백만원 단위
+    const millions = amount / 1000000;
+    if (kpi === 'MMP') {
+      // MMP는 소수점 1자리
+      return `${millions.toFixed(1)}백만원`;
     } else {
-      return `${amount.toLocaleString()} 원`;
+      // APE는 정수
+      return `${Math.round(millions)}백만원`;
     }
   };
 
@@ -35,34 +35,34 @@ const Agent360Dashboard = () => {
   const myKPIDefault = {
     // 목표달성률 (APE/MMP 기준)
     goalAchievement: {
-      current: 62.0, // 현재 달성률 (%)
-      target: 500000000, // 목표 (원)
-      actual: 310000000, // 실제 (원)
-      hqAvg: 58.3, // 영업본부 평균 (%)
-      nationalAvg: 55.1, // 전국 평균 (%)
-      vsLastMonth: 12.5, // 전월 동기 대비 증감 (%p)
-      gap: 190000000, // 남은 금액 (원)
-      dailyRequired: 27100000, // 일평균 필요 (원)
-      hqRankTotal: { rank: 8, total: 50 }, // 전체 지점장 순위
-      hqRankRegion: { rank: 4, total: 10 } // 영업본부 순위
+      current: 70.0, // 현재 달성률 (%)
+      target: 500000000, // 목표 (원) - APE 기준 500백만원
+      actual: 350000000, // 실제 (원) - APE 기준 350백만원
+      hqAvg: 65.2, // 영업본부 평균 (%)
+      nationalAvg: 62.8, // 전국 평균 (%)
+      vsLastMonth: 8.5, // 전월 동기 대비 증감 (%p)
+      gap: 150000000, // 남은 금액 (원)
+      dailyRequired: 21400000, // 일평균 필요 (원)
+      hqRankTotal: { rank: 12, total: 50 }, // 전체 지점장 순위
+      hqRankRegion: { rank: 5, total: 10 } // 영업본부 순위
     },
     // 설계사 가동률
     designerActivity: {
-      current: 65.2, // 현재 가동률 (%)
-      active: 456, // 가동 설계사 수
-      total: 700, // 전체 관리 설계사 수
-      hqAvg: 62.8, // 영업본부 평균 (%)
-      nationalAvg: 59.4, // 전국 평균 (%)
-      vsLastMonth: -5, // 전월 동기 대비 증감 (명) - 전체 설계사 감소
-      vsLastMonthPercent: 2.1, // 전월 동기 대비 증감 (%p) - 가동률은 상승
-      plan: 450, // 가동 계획
-      planAchievement: 101.3 // 가동 계획 대비 달성률 (%)
+      current: 67.8, // 현재 가동률 (%) - 251/370
+      active: 251, // 실제 가동 설계사 수
+      total: 3787, // 전체 담당 설계사 수
+      hqAvg: 7.2, // 영업본부 평균 (%)
+      nationalAvg: 8.1, // 전국 평균 (%)
+      vsLastMonth: -15, // 전월 동기 대비 증감 (명) - 가동 설계사 감소
+      vsLastMonthPercent: -0.4, // 전월 동기 대비 증감 (%p) - 가동률 감소
+      plan: 370, // 가동 계획
+      planAchievement: 67.8 // 가동 계획 대비 달성률 (%) - 251/370
     },
     // 모바일 청약률
     mobileContract: {
-      current: 45.8, // 현재 모바일 청약률 (%)
-      count: 103, // 모바일 청약 건수
-      total: 225, // 전체 청약 건수
+      current: 76.5, // 현재 모바일 청약률 (%) - 251/328
+      count: 251, // 모바일 청약 건수
+      total: 328, // 전체 청약 건수
       hqAvg: 42.6, // 영업본부 평균 (%)
       nationalAvg: 38.9, // 전국 평균 (%)
       vsLastMonth: -12, // 전월 동기 대비 증감 (건) - 모바일 건수 감소
@@ -70,8 +70,17 @@ const Agent360Dashboard = () => {
     }
   };
 
-  // myKPI는 기본값 (컴포넌트 내부에서 재정의됨)
-  let myKPI = myKPIDefault;
+  // MMP일 때는 APE를 12로 나누어 표시
+  let myKPI = {
+    ...myKPIDefault,
+    goalAchievement: {
+      ...myKPIDefault.goalAchievement,
+      target: performanceType === 'MMP' ? myKPIDefault.goalAchievement.target / 12 : myKPIDefault.goalAchievement.target,
+      actual: performanceType === 'MMP' ? myKPIDefault.goalAchievement.actual / 12 : myKPIDefault.goalAchievement.actual,
+      gap: performanceType === 'MMP' ? myKPIDefault.goalAchievement.gap / 12 : myKPIDefault.goalAchievement.gap,
+      dailyRequired: performanceType === 'MMP' ? myKPIDefault.goalAchievement.dailyRequired / 12 : myKPIDefault.goalAchievement.dailyRequired
+    }
+  };
 
   // 월별 성과 추이 데이터
   const monthlyTrend = {
@@ -627,8 +636,18 @@ const Agent360Dashboard = () => {
     };
   };
 
-  // 선택된 월에 따른 myKPI 데이터
-  myKPI = getHistoricalKPI(appliedMonth);
+  // 선택된 월에 따른 myKPI 데이터 가져오고 MMP 변환 적용
+  const historicalKPI = getHistoricalKPI(appliedMonth);
+  myKPI = {
+    ...historicalKPI,
+    goalAchievement: {
+      ...historicalKPI.goalAchievement,
+      target: performanceType === 'MMP' ? historicalKPI.goalAchievement.target / 12 : historicalKPI.goalAchievement.target,
+      actual: performanceType === 'MMP' ? historicalKPI.goalAchievement.actual / 12 : historicalKPI.goalAchievement.actual,
+      gap: performanceType === 'MMP' ? historicalKPI.goalAchievement.gap / 12 : historicalKPI.goalAchievement.gap,
+      dailyRequired: performanceType === 'MMP' ? historicalKPI.goalAchievement.dailyRequired / 12 : historicalKPI.goalAchievement.dailyRequired
+    }
+  };
 
   // 3년치 월 옵션 생성 (2023년 1월부터 2025년 9월까지)
   const monthOptions = [];
@@ -645,28 +664,28 @@ const Agent360Dashboard = () => {
   // 지점 순위 데이터
   const getBranchRankings = (getAllData = false, kpi = 'APE') => {
     const currentMonthData = [
-      { agency: '글로벌금융판매', branch: '글로벌화이브스타', achievement: 115.2, ape: 145.7, previousApe: 132.3, isActive: true },
-      { agency: '글로벌금융판매', branch: '하나돔', achievement: 112.8, ape: 138.2, previousApe: 95.8, isActive: true },
-      { agency: '글로벌금융판매', branch: '리더스에프엔', achievement: 108.5, ape: 132.9, previousApe: 118.5, isActive: true },
-      { agency: '지금용코리아', branch: '서울', achievement: 105.7, ape: 128.1, previousApe: 85.4, isActive: true },
-      { agency: '메타리치', branch: '보험스토어', achievement: 103.2, ape: 125.6, previousApe: 102.7, isActive: true },
-      { agency: '더블유에셋', branch: '일산센터', achievement: 101.5, ape: 122, isActive: true },
-      { agency: '글로벌금융판매', branch: '하나돔강북', achievement: 98.9, ape: 118, isActive: true },
-      { agency: '글로벌금융판매', branch: '리더스일산', achievement: 96.4, ape: 115, isActive: true },
-      { agency: '지금용코리아', branch: '대원', achievement: 94.7, ape: 112, isActive: true },
-      { agency: '한국지에이금융서비스', branch: '일산지사', achievement: 92.1, ape: 108, isActive: true },
-      { agency: '글로벌금융판매', branch: '화이브스타성화', achievement: 89.8, ape: 105, isActive: true },
-      { agency: '글로벌금융판매', branch: '리더스마이보험체크', achievement: 87.5, ape: 102, isActive: true },
-      { agency: '글로벌금융판매', branch: '이센트럴마포', achievement: 85.2, ape: 98, isActive: true },
-      { agency: '글로벌금융판매', branch: '케이엘아이은평', achievement: 83.1, ape: 95, isActive: true },
-      { agency: '글로벌금융판매', branch: '케이엘아이운정', achievement: 80.9, ape: 92, isActive: true },
-      { agency: '지금용코리아', branch: '그레이트탑', achievement: 92.5, ape: 168, isActive: true },
-      { agency: '지금용코리아', branch: '사랑', achievement: 89.2, ape: 162, isActive: true },
-      { agency: '메타리치', branch: '골드자산관리센터', achievement: 86.7, ape: 158, isActive: true },
-      { agency: '메타리치', branch: '리치골드', achievement: 84.3, ape: 155, isActive: true },
-      { agency: '지에이스타금융서비스', branch: '부천코어', achievement: 82.1, ape: 152, isActive: true },
-      { agency: '더블유에셋', branch: '1인지에이 일산2센터', achievement: 78.9, ape: 182, isActive: true },
-      { agency: '더블유에셋', branch: '기업금융본부', achievement: 76.4, ape: 175, isActive: true },
+      { agency: '글로벌금융판매', branch: '글로벌화이브스타', achievement: 115.2, ape: 1457, previousApe: 1323, isActive: true },
+      { agency: '글로벌금융판매', branch: '하나돔', achievement: 112.8, ape: 1382, previousApe: 958, isActive: true },
+      { agency: '글로벌금융판매', branch: '리더스에프엔', achievement: 108.5, ape: 1329, previousApe: 1185, isActive: true },
+      { agency: '지금용코리아', branch: '서울', achievement: 105.7, ape: 1281, previousApe: 854, isActive: true },
+      { agency: '메타리치', branch: '보험스토어', achievement: 103.2, ape: 1256, previousApe: 1027, isActive: true },
+      { agency: '더블유에셋', branch: '일산센터', achievement: 101.5, ape: 1220, isActive: true },
+      { agency: '글로벌금융판매', branch: '하나돔강북', achievement: 98.9, ape: 1180, isActive: true },
+      { agency: '글로벌금융판매', branch: '리더스일산', achievement: 96.4, ape: 1150, isActive: true },
+      { agency: '지금용코리아', branch: '대원', achievement: 94.7, ape: 1120, isActive: true },
+      { agency: '한국지에이금융서비스', branch: '일산지사', achievement: 92.1, ape: 1080, isActive: true },
+      { agency: '글로벌금융판매', branch: '화이브스타성화', achievement: 89.8, ape: 1050, isActive: true },
+      { agency: '글로벌금융판매', branch: '리더스마이보험체크', achievement: 87.5, ape: 1020, isActive: true },
+      { agency: '글로벌금융판매', branch: '이센트럴마포', achievement: 85.2, ape: 980, isActive: true },
+      { agency: '글로벌금융판매', branch: '케이엘아이은평', achievement: 83.1, ape: 950, isActive: true },
+      { agency: '글로벌금옵판매', branch: '케이엘아이운정', achievement: 80.9, ape: 920, isActive: true },
+      { agency: '지금용코리아', branch: '그레이트탑', achievement: 92.5, ape: 1680, isActive: true },
+      { agency: '지금용코리아', branch: '사랑', achievement: 89.2, ape: 1620, isActive: true },
+      { agency: '메타리치', branch: '골드자산관리센터', achievement: 86.7, ape: 1580, isActive: true },
+      { agency: '메타리치', branch: '리치골드', achievement: 84.3, ape: 1550, isActive: true },
+      { agency: '지에이스타금융서비스', branch: '부천코어', achievement: 82.1, ape: 1520, isActive: true },
+      { agency: '더블유에셋', branch: '1인지에이 일산2센터', achievement: 78.9, ape: 1820, isActive: true },
+      { agency: '더블유에셋', branch: '기업금융본부', achievement: 76.4, ape: 1750, isActive: true },
       { agency: '글로벌금융판매', branch: '케이에스드래곤슬', achievement: 74.2, ape: 172, isActive: true },
       { agency: '글로벌금융판매', branch: '케이에스드래곤행신', achievement: 72.8, ape: 168, isActive: true },
       { agency: '글로벌금융판매', branch: '수도디아이씨', achievement: 70.5, ape: 165, isActive: true },
@@ -1276,7 +1295,7 @@ const Agent360Dashboard = () => {
               <div className="text-center mb-4">
                 <div className="text-5xl font-black text-blue-600 mb-2">{myKPI.goalAchievement.current.toFixed(1)}%</div>
                 <div className="text-sm text-black  mb-4">
-                  {formatCurrency(myKPI.goalAchievement.actual).replace(' 백만원', '백만')} / {formatCurrency(myKPI.goalAchievement.target).replace(' 백만원', '백만')}
+                  {formatCurrency(myKPI.goalAchievement.actual, performanceType)} / {formatCurrency(myKPI.goalAchievement.target, performanceType)}
                 </div>
 
                 <div className="w-full bg-gray-200 rounded-full h-5 mb-2 relative group">
@@ -1291,15 +1310,15 @@ const Agent360Dashboard = () => {
                     >
                       <div className="font-bold mb-1">목표 달성률 {myKPI.goalAchievement.current.toFixed(1)}%</div>
                       <div className="text-gray-300">
-                        {(myKPI.goalAchievement.actual / 1000000).toFixed(1)}백만원 / {(myKPI.goalAchievement.target / 1000000).toFixed(1)}백만원
+                        {formatCurrency(myKPI.goalAchievement.actual, performanceType)} / {formatCurrency(myKPI.goalAchievement.target, performanceType)}
                       </div>
                       <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
                     </div>
                   )}
-                  {/* 전체 평균선 (59%) */}
+                  {/* 전체 평균선 (65%) */}
                   <div
                     className="absolute top-0 h-5 w-0.5 bg-orange-500 z-10 cursor-pointer"
-                    style={{left: `59%`}}
+                    style={{left: `65%`}}
                     onMouseEnter={() => setShowExpectedProgressTooltip(true)}
                     onMouseLeave={() => setShowExpectedProgressTooltip(false)}
                   />
@@ -1307,16 +1326,16 @@ const Agent360Dashboard = () => {
                   {showExpectedProgressTooltip && (
                     <div
                       className="absolute top-6 bg-gray-800 text-white text-xs rounded px-3 py-2 whitespace-nowrap z-20 shadow-lg"
-                      style={{left: `59%`, transform: 'translateX(-50%)'}}
+                      style={{left: `65%`, transform: 'translateX(-50%)'}}
                     >
-                      <div className="font-bold mb-1">전체 지점 평균 59.4%</div>
+                      <div className="font-bold mb-1">전체 지점 평균 65.2%</div>
                     </div>
                   )}
                 </div>
 
                 {/* 평균 표시 텍스트 */}
                 <div className="relative mb-4">
-                  <div className="text-xs text-orange-600 text-center" style={{marginLeft: `59%`, transform: 'translateX(-50%)'}}>평균</div>
+                  <div className="text-xs text-orange-600 text-center" style={{marginLeft: `65%`, transform: 'translateX(-50%)'}}>평균</div>
                 </div>
 
                 <div className="mb-4 h-4"></div>
@@ -1327,11 +1346,11 @@ const Agent360Dashboard = () => {
                   <div className="text-xs text-black mb-1">전월 동기 대비</div>
                   {shouldShowLastMonthComparison ? (
                     <>
-                      <div className={`font-semibold text-lg ${myKPI.goalAchievement.vsLastMonth > 0 ? 'text-black' : 'text-red-600'}`}>
+                      <div className={`font-semibold text-lg ${myKPI.goalAchievement.vsLastMonth > 0 ? 'text-blue-600' : 'text-red-600'}`}>
                         {myKPI.goalAchievement.vsLastMonth > 0 ? '▲ ' : '▼ '}{Math.abs(myKPI.goalAchievement.vsLastMonth)}%p
                       </div>
-                      <div className={`text-xs ${myKPI.goalAchievement.vsLastMonth > 0 ? 'text-black' : 'text-red-600'}`}>
-                        {myKPI.goalAchievement.vsLastMonth > 0 ? '+' : ''}{formatCurrency((myKPI.goalAchievement.actual * myKPI.goalAchievement.vsLastMonth / 100))}
+                      <div className={`text-xs ${myKPI.goalAchievement.vsLastMonth > 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                        {myKPI.goalAchievement.vsLastMonth > 0 ? '+' : ''}{formatCurrency((myKPI.goalAchievement.actual * myKPI.goalAchievement.vsLastMonth / 100), performanceType)}
                       </div>
                     </>
                   ) : (
@@ -1349,7 +1368,7 @@ const Agent360Dashboard = () => {
                 </div>
                 <div className="text-right">
                   <div className="text-xs text-black mb-1">목표까지</div>
-                  <div className="font-semibold text-lg text-gray-900">{formatCurrency(myKPI.goalAchievement.gap)}</div>
+                  <div className="font-semibold text-lg text-blue-600">{formatCurrency(myKPI.goalAchievement.gap, performanceType)}</div>
                   <div className="text-xs text-black">
                     {myKPI.goalAchievement.actual >= myKPI.goalAchievement.target ? '목표 달성!' : '남은 금액'}
                   </div>
@@ -1365,7 +1384,7 @@ const Agent360Dashboard = () => {
                     <div>
                       하루 평균
                       <div className="inline-block mx-1 px-2 py-1 bg-blue-600 text-white rounded-md font-bold text-base">
-                        {formatCurrency(myKPI.goalAchievement.dailyRequired)}
+                        {formatCurrency(myKPI.goalAchievement.dailyRequired, performanceType)}
                       </div>
                       이 필요해요!
                     </div>
@@ -1391,7 +1410,7 @@ const Agent360Dashboard = () => {
                 <h4 className="text-sm font-semibold text-gray-700 mb-3">설계사 가동률</h4>
                 <div className="text-center mb-3">
                   <div className="text-2xl font-bold text-blue-600">{myKPI.designerActivity.current.toFixed(1)}%</div>
-                  <div className="text-xs text-black">({myKPI.designerActivity.active}/{myKPI.designerActivity.total}명)</div>
+                  <div className="text-xs text-black">({myKPI.designerActivity.active}/{myKPI.designerActivity.plan}명)</div>
                 </div>
                 <div className="text-center">
                   <span className="text-xs text-black">전월 동기 대비 </span>
@@ -1407,7 +1426,7 @@ const Agent360Dashboard = () => {
                 </div>
                 <div className="text-center">
                   <span className="text-xs text-black">전월 동기 대비 </span>
-                  <span className="text-sm  text-black">▲ {myKPI.mobileContract.vsLastMonthPercent}%p</span>
+                  <span className="text-sm text-blue-600">▲ {myKPI.mobileContract.vsLastMonthPercent}%p</span>
                 </div>
               </div>
             </div>
@@ -1657,8 +1676,8 @@ const Agent360Dashboard = () => {
                           </div>
 
                           {/* 년도 라벨 */}
-                          <div className="text-xs text-black mt-2" style={{fontSize: '10px'}}>
-                            {data.year === '2025' ? '2025년(~9월)' : `${data.year}년`}
+                          <div className="text-xs text-black mt-2 whitespace-nowrap" style={{fontSize: '10px'}}>
+                            {data.year === '2025' ? '2025년 (~9월)' : `${data.year}년`}
                           </div>
 
                           {/* 툴팁 */}
@@ -1666,19 +1685,19 @@ const Agent360Dashboard = () => {
                             <div className="absolute top-0 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-20">
                               {yearlyKPI === 'nb_plan' ? (
                                 <div>
-                                  <div>{data.year === '2025' ? '2025년(~9월)' : `${data.year}년`}</div>
+                                  <div>{data.year === '2025' ? '2025년 (~9월)' : `${data.year}년`}</div>
                                   <div>{value.toFixed(1)}% ({data.nb_plan_achieved.toLocaleString()}/{data.nb_plan_target.toLocaleString()}백만원)</div>
                                   <div className="text-yellow-300">전체평균 {avgValue.toFixed(1)}%</div>
                                 </div>
                               ) : yearlyKPI === 'activity_plan' ? (
                                 <div>
-                                  <div>{data.year === '2025' ? '2025년(~9월)' : `${data.year}년`}</div>
+                                  <div>{data.year === '2025' ? '2025년 (~9월)' : `${data.year}년`}</div>
                                   <div>{value.toFixed(1)}% ({data.activity_achieved}/{data.activity_total}명)</div>
                                   <div className="text-yellow-300">전체평균 {avgValue.toFixed(1)}%</div>
                                 </div>
                               ) : (
                                 <div>
-                                  <div>{data.year === '2025' ? '2025년(~9월)' : `${data.year}년`}</div>
+                                  <div>{data.year === '2025' ? '2025년 (~9월)' : `${data.year}년`}</div>
                                   <div>{value.toFixed(1)}% ({data.mobile_achieved}/{data.mobile_total}건)</div>
                                   <div className="text-yellow-300">전체평균 {avgValue.toFixed(1)}%</div>
                                 </div>
@@ -1743,11 +1762,11 @@ const Agent360Dashboard = () => {
               <div className="bg-white rounded-lg shadow-sm border p-4">
                 <h4 className="text-sm font-semibold text-gray-700 mb-3">{performanceType}</h4>
                 <div className="text-center mb-3">
-                  <div className="text-2xl font-bold text-blue-600">{formatCurrency(getFilteredData('ape') * 10000)}</div>
+                  <div className="text-2xl font-bold text-blue-600">{formatCurrency(getFilteredData('ape') * 10000, performanceType)}</div>
                 </div>
                 <div className="text-center">
                   <span className="text-xs text-black">전월 동기 대비 ▲ </span>
-                  <span className="text-sm  text-black">{formatCurrency(getFilteredData('apeGrowthAmount') * 10000)}</span>
+                  <span className="text-sm  text-black">{formatCurrency(getFilteredData('apeGrowthAmount') * 10000, performanceType)}</span>
                 </div>
               </div>
               
@@ -1859,7 +1878,7 @@ const Agent360Dashboard = () => {
                   return (
                     <div className="absolute top-2 right-2 text-xs  flex items-center gap-1 z-20 text-black">
                       <div className="w-4 h-0.5" style={{backgroundColor: '#facc15'}}></div>
-                      <span>일 평균: {dailyChartMetric === 'APE' || dailyChartMetric === 'MMP' ? formatCurrency(average * 10000) : `${average.toFixed(1)}건`}</span>
+                      <span>일 평균: {dailyChartMetric === 'APE' || dailyChartMetric === 'MMP' ? formatCurrency(average * 10000, dailyChartMetric as 'APE' | 'MMP') : `${average.toFixed(1)}건`}</span>
                     </div>
                   );
                 })()}
@@ -1949,7 +1968,7 @@ const Agent360Dashboard = () => {
                     >
                       <div>9월 {hoveredDayData.day}일 (영업 {hoveredDayData.businessDay}일차) - {selectedProduct}</div>
                       {dailyChartMetric === 'APE' || dailyChartMetric === 'MMP' ? (
-                        <div>일 {performanceType}: {formatCurrency(hoveredDayData.value * 10000)}</div>
+                        <div>일 {performanceType}: {formatCurrency(hoveredDayData.value * 10000, performanceType)}</div>
                       ) : dailyChartMetric === '청약' ? (
                         <div>청약: {hoveredDayData.value}건</div>
                       ) : (
@@ -1990,7 +2009,7 @@ const Agent360Dashboard = () => {
                   {getPortfolioData().map((item, idx) => {
                     const apeAmountRaw = getFilteredData('ape') * item.value / 100; // 만원 단위
                     
-                    const formattedAmount = formatCurrency(apeAmountRaw * 10000);
+                    const formattedAmount = formatCurrency(apeAmountRaw * 10000, performanceType);
                     
                     return (
                       <div
@@ -2461,7 +2480,7 @@ const Agent360Dashboard = () => {
                       <div className="flex items-center">
                         <div className={`text-xs ${
                           branchSortBy === 'ape' ? 'text-blue-600 font-bold' : 'text-gray-900'
-                        }`}>{branch.ape.toFixed(1)}만원</div>
+                        }`}>{performanceType === 'MMP' ? `${(branch.ape / 100).toFixed(1)}백만원` : `${Math.round(branch.ape / 100)}백만원`}</div>
                       </div>
                       <div className="flex items-center">
                         <div className={`text-xs ${
@@ -2793,18 +2812,18 @@ const Agent360Dashboard = () => {
                       <div className="flex items-center justify-center border-r border-gray-200">
                         <div className={`text-xs ${
                           modalSortBy === 'ape' ? 'font-bold text-gray-900' : 'font-normal text-gray-900'
-                        }`}>{branch.ape === 0 ? '-' : branch.ape.toLocaleString()}</div>
+                        }`}>{branch.ape === 0 ? '-' : (branchRankingKPI === 'MMP' ? `${(branch.ape / 1000000).toFixed(1)}백만원` : `${Math.round(branch.ape / 1000000)}백만원`)}</div>
                       </div>
                       <div className="flex items-center justify-center border-r border-gray-200">
                         <div className={`text-xs ${
                           modalSortBy === 'previousApe' ? 'font-bold text-black' : 'font-normal text-black'
-                        }`}>{branch.previousApe === 0 ? '-' : branch.previousApe.toLocaleString()}</div>
+                        }`}>{branch.previousApe === 0 ? '-' : (branchRankingKPI === 'MMP' ? `${(branch.previousApe / 1000000).toFixed(1)}백만원` : `${Math.round(branch.previousApe / 1000000)}백만원`)}</div>
                       </div>
                       {/* 목표 섹션 */}
                       <div className="flex items-center justify-center border-r border-gray-200">
                         <div className={`text-xs ${
                           modalSortBy === 'target' ? 'font-bold text-gray-900' : 'font-normal text-gray-900'
-                        }`}>{(branch.target || 120).toLocaleString()}</div>
+                        }`}>{branchRankingKPI === 'MMP' ? `${((branch.target || 120) / 1000000).toFixed(1)}백만원` : `${Math.round((branch.target || 120) / 1000000)}백만원`}</div>
                       </div>
                       <div className="flex items-center justify-center border-r border-gray-200">
                         <div className={`text-xs ${
@@ -3121,7 +3140,7 @@ const Agent360Dashboard = () => {
                           <span className={`text-xs  ${
                             branch.currentMonthAPE > 0 ? 'text-black' : 'text-black'
                           }`}>
-                            {branch.currentMonthAPE > 0 ? branch.currentMonthAPE.toLocaleString() : '-'}
+                            {branch.currentMonthAPE > 0 ? (modalKPI === 'MMP' ? `${(branch.currentMonthAPE / 1000000).toFixed(1)}\ubc31\ub9cc\uc6d0` : `${Math.round(branch.currentMonthAPE / 1000000)}\ubc31\ub9cc\uc6d0`) : '-'}
                           </span>
                         </td>
 
