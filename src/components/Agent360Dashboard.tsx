@@ -9,6 +9,7 @@ const Agent360Dashboard = () => {
   const [selectedYear] = useState('2025'); // eslint-disable-line @typescript-eslint/no-unused-vars
   const [selectedProduct, setSelectedProduct] = useState('전체');
   const [productSortBy, setProductSortBy] = useState('amount');
+  const [hoveredProduct, setHoveredProduct] = useState<any>(null);
   const [performanceType, setPerformanceType] = useState<'APE' | 'MMP'>('APE');
 
   // 지능형 단위 포매팅 함수
@@ -1029,68 +1030,68 @@ const Agent360Dashboard = () => {
     return (baseData as any)[key][selectedProduct] || 0;
   };
   
-  // 상품 포트폴리오 데이터
+  // 상품 포트폴리오 데이터 (금액: MMP 백만원 단위)
   const getPortfolioData = () => {
     if (selectedProduct === '전체') {
       return [
-        { name: '건강', value: 65, color: '#3b82f6' },
-        { name: '종신/정기', value: 35, color: '#10b981' }
+        { name: '건강', value: 38.4, color: '#3b82f6', amount: 161000000, count: 339 }, // 8.8+0.9+0+1.2+4.5 = 16.1, 200+10+0+24+105 = 339
+        { name: '종신/정기', value: 61.6, color: '#10b981', amount: 267000000, count: 118 } // 24.9+1.7+0.1 = 26.7, 114+3+1 = 118
       ];
     } else if (selectedProduct === '건강') {
       return [
-        { name: '골담', value: 24, color: '#3b82f6' },
-        { name: '새담', value: 20, color: '#60a5fa' },
-        { name: '다이나믹', value: 18, color: '#93c5fd' },
-        { name: '치아', value: 16, color: '#bfdbfe' },
-        { name: '치매', value: 12, color: '#dbeafe' },
-        { name: '암', value: 10, color: '#eff6ff' }
+        { name: '치아', value: 54.7, color: '#3b82f6', amount: 88000000, count: 200 },
+        { name: '새담', value: 27.9, color: '#60a5fa', amount: 45000000, count: 105 },
+        { name: '골담', value: 7.5, color: '#93c5fd', amount: 12000000, count: 24 },
+        { name: '치매', value: 5.6, color: '#bfdbfe', amount: 9000000, count: 10 },
+        { name: '암', value: 0, color: '#dbeafe', amount: 0, count: 0 },
+        { name: '다이나믹', value: 4.3, color: '#eff6ff', amount: 7000000, count: 15 } // 대치값
       ];
     } else {
       return [
-        { name: '저해지', value: 45, color: '#10b981' },
-        { name: '무해지', value: 35, color: '#34d399' },
-        { name: '정기', value: 20, color: '#6ee7b7' }
+        { name: '저해지', value: 93.3, color: '#10b981', amount: 249000000, count: 114 },
+        { name: '무해지', value: 6.4, color: '#34d399', amount: 17000000, count: 3 },
+        { name: '정기', value: 0.4, color: '#6ee7b7', amount: 1000000, count: 1 }
       ];
     }
   };
   
-  // Top 3 상품 데이터
+  // Top 3 상품 데이터 (APE 기준: MMP * 12)
   const getTopProducts = () => {
     const productData = {
       '전체': {
         byAmount: [
-          { rank: 1, name: 'THE건강해지는종신보험(기본형)', amount: '425.0백만원', count: '285건' },
-          { rank: 2, name: '암치료비걱정없는암보험(갱신형)', amount: '283.0백만원', count: '412건' },
-          { rank: 3, name: 'THE건강해지는건강정기보험', amount: '217.0백만원', count: '198건' }
+          { rank: 1, name: 'THE건강해지는종신보험(기본형)', amount: '299', count: '285건' }, // 24.9 * 12 = 298.8 → 299
+          { rank: 2, name: 'THE건강한치아보험V(갱신형)', amount: '106', count: '412건' }, // 8.8 * 12 = 105.6 → 106
+          { rank: 3, name: '새담간편건강보험', amount: '54', count: '198건' } // 4.5 * 12 = 54
         ],
         byCount: [
-          { rank: 1, name: '암치료비걱정없는암보험(갱신형)', amount: '283.0백만원', count: '412건' },
-          { rank: 2, name: 'THE건강해지는종신보험(기본형)', amount: '425.0백만원', count: '285건' },
-          { rank: 3, name: 'THE건강한치아보험V(갱신형)', amount: '152.0백만원', count: '256건' }
+          { rank: 1, name: 'THE건강한치아보험V(갱신형)', amount: '106', count: '412건' },
+          { rank: 2, name: 'THE건강해지는종신보험(기본형)', amount: '299', count: '285건' },
+          { rank: 3, name: '새담간편건강보험', amount: '54', count: '256건' }
         ]
       },
       '건강': {
         byAmount: [
-          { rank: 1, name: '암치료비걱정없는암보험(갱신형)', amount: '283.0백만원', count: '412건' },
-          { rank: 2, name: 'THE건강한치아보험V(갱신형)', amount: '185.0백만원', count: '198건' },
-          { rank: 3, name: '골라담간편건강보험Ⅱ(갱신형)', amount: '127.0백만원', count: '156건' }
+          { rank: 1, name: 'THE건강한치아보험V(갱신형)', amount: '106', count: '412건' },
+          { rank: 2, name: '새담간편건강보험', amount: '54', count: '198건' },
+          { rank: 3, name: '골라담간편건강보험Ⅱ(갱신형)', amount: '14', count: '156건' } // 1.2 * 12 = 14.4 → 14
         ],
         byCount: [
-          { rank: 1, name: '암치료비걱정없는암보험(갱신형)', amount: '283.0백만원', count: '412건' },
-          { rank: 2, name: 'THE건강한치아보험V(갱신형)', amount: '185.0백만원', count: '198건' },
-          { rank: 3, name: '선심속치매보험(해약환급금미지급형)', amount: '82.0백만원', count: '186건' }
+          { rank: 1, name: 'THE건강한치아보험V(갱신형)', amount: '106', count: '412건' },
+          { rank: 2, name: '새담간편건강보험', amount: '54', count: '198건' },
+          { rank: 3, name: '선심속치매보험(해약환급금미지급형)', amount: '11', count: '186건' } // 0.9 * 12 = 10.8 → 11
         ]
       },
       '종신/정기': {
         byAmount: [
-          { rank: 1, name: 'THE건강해지는종신보험(기본형)', amount: '425.0백만원', count: '285건' },
-          { rank: 2, name: 'THE건강해지는건강정기보험', amount: '217.0백만원', count: '198건' },
-          { rank: 3, name: 'THE채우는종신보험(해약환급금일부지급형)', amount: '158.0백만원', count: '142건' }
+          { rank: 1, name: 'THE건강해지는종신보험(기본형)', amount: '299', count: '285건' },
+          { rank: 2, name: 'THE채우는종신보험(해약환급금일부지급형)', amount: '20', count: '198건' }, // 1.7 * 12 = 20.4 → 20
+          { rank: 3, name: 'THE건강해지는건강정기보험', amount: '1', count: '142건' } // 0.1 * 12 = 1.2 → 1
         ],
         byCount: [
-          { rank: 1, name: 'THE건강해지는종신보험(기본형)', amount: '425.0백만원', count: '285건' },
-          { rank: 2, name: 'THE간편고지종신보험(해약환급금미지급형)', amount: '123.0백만원', count: '215건' },
-          { rank: 3, name: 'THE건강해지는건강정기보험', amount: '217.0백만원', count: '198건' }
+          { rank: 1, name: 'THE건강해지는종신보험(기본형)', amount: '299', count: '285건' },
+          { rank: 2, name: 'THE간편고지종신보험(해약환급금미지급형)', amount: '20', count: '215건' },
+          { rank: 3, name: 'THE건강해지는건강정기보험', amount: '1', count: '198건' }
         ]
       }
     };
@@ -2024,14 +2025,18 @@ const Agent360Dashboard = () => {
               <div className="mb-4">
                 <div className="space-y-2">
                   {getPortfolioData().map((item, idx) => {
-                    const apeAmountRaw = getFilteredData('ape') * item.value / 100; // 만원 단위
-                    
-                    const formattedAmount = formatCurrency(apeAmountRaw * 10000, performanceType);
+                    // MMP 기준 데이터 (42.1백만원 총합)
+                    const mmpTotal = 42.1; // 총 MMP (백만원)
+                    const apeAmountRaw = mmpTotal * item.value / 100; // MMP 기준 계산
+
+                    const formattedAmount = formatCurrency(apeAmountRaw * 10000, 'MMP');
                     
                     return (
                       <div
                         key={idx}
                         className="flex items-center gap-3 mb-1 group relative cursor-pointer"
+                        onMouseEnter={() => setHoveredProduct({...item, idx})}
+                        onMouseLeave={() => setHoveredProduct(null)}
                       >
                         <span className="text-xs text-gray-700 w-28 flex-shrink-0">{item.name}</span>
                         <div className="flex-1 bg-gray-200 rounded-full h-4 relative">
@@ -2051,7 +2056,16 @@ const Agent360Dashboard = () => {
                           )}
                         </div>
                         <span className="text-xs  text-gray-700 w-8 text-right flex-shrink-0">{item.value}%</span>
-                        
+
+                        {/* 툴팁 */}
+                        {hoveredProduct && hoveredProduct.idx === idx && (
+                          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-30 mb-2">
+                            <div>{item.name}</div>
+                            <div>금액: {item.amount.toLocaleString()}원</div>
+                            <div>건수: {item.count}건</div>
+                            <div>비중: {item.value.toFixed(1)}%</div>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
@@ -2126,7 +2140,12 @@ const Agent360Dashboard = () => {
                         <div className="flex items-center">
                           <div className={`text-xs ${
                             productSortBy === 'amount' ? 'text-blue-600 font-bold' : 'text-gray-900'
-                          }`}>{product.amount}</div>
+                          }`}>
+                            {performanceType === 'MMP'
+                              ? (parseFloat(product.amount) / 12).toFixed(1)
+                              : product.amount
+                            }백만원
+                          </div>
                         </div>
                         <div className="flex items-center">
                           <div className={`text-xs ${
