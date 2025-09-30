@@ -42,8 +42,8 @@ const Agent360Dashboard = () => {
       hqAvg: 65.2, // 영업본부 평균 (%)
       nationalAvg: 62.8, // 전국 평균 (%)
       vsLastMonth: 8.5, // 전월 동기 대비 증감 (%p)
-      gap: 150000000, // 남은 금액 (원)
-      dailyRequired: 21400000, // 일평균 필요 (원)
+      gap: 150000000, // 남은 금액 (원) - 500백만 - 350백만
+      dailyRequired: 21400000, // 일평균 필요 (원) - 약 21백만원/일
       hqRankTotal: { rank: 12, total: 50 }, // 전체 지점장 순위
       hqRankRegion: { rank: 5, total: 10 } // 영업본부 순위
     },
@@ -994,9 +994,9 @@ const Agent360Dashboard = () => {
     };
 
     const baseData = {
-      '전체': generateMonthData({ape: 2100000, contract: 30, proposal: 51}),
-      '건강': generateMonthData({ape: 1360000, contract: 20, proposal: 33}),
-      '종신/정기': generateMonthData({ape: 740000, contract: 10, proposal: 18})
+      '전체': generateMonthData({ape: 23, contract: 30, proposal: 51}),
+      '건강': generateMonthData({ape: 15, contract: 20, proposal: 33}),
+      '종신/정기': generateMonthData({ape: 8, contract: 10, proposal: 18})
     };
 
     const data = (baseData as any)[selectedProduct] || baseData['전체'];
@@ -1010,8 +1010,8 @@ const Agent360Dashboard = () => {
   // 필터별 데이터
   const getFilteredData = (key: string) => {
     const baseData = performanceType === 'APE' ? {
-      ape: { '전체': 31000, '건강': 20100, '종신/정기': 10900 }, // 만원 단위
-      dailyApe: { '전체': 1600, '건강': 1100, '종신/정기': 500 }, // 만원 단위
+      ape: { '전체': 35000, '건강': 22750, '종신/정기': 12250 }, // 만원 단위 (350백만원)
+      dailyApe: { '전체': 2330, '건강': 1515, '종신/정기': 815 }, // 만원 단위 (일평균)
       apeGrowth: { '전체': 15.3, '건강': 18.7, '종신/정기': 11.2 },
       apeGrowthAmount: { '전체': 4100, '건강': 3200, '종신/정기': 900 }, // 전월 동기 대비 절대 증가분 (만원)
       dailyApeAmount: { '전체': 1600, '건강': 1100, '종신/정기': 500 },
@@ -1908,7 +1908,11 @@ const Agent360Dashboard = () => {
                   return (
                     <div className="absolute top-2 right-2 text-xs  flex items-center gap-1 z-20 text-black">
                       <div className="w-4 h-0.5" style={{backgroundColor: '#facc15'}}></div>
-                      <span>일 평균: {dailyChartMetric === 'APE' || dailyChartMetric === 'MMP' ? formatCurrency(average * 10000, dailyChartMetric as 'APE' | 'MMP') : `${average.toFixed(1)}건`}</span>
+                      <span>일 평균: {
+                        dailyChartMetric === 'APE' ? `${Math.round(average).toLocaleString()}백만원` :
+                        dailyChartMetric === 'MMP' ? `${Math.round(average).toLocaleString()}천원` :
+                        `${average.toFixed(1)}건`
+                      }</span>
                     </div>
                   );
                 })()}
@@ -2098,16 +2102,19 @@ const Agent360Dashboard = () => {
 
               {/* Top 3 상품 - 테이블 형태 */}
               <div className="border-t pt-3">
-                <div className="text-xs  text-gray-700 mb-3">Top 3 상품</div>
-                
+                <div className="flex items-center justify-between mb-3">
+                  <div className="text-xs  text-gray-700">Top 3 상품</div>
+                  <div className="text-xs text-gray-600">[단위: 백만원]</div>
+                </div>
+
                 <div className="overflow-hidden">
                   {/* 헤더 */}
-                  <div className="grid gap-2 pb-2 border-b border-gray-200 mb-3" style={{gridTemplateColumns: '30px 1fr 80px 80px'}}>
-                    <div className="text-xs  text-black">순위</div>
+                  <div className="grid gap-2 pb-2 border-b border-gray-200 mb-3" style={{gridTemplateColumns: '45px minmax(120px, 1fr) 100px 80px'}}>
+                    <div className="text-xs  text-black text-center">순위</div>
                     <div className="text-xs  text-black">상품명</div>
                     <button
                       onClick={() => setProductSortBy(productSortBy === 'amount' ? 'count' : 'amount')}
-                      className={`text-xs  hover:text-blue-600 transition-colors text-left flex items-center gap-1 ${
+                      className={`text-xs  hover:text-blue-600 transition-colors text-right flex items-center justify-end gap-1 ${
                         productSortBy === 'amount' ? 'text-blue-600 font-bold' : 'text-gray-900'
                       }`}
                     >
@@ -2118,7 +2125,7 @@ const Agent360Dashboard = () => {
                     </button>
                     <button
                       onClick={() => setProductSortBy(productSortBy === 'count' ? 'amount' : 'count')}
-                      className={`text-xs  hover:text-blue-600 transition-colors text-left flex items-center gap-1 ${
+                      className={`text-xs  hover:text-blue-600 transition-colors text-right flex items-center justify-end gap-1 ${
                         productSortBy === 'count' ? 'text-blue-600 font-bold' : 'text-gray-900'
                       }`}
                     >
@@ -2128,16 +2135,16 @@ const Agent360Dashboard = () => {
                       )}
                     </button>
                   </div>
-                  
+
                   {/* 데이터 행 */}
                   <div className="space-y-1">
                     {getTopProducts().map((product: any, idx: number) => (
-                      <div 
-                        key={product.rank} 
+                      <div
+                        key={product.rank}
                         className="grid gap-2 p-2 rounded-lg"
-                        style={{gridTemplateColumns: '30px 1fr 80px 80px'}}
+                        style={{gridTemplateColumns: '45px minmax(120px, 1fr) 100px 80px'}}
                       >
-                        <div className="flex items-center">
+                        <div className="flex items-center justify-center">
                           <div className={`w-4 h-4 rounded-full flex items-center justify-center text-xs font-bold ${
                             idx < 3 ? 'bg-yellow-400 text-yellow-900' : 'bg-gray-200 text-black'
                           }`}>
@@ -2149,17 +2156,17 @@ const Agent360Dashboard = () => {
                             {product.name}
                           </div>
                         </div>
-                        <div className="flex items-center">
+                        <div className="flex items-center justify-end">
                           <div className={`text-xs ${
                             productSortBy === 'amount' ? 'text-blue-600 font-bold' : 'text-gray-900'
                           }`}>
                             {performanceType === 'MMP'
                               ? (parseFloat(product.amount) / 12).toFixed(1)
                               : product.amount
-                            }백만원
+                            }
                           </div>
                         </div>
-                        <div className="flex items-center">
+                        <div className="flex items-center justify-end">
                           <div className={`text-xs ${
                             productSortBy === 'count' ? 'text-blue-600 font-bold' : 'text-gray-900'
                           }`}>{product.count}</div>
@@ -2219,8 +2226,8 @@ const Agent360Dashboard = () => {
                     {/* 컬럼 헤더 */}
                     <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg mb-2 text-xs  text-gray-700 border-b border-gray-200">
                       <div className="min-w-[35px] shrink-0">날짜</div>
-                      <div className="min-w-[180px] shrink-0">대리점 {'>'} 지점</div>
-                      <div className="flex-1">활동 내용</div>
+                      <div className="min-w-[240px] shrink-0">대리점 {'>'} 지점</div>
+                      <div className="flex-1 min-w-0">활동 내용</div>
                     </div>
 
                     <div className="space-y-1">
@@ -2232,16 +2239,16 @@ const Agent360Dashboard = () => {
                           <div className="text-black min-w-[35px] shrink-0 font-mono">
                             {item.date}
                           </div>
-                          <div className="min-w-[180px] shrink-0 flex items-center">
-                            <span className=" text-gray-900 truncate max-w-[85px]">
+                          <div className="min-w-[240px] shrink-0 flex items-center">
+                            <span className=" text-gray-900 truncate max-w-[115px]">
                               {item.agency}
                             </span>
                             <ChevronRight className="w-3 h-3 text-gray-400 mx-1 shrink-0" />
-                            <span className="text-gray-700 truncate max-w-[85px]">
+                            <span className="text-gray-700 truncate max-w-[115px]">
                               {item.branch}
                             </span>
                           </div>
-                          <div className="text-black flex-1 truncate">
+                          <div className="text-black flex-1 min-w-0 truncate">
                             {item.detail}
                           </div>
                         </div>
@@ -2460,13 +2467,18 @@ const Agent360Dashboard = () => {
                   </button>
                 </div>
               </div>
-              
+
+              {/* 단위 표시 */}
+              <div className="mb-2 text-right">
+                <span className="text-xs text-gray-600">[단위: 천원]</span>
+              </div>
+
               {/* 테이블 형태 */}
               <div className="overflow-hidden">
                 {/* 헤더 */}
-                <div className="grid gap-2 pb-2 border-b border-gray-200 mb-3" style={{gridTemplateColumns: '30px 1fr 80px 90px'}}>
-                  <div className="text-xs  text-black">번호</div>
-                  <div className="text-xs  text-black">지점명</div>
+                <div className="grid gap-3 pb-3 border-b border-gray-200 mb-2" style={{gridTemplateColumns: '50px 1fr 90px 90px'}}>
+                  <div className="text-xs font-semibold text-gray-700 text-center">번호</div>
+                  <div className="text-xs font-semibold text-gray-700">지점명</div>
                   <button
                     onClick={() => {
                       if (branchSortBy === 'ape') {
@@ -2476,8 +2488,8 @@ const Agent360Dashboard = () => {
                         setBranchSortOrder('desc');
                       }
                     }}
-                    className={`text-xs  hover:text-blue-600 transition-colors text-left flex items-center gap-1 ${
-                      branchSortBy === 'ape' ? 'text-blue-600 font-bold' : 'text-gray-900'
+                    className={`text-xs font-semibold hover:text-blue-600 transition-colors text-right flex items-center justify-end gap-1 ${
+                      branchSortBy === 'ape' ? 'text-blue-600' : 'text-gray-700'
                     }`}
                   >
                     {performanceType}
@@ -2494,8 +2506,8 @@ const Agent360Dashboard = () => {
                         setBranchSortOrder('desc');
                       }
                     }}
-                    className={`text-xs  hover:text-blue-600 transition-colors text-left flex items-center gap-1 ${
-                      branchSortBy === 'achievement' ? 'text-blue-600 font-bold' : 'text-gray-900'
+                    className={`text-xs font-semibold hover:text-blue-600 transition-colors text-right flex items-center justify-end gap-1 ${
+                      branchSortBy === 'achievement' ? 'text-blue-600' : 'text-gray-700'
                     }`}
                   >
                     달성률
@@ -2504,35 +2516,33 @@ const Agent360Dashboard = () => {
                     )}
                   </button>
                 </div>
-                
+
                 {/* 데이터 행 */}
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                   {getBranchRankings().data.map((branch, idx) => (
                     <div
                       key={idx}
-                      className="grid gap-2 p-2 hover:bg-blue-50 rounded-lg cursor-pointer transition-all"
-                      style={{gridTemplateColumns: '30px 1fr 80px 90px'}}
+                      className="grid gap-3 py-2.5 px-2 hover:bg-blue-50 rounded cursor-pointer transition-all"
+                      style={{gridTemplateColumns: '50px 1fr 90px 90px'}}
                       onClick={() => handleBranchClick(branch.agency, branch.branch)}
                     >
-                      <div className="flex items-center">
-                        <div className="text-xs font-bold text-black">
+                      <div className="flex items-center justify-center">
+                        <div className="text-sm font-bold text-gray-900">
                           {idx + 1}
                         </div>
                       </div>
-                      <div className="flex items-center min-w-0">
-                        <div className="text-xs  text-gray-900 break-words">
-                          <div>{branch.agency}</div>
-                          <div className="text-xs text-black">{branch.branch}</div>
-                        </div>
+                      <div className="flex flex-col justify-center min-w-0">
+                        <div className="text-xs text-gray-600 leading-tight">{branch.agency}</div>
+                        <div className="text-sm font-medium text-gray-900 leading-tight">{branch.branch}</div>
                       </div>
-                      <div className="flex items-center">
-                        <div className={`text-xs ${
-                          branchSortBy === 'ape' ? 'text-blue-600 font-bold' : 'text-gray-900'
-                        }`}>{`${branch.ape.toLocaleString()}`}</div>
+                      <div className="flex items-center justify-end">
+                        <div className={`text-sm font-medium ${
+                          branchSortBy === 'ape' ? 'text-blue-600' : 'text-gray-900'
+                        }`}>{`${Math.round(branch.ape / 1000).toLocaleString()}`}</div>
                       </div>
-                      <div className="flex items-center">
-                        <div className={`text-xs ${
-                          branchSortBy === 'achievement' ? 'text-blue-600 font-bold' : 'text-gray-900'
+                      <div className="flex items-center justify-end">
+                        <div className={`text-sm font-medium ${
+                          branchSortBy === 'achievement' ? 'text-blue-600' : 'text-gray-900'
                         }`}>
                           {branch.target ? Math.round((branch.ape / (branch.target || 120)) * 100 * 10) / 10 : branch.achievement}%
                         </div>
