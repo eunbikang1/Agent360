@@ -215,7 +215,7 @@ const Agent360Dashboard = () => {
   const kpiData = monthlyTrend[2025][selectedKPI as keyof typeof monthlyTrend[2025]] || [];
 
   // 지점 기본정보 데이터 함수
-  const getBranchInfoData = () => {
+  const getBranchInfoData = (kpi = 'APE') => {
     // 기존 지점 순위 데이터에서 전체 160개 지점 가져오기 (가동 + 비가동)
     const rankingData = getBranchRankings(true).data;
 
@@ -271,30 +271,30 @@ const Agent360Dashboard = () => {
       // 실적값 계산 (가동설계사가 0이면 실적도 0)
       let performanceValue = 0;
       if (activeAgents > 0 && hasPerformance) {
-        // 500원부터 300만원까지 다양한 범위, 500원 단위로 제한
-        const minValue = 500; // 500원
-        const maxValue = 3000000; // 300만원
+        // 5만원부터 200만원까지 현실적인 지점별 실적 범위, 1만원 단위로 제한
+        const minValue = 50000; // 5만원
+        const maxValue = 2000000; // 200만원
         const randomFactor1 = (branchHash % 100) / 100; // 0~1
         const randomFactor2 = ((branchHash + index) % 100) / 100; // 0~1
         const randomFactor3 = ((branchHash * 2 + index) % 100) / 100; // 0~1
 
-        // 더 다양한 분포를 위한 복합 계산
+        // 더 현실적인 지점별 실적 분포
         let baseValue;
         if (randomFactor1 < 0.3) {
-          // 30% 확률로 작은 값들 (500원 ~ 10만원)
-          baseValue = minValue + Math.floor((100000 - minValue) * randomFactor2 * randomFactor3);
-        } else if (randomFactor1 < 0.7) {
-          // 40% 확률로 중간 값들 (10만원 ~ 100만원)
-          baseValue = 100000 + Math.floor((1000000 - 100000) * randomFactor2);
+          // 30% 확률로 작은 값들 (5만원 ~ 30만원)
+          baseValue = minValue + Math.floor((300000 - minValue) * randomFactor2 * randomFactor3);
+        } else if (randomFactor1 < 0.8) {
+          // 50% 확률로 중간 값들 (30만원 ~ 120만원) - 대부분 여기에 분포
+          baseValue = 300000 + Math.floor((1200000 - 300000) * randomFactor2);
         } else {
-          // 30% 확률로 큰 값들 (100만원 ~ 300만원)
-          baseValue = 1000000 + Math.floor((maxValue - 1000000) * randomFactor2 * randomFactor3);
+          // 20% 확률로 큰 값들 (120만원 ~ 200만원)
+          baseValue = 1200000 + Math.floor((maxValue - 1200000) * randomFactor2 * randomFactor3);
         }
 
-        // 500원 단위로 반올림
-        baseValue = Math.round(baseValue / 500) * 500;
+        // 1만원 단위로 반올림
+        baseValue = Math.round(baseValue / 10000) * 10000;
 
-        performanceValue = modalKPI === 'MMP' ? Math.round(baseValue * 12) : baseValue;
+        performanceValue = kpi === 'MMP' ? Math.round(baseValue * 12) : baseValue;
       }
 
       return {
@@ -665,69 +665,69 @@ const Agent360Dashboard = () => {
   // 지점 순위 데이터
   const getBranchRankings = (getAllData = false, kpi = 'APE') => {
     const currentMonthData = [
-      { agency: '글로벌금융판매', branch: '글로벌화이브스타', achievement: 115.2, ape: 1457, previousApe: 1323, isActive: true },
-      { agency: '글로벌금융판매', branch: '하나돔', achievement: 112.8, ape: 1382, previousApe: 958, isActive: true },
-      { agency: '글로벌금융판매', branch: '리더스에프엔', achievement: 108.5, ape: 1329, previousApe: 1185, isActive: true },
-      { agency: '지금용코리아', branch: '서울', achievement: 105.7, ape: 1281, previousApe: 854, isActive: true },
-      { agency: '메타리치', branch: '보험스토어', achievement: 103.2, ape: 1256, previousApe: 1027, isActive: true },
-      { agency: '더블유에셋', branch: '일산센터', achievement: 101.5, ape: 1220, isActive: true },
-      { agency: '글로벌금융판매', branch: '하나돔강북', achievement: 98.9, ape: 1180, isActive: true },
-      { agency: '글로벌금융판매', branch: '리더스일산', achievement: 96.4, ape: 1150, isActive: true },
-      { agency: '지금용코리아', branch: '대원', achievement: 94.7, ape: 1120, isActive: true },
-      { agency: '한국지에이금융서비스', branch: '일산지사', achievement: 92.1, ape: 1080, isActive: true },
-      { agency: '글로벌금융판매', branch: '화이브스타성화', achievement: 89.8, ape: 1050, isActive: true },
-      { agency: '글로벌금융판매', branch: '리더스마이보험체크', achievement: 87.5, ape: 1020, isActive: true },
-      { agency: '글로벌금융판매', branch: '이센트럴마포', achievement: 85.2, ape: 980, isActive: true },
-      { agency: '글로벌금융판매', branch: '케이엘아이은평', achievement: 83.1, ape: 950, isActive: true },
-      { agency: '글로벌금옵판매', branch: '케이엘아이운정', achievement: 80.9, ape: 920, isActive: true },
-      { agency: '지금용코리아', branch: '그레이트탑', achievement: 92.5, ape: 1680, isActive: true },
-      { agency: '지금용코리아', branch: '사랑', achievement: 89.2, ape: 1620, isActive: true },
-      { agency: '메타리치', branch: '골드자산관리센터', achievement: 86.7, ape: 1580, isActive: true },
-      { agency: '메타리치', branch: '리치골드', achievement: 84.3, ape: 1550, isActive: true },
-      { agency: '지에이스타금융서비스', branch: '부천코어', achievement: 82.1, ape: 1520, isActive: true },
-      { agency: '더블유에셋', branch: '1인지에이 일산2센터', achievement: 78.9, ape: 1820, isActive: true },
-      { agency: '더블유에셋', branch: '기업금융본부', achievement: 76.4, ape: 1750, isActive: true },
-      { agency: '글로벌금융판매', branch: '케이에스드래곤슬', achievement: 74.2, ape: 172, isActive: true },
-      { agency: '글로벌금융판매', branch: '케이에스드래곤행신', achievement: 72.8, ape: 168, isActive: true },
-      { agency: '글로벌금융판매', branch: '수도디아이씨', achievement: 70.5, ape: 165, isActive: true },
-      { agency: '글로벌금융판매', branch: '글로벌인슈몽산', achievement: 95.8, ape: 188, isActive: true },
-      { agency: '글로벌금융판매', branch: '글로벌인슈고양', achievement: 93.4, ape: 185, isActive: true },
-      { agency: '글로벌금융판매', branch: '글로벌인슈에이치', achievement: 91.2, ape: 182, isActive: true },
-      { agency: '글로벌금융판매', branch: '브릿지재무설계', achievement: 88.9, ape: 178, isActive: true },
-      { agency: '글로벌금융판매', branch: '인스라이트서클강북', achievement: 86.7, ape: 175, isActive: true }
+      { agency: '글로벌금융판매', branch: '글로벌화이브스타', achievement: 115.2, ape: 1450000, previousApe: 1320000, isActive: true },
+      { agency: '글로벌금융판매', branch: '하나돔', achievement: 112.8, ape: 1380000, previousApe: 960000, isActive: true },
+      { agency: '글로벌금융판매', branch: '리더스에프엔', achievement: 108.5, ape: 1330000, previousApe: 1190000, isActive: true },
+      { agency: '지금용코리아', branch: '서울', achievement: 105.7, ape: 1280000, previousApe: 850000, isActive: true },
+      { agency: '메타리치', branch: '보험스토어', achievement: 103.2, ape: 1260000, previousApe: 1030000, isActive: true },
+      { agency: '더블유에셋', branch: '일산센터', achievement: 101.5, ape: 1220000, isActive: true },
+      { agency: '글로벌금융판매', branch: '하나돔강북', achievement: 98.9, ape: 1180000, isActive: true },
+      { agency: '글로벌금융판매', branch: '리더스일산', achievement: 96.4, ape: 1150000, isActive: true },
+      { agency: '지금용코리아', branch: '대원', achievement: 94.7, ape: 1120000, isActive: true },
+      { agency: '한국지에이금융서비스', branch: '일산지사', achievement: 92.1, ape: 1080000, isActive: true },
+      { agency: '글로벌금융판매', branch: '화이브스타성화', achievement: 89.8, ape: 1050000, isActive: true },
+      { agency: '글로벌금융판매', branch: '리더스마이보험체크', achievement: 87.5, ape: 1020000, isActive: true },
+      { agency: '글로벌금융판매', branch: '이센트럴마포', achievement: 85.2, ape: 980000, isActive: true },
+      { agency: '글로벌금융판매', branch: '케이엘아이은평', achievement: 83.1, ape: 950000, isActive: true },
+      { agency: '글로벌금옵판매', branch: '케이엘아이운정', achievement: 80.9, ape: 920000, isActive: true },
+      { agency: '지금용코리아', branch: '그레이트탑', achievement: 92.5, ape: 1680000, isActive: true },
+      { agency: '지금용코리아', branch: '사랑', achievement: 89.2, ape: 1620000, isActive: true },
+      { agency: '메타리치', branch: '골드자산관리센터', achievement: 86.7, ape: 1580000, isActive: true },
+      { agency: '메타리치', branch: '리치골드', achievement: 84.3, ape: 1550000, isActive: true },
+      { agency: '지에이스타금융서비스', branch: '부천코어', achievement: 82.1, ape: 1520000, isActive: true },
+      { agency: '더블유에셋', branch: '1인지에이 일산2센터', achievement: 78.9, ape: 1820000, isActive: true },
+      { agency: '더블유에셋', branch: '기업금융본부', achievement: 76.4, ape: 1750000, isActive: true },
+      { agency: '글로벌금융판매', branch: '케이에스드래곤슬', achievement: 74.2, ape: 720000, isActive: true },
+      { agency: '글로벌금융판매', branch: '케이에스드래곤행신', achievement: 72.8, ape: 680000, isActive: true },
+      { agency: '글로벌금융판매', branch: '수도디아이씨', achievement: 70.5, ape: 650000, isActive: true },
+      { agency: '글로벌금융판매', branch: '글로벌인슈몽산', achievement: 95.8, ape: 880000, isActive: true },
+      { agency: '글로벌금융판매', branch: '글로벌인슈고양', achievement: 93.4, ape: 850000, isActive: true },
+      { agency: '글로벌금융판매', branch: '글로벌인슈에이치', achievement: 91.2, ape: 820000, isActive: true },
+      { agency: '글로벌금융판매', branch: '브릿지재무설계', achievement: 88.9, ape: 780000, isActive: true },
+      { agency: '글로벌금융판매', branch: '인스라이트서클강북', achievement: 86.7, ape: 750000, isActive: true }
     ];
 
     const previousMonthData = [
-      { agency: '메타리치', branch: '골드자산관리센터', achievement: 118.5, ape: 195, isActive: true },
-      { agency: '글로벌금융판매', branch: '리더스에이치비', achievement: 116.2, ape: 142, isActive: true },
-      { agency: '지에이스타금융서비스', branch: '부천코어', achievement: 114.8, ape: 190, isActive: true },
-      { agency: '더블유에셋', branch: '서울지사', achievement: 112.3, ape: 138, isActive: true },
-      { agency: '한국지에이금융서비스', branch: '일산지사', achievement: 110.1, ape: 185, isActive: true },
-      { agency: '글로벌금융판매', branch: '케이엘아이케이베스트', achievement: 108.9, ape: 135, isActive: true },
-      { agency: '메타리치', branch: '리치골드', achievement: 107.5, ape: 180, isActive: true },
-      { agency: '지금용코리아', branch: '그레이트탑', achievement: 106.2, ape: 132, isActive: true },
-      { agency: '더블유에셋', branch: '기업금융본부', achievement: 104.8, ape: 175, isActive: true },
-      { agency: '글로벌금융판매', branch: '브릿지재무설계', achievement: 103.5, ape: 128, isActive: true },
-      { agency: '글로벌금융판매', branch: '굿브즈스카이', achievement: 102.1, ape: 172, isActive: true },
-      { agency: '글로벌금융판매', branch: '인슈에셋자오선', achievement: 100.8, ape: 125, isActive: true },
-      { agency: '메타리치', branch: '보험스토어A', achievement: 99.4, ape: 168, isActive: true },
-      { agency: '지금용코리아', branch: '서울A', achievement: 98.1, ape: 165, isActive: true },
-      { agency: '지금용코리아', branch: '대원A', achievement: 96.8, ape: 122, isActive: true },
-      { agency: '지금용코리아', branch: '그레이트탑A', achievement: 95.4, ape: 162, isActive: true },
-      { agency: '지금용코리아', branch: '사랑A', achievement: 94.1, ape: 118, isActive: true },
-      { agency: '더블유에셋', branch: '일산센터A', achievement: 92.8, ape: 158, isActive: true },
-      { agency: '더블유에셋', branch: '서울지사A', achievement: 91.4, ape: 155, isActive: true },
-      { agency: '더블유에셋', branch: '기업금융본부A', achievement: 90.1, ape: 115, isActive: true },
-      { agency: '한국지에이금융서비스', branch: '일산지사A', achievement: 88.8, ape: 152, isActive: true },
-      { agency: '메가', branch: '인슈에셋고양', achievement: 87.4, ape: 148, isActive: true },
-      { agency: '메가', branch: '인슈에셋고양A', achievement: 86.1, ape: 112, isActive: true },
-      { agency: '글로벌금융판매', branch: '하나돔A', achievement: 84.8, ape: 145, isActive: true },
-      { agency: '글로벌금융판매', branch: '하나돔강북A', achievement: 83.4, ape: 108, isActive: true },
-      { agency: '글로벌금융판매', branch: '리더스에프엔A', achievement: 82.1, ape: 142, isActive: true },
-      { agency: '글로벌금융판매', branch: '리더스에이치비A', achievement: 80.8, ape: 105, isActive: true },
-      { agency: '글로벌금융판매', branch: '리더스마이보험A', achievement: 79.4, ape: 102, isActive: true },
-      { agency: '글로벌금융판매', branch: '리더스일산A', achievement: 78.1, ape: 98, isActive: true },
-      { agency: '글로벌금융판매', branch: '케이엘아이케이베스트A', achievement: 76.8, ape: 95, isActive: true }
+      { agency: '메타리치', branch: '골드자산관리센터', achievement: 118.5, ape: 950000, isActive: true },
+      { agency: '글로벌금융판매', branch: '리더스에이치비', achievement: 116.2, ape: 920000, isActive: true },
+      { agency: '지에이스타금융서비스', branch: '부천코어', achievement: 114.8, ape: 9.0, isActive: true },
+      { agency: '더블유에셋', branch: '서울지사', achievement: 112.3, ape: 880000, isActive: true },
+      { agency: '한국지에이금융서비스', branch: '일산지사', achievement: 110.1, ape: 850000, isActive: true },
+      { agency: '글로벌금융판매', branch: '케이엘아이케이베스트', achievement: 108.9, ape: 820000, isActive: true },
+      { agency: '메타리치', branch: '리치골드', achievement: 107.5, ape: 8.0, isActive: true },
+      { agency: '지금용코리아', branch: '그레이트탑', achievement: 106.2, ape: 780000, isActive: true },
+      { agency: '더블유에셋', branch: '기업금융본부', achievement: 104.8, ape: 750000, isActive: true },
+      { agency: '글로벌금융판매', branch: '브릿지재무설계', achievement: 103.5, ape: 720000, isActive: true },
+      { agency: '글로벌금융판매', branch: '굿브즈스카이', achievement: 102.1, ape: 720000, isActive: true },
+      { agency: '글로벌금융판매', branch: '인슈에셋자오선', achievement: 100.8, ape: 70, isActive: true },
+      { agency: '메타리치', branch: '보험스토어A', achievement: 99.4, ape: 680000, isActive: true },
+      { agency: '지금용코리아', branch: '서울A', achievement: 98.1, ape: 650000, isActive: true },
+      { agency: '지금용코리아', branch: '대원A', achievement: 96.8, ape: 62, isActive: true },
+      { agency: '지금용코리아', branch: '그레이트탑A', achievement: 95.4, ape: 62, isActive: true },
+      { agency: '지금용코리아', branch: '사랑A', achievement: 94.1, ape: 58, isActive: true },
+      { agency: '더블유에셋', branch: '일산센터A', achievement: 92.8, ape: 58, isActive: true },
+      { agency: '더블유에셋', branch: '서울지사A', achievement: 91.4, ape: 55, isActive: true },
+      { agency: '더블유에셋', branch: '기업금융본부A', achievement: 90.1, ape: 52, isActive: true },
+      { agency: '한국지에이금융서비스', branch: '일산지사A', achievement: 88.8, ape: 52, isActive: true },
+      { agency: '메가', branch: '인슈에셋고양', achievement: 87.4, ape: 48, isActive: true },
+      { agency: '메가', branch: '인슈에셋고양A', achievement: 86.1, ape: 45, isActive: true },
+      { agency: '글로벌금융판매', branch: '하나돔A', achievement: 84.8, ape: 45, isActive: true },
+      { agency: '글로벌금융판매', branch: '하나돔강북A', achievement: 83.4, ape: 42, isActive: true },
+      { agency: '글로벌금융판매', branch: '리더스에프엔A', achievement: 82.1, ape: 42, isActive: true },
+      { agency: '글로벌금융판매', branch: '리더스에이치비A', achievement: 80.8, ape: 38, isActive: true },
+      { agency: '글로벌금융판매', branch: '리더스마이보험A', achievement: 79.4, ape: 35, isActive: true },
+      { agency: '글로벌금융판매', branch: '리더스일산A', achievement: 78.1, ape: 32, isActive: true },
+      { agency: '글로벌금융판매', branch: '케이엘아이케이베스트A', achievement: 76.8, ape: 28, isActive: true }
     ];
     
     // 현재 선택된 기간에 따라 데이터 선택
@@ -982,9 +982,9 @@ const Agent360Dashboard = () => {
     };
 
     const baseData = {
-      '전체': generateMonthData({ape: 210, contract: 30, proposal: 51}),
-      '건강': generateMonthData({ape: 136, contract: 20, proposal: 33}),
-      '종신/정기': generateMonthData({ape: 74, contract: 10, proposal: 18})
+      '전체': generateMonthData({ape: 2100000, contract: 30, proposal: 51}),
+      '건강': generateMonthData({ape: 1360000, contract: 20, proposal: 33}),
+      '종신/정기': generateMonthData({ape: 740000, contract: 10, proposal: 18})
     };
 
     const data = (baseData as any)[selectedProduct] || baseData['전체'];
@@ -1986,7 +1986,7 @@ const Agent360Dashboard = () => {
                     >
                       <div>9월 {hoveredDayData.day}일 (영업 {hoveredDayData.businessDay}일차) - {selectedProduct}</div>
                       {dailyChartMetric === 'APE' || dailyChartMetric === 'MMP' ? (
-                        <div>{performanceType}: {(hoveredDayData.value * 10000).toLocaleString()}원</div>
+                        <div>{performanceType}: {hoveredDayData.value.toLocaleString()}원</div>
                       ) : dailyChartMetric === '청약' ? (
                         <div>청약: {hoveredDayData.value}건</div>
                       ) : (
@@ -2453,7 +2453,7 @@ const Agent360Dashboard = () => {
               <div className="overflow-hidden">
                 {/* 헤더 */}
                 <div className="grid gap-2 pb-2 border-b border-gray-200 mb-3" style={{gridTemplateColumns: '30px 1fr 80px 90px'}}>
-                  <div className="text-xs  text-black">순위</div>
+                  <div className="text-xs  text-black">번호</div>
                   <div className="text-xs  text-black">지점명</div>
                   <button
                     onClick={() => {
@@ -2503,7 +2503,7 @@ const Agent360Dashboard = () => {
                       onClick={() => handleBranchClick(branch.agency, branch.branch)}
                     >
                       <div className="flex items-center">
-                        <div className="w-4 h-4 rounded-full flex items-center justify-center text-xs font-bold bg-yellow-400 text-yellow-900">
+                        <div className="text-xs font-bold text-black">
                           {idx + 1}
                         </div>
                       </div>
@@ -2516,7 +2516,7 @@ const Agent360Dashboard = () => {
                       <div className="flex items-center">
                         <div className={`text-xs ${
                           branchSortBy === 'ape' ? 'text-blue-600 font-bold' : 'text-gray-900'
-                        }`}>{performanceType === 'MMP' ? `${(branch.ape / 100).toFixed(1)}백만원` : `${Math.round(branch.ape / 100)}백만원`}</div>
+                        }`}>{`${branch.ape.toLocaleString()}`}</div>
                       </div>
                       <div className="flex items-center">
                         <div className={`text-xs ${
@@ -2554,7 +2554,7 @@ const Agent360Dashboard = () => {
       {/* 전체 지점 목록 모달 */}
       {showAllBranchesModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowAllBranchesModal(false)}>
-          <div className="bg-white rounded-lg p-6 max-w-6xl w-full mx-4 max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white rounded-lg p-6 max-w-[90vw] w-full mx-4 max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-lg font-semibold text-gray-900">
                 전체 지점 순위
@@ -2606,8 +2606,8 @@ const Agent360Dashboard = () => {
               {/* 테이블 헤더 */}
               <div className="bg-gray-100 border-b sticky top-0">
                 {/* 메인 헤더 */}
-                <div className="grid gap-2 p-3 pb-1 text-xs font-semibold text-gray-700 border-b border-gray-200" style={{gridTemplateColumns: '40px 140px 1fr 160px 180px 200px'}}>
-                  <div className="row-span-2 flex items-center border-r border-gray-300">순위</div>
+                <div className="grid gap-2 p-3 pb-1 text-xs font-semibold text-gray-700 border-b border-gray-200" style={{gridTemplateColumns: '60px 1.5fr 1.5fr 1fr 1fr 1fr'}}>
+                  <div className="row-span-2 flex items-center border-r border-gray-300">번호</div>
                   <div className="row-span-2 flex items-center border-r border-gray-300">대리점명</div>
                   <div className="row-span-2 flex items-center border-r border-gray-300">지점명</div>
                   <div className="text-center border-r border-gray-300">실적({branchRankingKPI})</div>
@@ -2615,7 +2615,7 @@ const Agent360Dashboard = () => {
                   <div className="text-center">나의 성과 기여도</div>
                 </div>
                 {/* 서브 헤더 */}
-                <div className="grid gap-2 px-3 pb-2 pt-1 text-xs font-semibold text-black" style={{gridTemplateColumns: '40px 140px 1fr 80px 80px 90px 90px 100px 100px'}}>
+                <div className="grid gap-2 px-3 pb-2 pt-1 text-xs font-semibold text-black" style={{gridTemplateColumns: '60px 1.5fr 1.5fr 1fr 1fr 1fr'}}>
                   <div className="border-r border-gray-300"></div>
                   <div className="border-r border-gray-300"></div>
                   <div className="border-r border-gray-300"></div>
@@ -2828,13 +2828,11 @@ const Agent360Dashboard = () => {
                     <div
                       key={idx}
                       className="grid gap-2 p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
-                      style={{gridTemplateColumns: '40px 140px 1fr 80px 80px 90px 90px 100px 100px'}}
+                      style={{gridTemplateColumns: '60px 1.5fr 1.5fr 1fr 1fr 1fr'}}
                       onClick={() => handleBranchClick(branch.agency, branch.branch)}
                     >
-                      <div className="flex items-center border-r border-gray-200">
-                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                          idx < 5 ? 'bg-yellow-400 text-yellow-900' : 'bg-gray-200 text-black'
-                        }`}>
+                      <div className="flex items-center justify-center border-r border-gray-200">
+                        <div className="text-xs font-bold text-black">
                           {idx + 1}
                         </div>
                       </div>
@@ -2844,41 +2842,36 @@ const Agent360Dashboard = () => {
                       <div className="flex items-center border-r border-gray-200">
                         <div className="text-sm  text-gray-900 truncate">{branch.branch}</div>
                       </div>
-                      {/* APE 섹션 */}
-                      <div className="flex items-center justify-center border-r border-gray-200">
+                      {/* 실적 컬럼 - 당월/전월 합쳐서 표시 */}
+                      <div className="flex flex-col items-center justify-center border-r border-gray-200">
                         <div className={`text-xs ${
                           modalSortBy === 'ape' ? 'font-bold text-gray-900' : 'font-normal text-gray-900'
-                        }`}>{branch.ape === 0 ? '-' : (branchRankingKPI === 'MMP' ? `${(branch.ape / 1000000).toFixed(1)}백만원` : `${Math.round(branch.ape / 1000000)}백만원`)}</div>
-                      </div>
-                      <div className="flex items-center justify-center border-r border-gray-200">
+                        }`}>당월: {branch.ape === 0 ? '-' : `${branch.ape.toLocaleString()}`}</div>
                         <div className={`text-xs ${
                           modalSortBy === 'previousApe' ? 'font-bold text-black' : 'font-normal text-black'
-                        }`}>{branch.previousApe === 0 ? '-' : (branchRankingKPI === 'MMP' ? `${(branch.previousApe / 1000000).toFixed(1)}백만원` : `${Math.round(branch.previousApe / 1000000)}백만원`)}</div>
+                        }`}>전월: {branch.previousApe === 0 ? '-' : `${branch.previousApe.toLocaleString()}`}</div>
                       </div>
-                      {/* 목표 섹션 */}
-                      <div className="flex items-center justify-center border-r border-gray-200">
+                      {/* 목표관리 컬럼 - 목표/달성률 합쳐서 표시 */}
+                      <div className="flex flex-col items-center justify-center border-r border-gray-200">
                         <div className={`text-xs ${
                           modalSortBy === 'target' ? 'font-bold text-gray-900' : 'font-normal text-gray-900'
-                        }`}>{branchRankingKPI === 'MMP' ? `${((branch.target || 120) / 1000000).toFixed(1)}백만원` : `${Math.round((branch.target || 120) / 1000000)}백만원`}</div>
-                      </div>
-                      <div className="flex items-center justify-center border-r border-gray-200">
+                        }`}>목표: {`${((branch.target || 120) * 10000).toLocaleString()}`}</div>
                         <div className={`text-xs ${
                           modalSortBy === 'achievement'
                             ? `font-bold ${branch.ape === 0 ? 'text-black' : 'text-black'}`
                             : `font-normal ${branch.ape === 0 ? 'text-black' : 'text-black'}`
                         }`}>
-                          {branch.ape === 0 ? '-' : `${branch.calculatedAchievement}%`}
+                          달성률: {branch.ape === 0 ? '-' : `${branch.calculatedAchievement}%`}
                         </div>
                       </div>
-                      <div className="flex items-center justify-center border-r border-gray-200">
+                      {/* 성과기여도 컬럼 - 목표담당/실적담당 합쳐서 표시 */}
+                      <div className="flex flex-col items-center justify-center">
                         <div className={`text-xs ${
                           modalSortBy === 'targetContributor' ? 'font-bold text-gray-900' : 'font-normal text-gray-700'
-                        }`}>{branch.targetContributor}</div>
-                      </div>
-                      <div className="flex items-center justify-center">
+                        }`}>목표: {branch.targetContributor}</div>
                         <div className={`text-xs ${
                           modalSortBy === 'performanceContributor' ? 'font-bold text-gray-900' : 'font-normal text-gray-700'
-                        }`}>{branch.performanceContributor}</div>
+                        }`}>실적: {branch.performanceContributor}</div>
                       </div>
                     </div>
                   );
@@ -2895,7 +2888,7 @@ const Agent360Dashboard = () => {
       {showBranchInfoModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setBranchInfoModal(false)}>
           <div className="bg-white rounded-lg p-6 max-w-7xl w-full mx-4 max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-2">
               <h3 className="text-lg font-semibold text-gray-900">전체 관리 지점 목록</h3>
               <button
                 onClick={() => setBranchInfoModal(false)}
@@ -2904,6 +2897,12 @@ const Agent360Dashboard = () => {
                 <X className="w-5 h-5" />
               </button>
             </div>
+
+            {/* 단위 안내 */}
+            <div className="mb-4">
+              <div className="text-xs text-gray-500">단위: 원, 명</div>
+            </div>
+
 
             {/* KPI 선택 라디오 버튼 */}
             <div className="mb-4">
@@ -3005,7 +3004,7 @@ const Agent360Dashboard = () => {
                             }
                           }}>
                         <div className="flex items-center gap-1">
-                          지점 개설일
+                          지점 개설일자
                           {branchInfoSortBy === 'partnershipDate' && (
                             branchInfoSortOrder === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
                           )}
@@ -3176,7 +3175,7 @@ const Agent360Dashboard = () => {
                           <span className={`text-xs  ${
                             branch.currentMonthAPE > 0 ? 'text-black' : 'text-black'
                           }`}>
-                            {branch.currentMonthAPE > 0 ? (modalKPI === 'MMP' ? `${(branch.currentMonthAPE / 1000000).toFixed(1)}\ubc31\ub9cc\uc6d0` : `${Math.round(branch.currentMonthAPE / 1000000)}\ubc31\ub9cc\uc6d0`) : '-'}
+                            {branch.currentMonthAPE > 0 ? `${branch.currentMonthAPE.toLocaleString()}` : '-'}
                           </span>
                         </td>
 
