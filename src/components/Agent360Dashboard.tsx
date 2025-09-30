@@ -943,6 +943,16 @@ const Agent360Dashboard = () => {
     // 동적으로 데이터 생성
     const generateMonthData = (baseValues: {ape: number, contract: number, proposal: number}) => {
       const data = [];
+
+      // 9월 영업일의 자연스러운 패턴 (실제 실적 데이터처럼 조정)
+      const septemberPattern = [
+        1.1, 0.8, 1.3, 1.5, 1.2, // 1주차: 월수목금 (2,3,4,5일)
+        0.9, 1.4, 1.1, 1.6, 1.0, // 2주차: 월화수목금 (9,10,11,12,13일)
+        1.2, 1.7, 0.7, 1.3, 1.8  // 3주차: 월화수목금 (16,17,18,19,20일)
+      ];
+
+      let businessDayIndex = 0;
+
       for (let day = 1; day <= maxDay; day++) {
         const isWeekend = weekendDays.has(day);
         if (isWeekend) {
@@ -954,16 +964,15 @@ const Agent360Dashboard = () => {
             isWeekend: true
           });
         } else {
-          // 영업일 실적 생성 (약간의 랜덤성을 가지지만 일관성 있게)
-          const dayFactor = (day % 7) + 1; // 1-7 사이의 값
-          const weekFactor = Math.floor(day / 7) + 1; // 주차별 조정
-          const monthFactor = selectedMonth === 9 ? 1.1 : (selectedMonth / 10); // 월별 조정
+          // 자연스러운 패턴 적용
+          const patternFactor = septemberPattern[businessDayIndex] || 1.0;
+          businessDayIndex++;
 
           data.push({
             day,
-            apeAmount: Math.round(baseValues.ape * dayFactor * monthFactor / 4),
-            contractCount: Math.round(baseValues.contract * dayFactor * monthFactor / 4),
-            proposalCount: Math.round(baseValues.proposal * dayFactor * monthFactor / 4),
+            apeAmount: Math.round(baseValues.ape * patternFactor),
+            contractCount: Math.round(baseValues.contract * patternFactor),
+            proposalCount: Math.round(baseValues.proposal * patternFactor),
             isWeekend: false
           });
         }
@@ -972,9 +981,9 @@ const Agent360Dashboard = () => {
     };
 
     const baseData = {
-      '전체': generateMonthData({ape: 25, contract: 18, proposal: 30}),
-      '건강': generateMonthData({ape: 15, contract: 12, proposal: 20}),
-      '종신/정기': generateMonthData({ape: 10, contract: 6, proposal: 10})
+      '전체': generateMonthData({ape: 210, contract: 30, proposal: 51}),
+      '건강': generateMonthData({ape: 136, contract: 20, proposal: 33}),
+      '종신/정기': generateMonthData({ape: 74, contract: 10, proposal: 18})
     };
 
     const data = (baseData as any)[selectedProduct] || baseData['전체'];
@@ -995,10 +1004,10 @@ const Agent360Dashboard = () => {
       dailyApeAmount: { '전체': 1600, '건강': 1100, '종신/정기': 500 },
       apeRatio: { '전체': 100, '건강': 65, '종신/정기': 35 },
       dailyApeGrowth: { '전체': 8.7, '건강': 12.3, '종신/정기': 5.8 },
-      design: { '전체': 380, '건강': 248, '종신/정기': 132 },
+      design: { '전체': 771, '건강': 500, '종신/정기': 271 },
       dailyDesign: { '전체': 25, '건강': 16, '종신/정기': 9 },
       designGrowth: { '전체': -8, '건강': -5, '종신/정기': -3 },
-      contract: { '전체': 225, '건강': 146, '종신/정기': 79 },
+      contract: { '전체': 455, '건강': 295, '종신/정기': 160 },
       dailyContract: { '전체': 15, '건강': 10, '종신/정기': 5 },
       contractGrowth: { '전체': 12, '건강': 18, '종신/정기': 8 }
     } : {
@@ -1010,10 +1019,10 @@ const Agent360Dashboard = () => {
       dailyApeAmount: { '전체': Math.round(1600/12), '건강': Math.round(1100/12), '종신/정기': Math.round(500/12) },
       apeRatio: { '전체': 100, '건강': 65, '종신/정기': 35 },
       dailyApeGrowth: { '전체': 8.7, '건강': 12.3, '종신/정기': 5.8 },
-      design: { '전체': 380, '건강': 248, '종신/정기': 132 },
+      design: { '전체': 771, '건강': 500, '종신/정기': 271 },
       dailyDesign: { '전체': 25, '건강': 16, '종신/정기': 9 },
       designGrowth: { '전체': -8, '건강': -5, '종신/정기': -3 },
-      contract: { '전체': 225, '건강': 146, '종신/정기': 79 },
+      contract: { '전체': 455, '건강': 295, '종신/정기': 160 },
       dailyContract: { '전체': 15, '건강': 10, '종신/정기': 5 },
       contractGrowth: { '전체': 12, '건강': 18, '종신/정기': 8 }
     };
@@ -1511,14 +1520,18 @@ const Agent360Dashboard = () => {
                           <div className="absolute top-0 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-20">
                             {selectedKPI === 'nb_plan' ? (
                               <div>
-                                <div>{data.month}</div>
-                                <div>{data.value.toFixed(1)}% ({data.actual}/{data.target}백만원)</div>
+                                <div>{data.month} - {performanceType}</div>
+                                <div>Bf Plan: {(data.target * 10000).toLocaleString()}원</div>
+                                <div>Actual: {(data.actual * 10000).toLocaleString()}원</div>
+                                <div>{data.value.toFixed(1)}% 달성</div>
                                 <div className="text-yellow-300">전체평균 {data.hqAvg}%</div>
                               </div>
                             ) : selectedKPI === 'activity_plan' ? (
                               <div>
                                 <div>{data.month}</div>
-                                <div>{data.value.toFixed(1)}% ({data.active}/{data.target}명)</div>
+                                <div>가동 Plan: {data.target}명</div>
+                                <div>Actual: {data.active}명</div>
+                                <div>{data.value.toFixed(1)}% 달성</div>
                                 <div className="text-yellow-300">전체평균 {data.hqAvg}%</div>
                               </div>
                             ) : (
@@ -1685,14 +1698,18 @@ const Agent360Dashboard = () => {
                             <div className="absolute top-0 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-20">
                               {yearlyKPI === 'nb_plan' ? (
                                 <div>
-                                  <div>{data.year === '2025' ? '2025년 (~9월)' : `${data.year}년`}</div>
-                                  <div>{value.toFixed(1)}% ({data.nb_plan_achieved.toLocaleString()}/{data.nb_plan_target.toLocaleString()}백만원)</div>
+                                  <div>{data.year === '2025' ? '2025년 (~9월)' : `${data.year}년`} - {performanceType}</div>
+                                  <div>Bf Plan: {(data.nb_plan_target * 10000).toLocaleString()}원</div>
+                                  <div>Actual: {(data.nb_plan_achieved * 10000).toLocaleString()}원</div>
+                                  <div>{value.toFixed(1)}% 달성</div>
                                   <div className="text-yellow-300">전체평균 {avgValue.toFixed(1)}%</div>
                                 </div>
                               ) : yearlyKPI === 'activity_plan' ? (
                                 <div>
                                   <div>{data.year === '2025' ? '2025년 (~9월)' : `${data.year}년`}</div>
-                                  <div>{value.toFixed(1)}% ({data.activity_achieved}/{data.activity_total}명)</div>
+                                  <div>가동 Plan: {data.activity_total}명</div>
+                                  <div>Actual: {data.activity_achieved}명</div>
+                                  <div>{value.toFixed(1)}% 달성</div>
                                   <div className="text-yellow-300">전체평균 {avgValue.toFixed(1)}%</div>
                                 </div>
                               ) : (
@@ -1765,8 +1782,8 @@ const Agent360Dashboard = () => {
                   <div className="text-2xl font-bold text-blue-600">{formatCurrency(getFilteredData('ape') * 10000, performanceType)}</div>
                 </div>
                 <div className="text-center">
-                  <span className="text-xs text-black">전월 동기 대비 ▲ </span>
-                  <span className="text-sm  text-black">{formatCurrency(getFilteredData('apeGrowthAmount') * 10000, performanceType)}</span>
+                  <span className="text-xs text-black">전월 동기 대비 </span>
+                  <span className="text-sm text-blue-600">▲ {formatCurrency(getFilteredData('apeGrowthAmount') * 10000, performanceType)}</span>
                 </div>
               </div>
               
@@ -1779,8 +1796,8 @@ const Agent360Dashboard = () => {
                     <div className="text-2xl font-bold text-blue-600">{getFilteredData('design')}<span className="text-base text-black">건</span></div>
                   </div>
                   <div className="text-center">
-                    <span className="text-xs text-black">전월 동기 대비 ▼ </span>
-                    <span className="text-sm  text-red-600">{Math.abs(getFilteredData('designGrowth'))}건</span>
+                    <span className="text-xs text-black">전월 동기 대비 </span>
+                    <span className="text-sm text-red-600">▼ {Math.abs(getFilteredData('designGrowth'))}건</span>
                   </div>
                 </div>
 
@@ -1834,8 +1851,8 @@ const Agent360Dashboard = () => {
                     );
                   })()}
                   <div className="text-center">
-                    <span className="text-xs text-black">전월 동기 대비 ▲ </span>
-                    <span className="text-sm  text-black">{getFilteredData('contractGrowth')}건</span>
+                    <span className="text-xs text-black">전월 동기 대비 </span>
+                    <span className="text-sm text-blue-600">▲ {getFilteredData('contractGrowth')}건</span>
                   </div>
                 </div>
               </div>
@@ -1968,7 +1985,7 @@ const Agent360Dashboard = () => {
                     >
                       <div>9월 {hoveredDayData.day}일 (영업 {hoveredDayData.businessDay}일차) - {selectedProduct}</div>
                       {dailyChartMetric === 'APE' || dailyChartMetric === 'MMP' ? (
-                        <div>일 {performanceType}: {formatCurrency(hoveredDayData.value * 10000, performanceType)}</div>
+                        <div>{performanceType}: {(hoveredDayData.value * 10000).toLocaleString()}원</div>
                       ) : dailyChartMetric === '청약' ? (
                         <div>청약: {hoveredDayData.value}건</div>
                       ) : (
