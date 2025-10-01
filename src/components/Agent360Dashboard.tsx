@@ -306,7 +306,7 @@ const Agent360Dashboard = () => {
         // 10만원 단위로 반올림
         baseValue = Math.round(baseValue / 100000) * 100000;
 
-        performanceValue = kpi === 'MMP' ? Math.round(baseValue * 12) : baseValue;
+        performanceValue = kpi === 'MMP' ? Math.round(baseValue / 12) : baseValue;
       }
 
       return {
@@ -957,11 +957,11 @@ const Agent360Dashboard = () => {
     const generateMonthData = (baseValues: {ape: number, contract: number, proposal: number}) => {
       const data = [];
 
-      // 9월 영업일의 자연스러운 패턴 (실제 실적 데이터처럼 조정)
+      // 9월 영업일의 지수 형태 패턴 (월초 낮고 월말로 갈수록 증가)
       const septemberPattern = [
-        1.1, 0.8, 1.3, 1.5, 1.2, // 1주차: 월수목금 (2,3,4,5일)
-        0.9, 1.4, 1.1, 1.6, 1.0, // 2주차: 월화수목금 (9,10,11,12,13일)
-        1.2, 1.7, 0.7, 1.3, 1.8  // 3주차: 월화수목금 (16,17,18,19,20일)
+        0.3, 0.4, 0.5, 0.6, 0.7, // 1주차: 월수목금 (2,3,4,5일) - 낮은 실적
+        0.8, 0.9, 1.0, 1.2, 1.4, // 2주차: 월화수목금 (9,10,11,12,13일) - 점진적 증가
+        1.6, 1.9, 2.2, 2.5, 2.8  // 3주차: 월화수목금 (16,17,18,19,20일) - 급격히 증가
       ];
 
       let businessDayIndex = 0;
@@ -1335,8 +1335,8 @@ const Agent360Dashboard = () => {
                       className="absolute -top-16 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded px-3 py-2 whitespace-nowrap z-20 shadow-lg text-left"
                     >
                       <div>9월 - {performanceType}</div>
-                      <div>NB Plan: {(performanceType === 'MMP' ? Math.round(myKPI.goalAchievement.target / 12) : myKPI.goalAchievement.target).toLocaleString()}원</div>
-                      <div>Actual: {(performanceType === 'MMP' ? Math.round(myKPI.goalAchievement.actual / 12) : myKPI.goalAchievement.actual).toLocaleString()}원</div>
+                      <div>NB Plan: {Math.round(myKPI.goalAchievement.target).toLocaleString()}원</div>
+                      <div>Actual: {Math.round(myKPI.goalAchievement.actual).toLocaleString()}원</div>
                       <div>{myKPI.goalAchievement.current.toFixed(1)}% 달성</div>
                       <div className="text-yellow-300">전체평균 {myKPI.goalAchievement.hqAvg}%</div>
                       <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
@@ -1911,8 +1911,8 @@ const Agent360Dashboard = () => {
                     <div className="absolute top-2 right-2 text-xs  flex items-center gap-1 z-20 text-black">
                       <div className="w-4 h-0.5" style={{backgroundColor: '#facc15'}}></div>
                       <span>일 평균: {
-                        dailyChartMetric === 'APE' ? `${Math.round(average).toLocaleString()}백만원` :
-                        dailyChartMetric === 'MMP' ? `${Math.round(average).toLocaleString()}천원` :
+                        dailyChartMetric === 'APE' ? `${Math.round(average * 1000000).toLocaleString()}원` :
+                        dailyChartMetric === 'MMP' ? `${Math.round(average * 1000).toLocaleString()}원` :
                         `${average.toFixed(1)}건`
                       }</span>
                     </div>
@@ -2004,7 +2004,7 @@ const Agent360Dashboard = () => {
                     >
                       <div>9월 {hoveredDayData.day}일 (영업 {hoveredDayData.businessDay}일차) - {selectedProduct}</div>
                       {dailyChartMetric === 'APE' || dailyChartMetric === 'MMP' ? (
-                        <div>{performanceType}: {hoveredDayData.value.toLocaleString()}원</div>
+                        <div>{performanceType}: {Math.round(hoveredDayData.value * (performanceType === 'APE' ? 1000000 : 1000)).toLocaleString()}원</div>
                       ) : dailyChartMetric === '청약' ? (
                         <div>청약: {hoveredDayData.value}건</div>
                       ) : (

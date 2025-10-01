@@ -504,36 +504,36 @@ const Branch360Dashboard = () => {
   // 핵심 성과 지표 (전일 마감 기준)
   const corePerformance = {
     // 목표 달성률 (APE/MMP 기준)
-    achievementRate: 32.67, // 98/300
-    currentApe: 98, // 만원 단위 (98만원) - APE 기준
-    targetApe: 300, // 만원 단위 (300만원) - APE 기준
+    achievementRate: 50.0, // 1000/2000
+    currentApe: 1000, // 만원 단위 (1000만원 = 1억) - APE 기준
+    targetApe: 2000, // 만원 단위 (2000만원 = 2억) - APE 기준
     achievementVsLastMonth: 8.5, // 전월 동기 대비 %p
 
     // 지점장 실적 기여도
-    managerContributionRate: 0.28, // 역삼지점 실적(98만원) ÷ 지점장 전체 실적(3.5억 = 35000만원) * 100
+    managerContributionRate: 2.9, // 역삼지점 실적(1000만원) ÷ 지점장 전체 실적(3.5억 = 35000만원) * 100
     managerApe: 35000, // 지점장 개인 실적 (만원) 3.5억 - APE 기준
     managerName: '김영수', // 지점장 이름
     managerPersonalTarget: 50000, // 지점장 개인 목표 (만원) 5억 - APE 기준
-    branchTargetApe: 300, // 역삼지점 목표 APE (만원) 300만원 - APE 기준
-    managerPlanContribution: 0.6, // 역삼지점 목표(300만원) ÷ 지점장 목표(5억 = 50000만원) * 100
+    branchTargetApe: 2000, // 역삼지점 목표 APE (만원) 2000만원 - APE 기준
+    managerPlanContribution: 4.0, // 역삼지점 목표(2000만원) ÷ 지점장 목표(5억 = 50000만원) * 100
     managerContribVsLastMonth: -2.3, // 전월 동기 대비 %p
-    totalBranchApe: 98, // 역삼지점 실적 APE (만원) 98만원 - APE 기준
+    totalBranchApe: 1000, // 역삼지점 실적 APE (만원) 1000만원 - APE 기준
 
     // 월누적 APE
-    monthlyApeAmount: 98, // 만원 - APE 기준
-    apeGrowthAmount: 20, // 전월 동기 대비 증가분 (만원) - APE 기준
-    apeGrowthPercent: 25.6, // 전월 동기 대비 %
-    apeDailyAverage: Math.round(98/15), // 일평균 APE (만원) - APE 기준, formatCurrency에서 변환
+    monthlyApeAmount: 1000, // 만원 - APE 기준
+    apeGrowthAmount: 200, // 전월 동기 대비 증가분 (만원) - APE 기준
+    apeGrowthPercent: 25.0, // 전월 동기 대비 %
+    apeDailyAverage: Math.round(1000/15), // 일평균 APE (만원) - APE 기준, formatCurrency에서 변환
 
     // 월누적 설계
-    proposalCount: 162,
-    proposalGrowth: 12, // 전월 동기 대비
-    proposalDailyAverage: Math.round(162/15),
+    proposalCount: 250,
+    proposalGrowth: 18, // 전월 동기 대비
+    proposalDailyAverage: Math.round(250/15),
 
     // 월누적 청약
-    contractCount: 95,
-    contractGrowth: -5, // 전월 동기 대비
-    contractDailyAverage: Math.round(95/15)
+    contractCount: 150,
+    contractGrowth: 12, // 전월 동기 대비
+    contractDailyAverage: Math.round(150/15)
   };
 
   // 선택된 월에 따른 동적 일별 실적 데이터 생성
@@ -550,8 +550,8 @@ const Branch360Dashboard = () => {
 
     const dailyData = [];
 
-    // 9월의 경우 15 영업일 총합 = 980천원 (APE 기준)
-    const targetTotal = isCurrentMonth ? 980 : 980; // 천원 단위
+    // 9월의 경우 15 영업일 총합 = 15000천원 (APE 기준, 1.5억)
+    const targetTotal = isCurrentMonth ? 1000 : 1000; // 천원 단위
     const businessDays = [];
 
     // 먼저 영업일/주말 구분
@@ -565,10 +565,11 @@ const Branch360Dashboard = () => {
       }
     }
 
-    // 일별 비율 생성 (고정된 패턴으로 자연스러운 변동)
+    // 일별 비율 생성 (GA채널 특징: 월초 낮고 월말로 지수적으로 증가)
     const ratios = businessDays.map((day, idx) => {
-      const baseRatio = 1 + (Math.sin(idx * 0.5) * 0.3) + ((day % 7) * 0.03 - 0.1);
-      return Math.max(0.5, baseRatio);
+      // 지수 함수 사용: e^(idx * 0.25) - 월초에 낮고 월말로 갈수록 급증
+      const exponentialRatio = Math.exp(idx * 0.25);
+      return exponentialRatio;
     });
 
     const totalRatio = ratios.reduce((sum, r) => sum + r, 0);
@@ -689,7 +690,7 @@ const Branch360Dashboard = () => {
   const [agentListModal, setAgentListModal] = useState(false);
   const [selectedAgent] = useState<any>(null);
   const [agentDetailModal, setAgentDetailModal] = useState(false);
-  const [agentSortBy, setAgentSortBy] = useState('mmp0');
+  const [agentSortBy, setAgentSortBy] = useState('commissionMonth');
   const [agentSortOrder, setAgentSortOrder] = useState<'desc' | 'asc'>('desc');
   const [showAllAgentsModal, setShowAllAgentsModal] = useState(false);
   const [agentPeriod, setAgentPeriod] = useState<'current' | 'previous'>('current');
@@ -698,6 +699,7 @@ const Branch360Dashboard = () => {
   const [showManagementHistoryModal, setShowManagementHistoryModal] = useState(false); // 관리활동 더보기 모달
   const [showActiveAgentsModal, setShowActiveAgentsModal] = useState(false); // 가동 설계사 모달
   const [showInactiveAgentsModal, setShowInactiveAgentsModal] = useState(false); // 미가동 설계사 모달
+  const [modalPerformanceType, setModalPerformanceType] = useState<'APE' | 'MMP'>('MMP'); // 모달 성과 기준
   const [activeSortBy, setActiveSortBy] = useState<'name' | 'code' | 'tenure' | 'commissionMonth' | 'currentMMP' | 'previousMMP' | 'M0' | 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M0건' | 'M1건' | 'M2건' | 'M3건' | 'M4건' | 'M5건'>('M0'); // 가동 설계사 정렬 기준
   const [activeSortOrder, setActiveSortOrder] = useState<'asc' | 'desc'>('desc'); // 가동 설계사 정렬 순서
   const [inactiveSortBy, setInactiveSortBy] = useState<'name' | 'code' | 'tenure' | 'commissionMonth' | 'previousMMP' | 'M0' | 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M0건' | 'M1건' | 'M2건' | 'M3건' | 'M4건' | 'M5건'>('commissionMonth'); // 미가동 설계사 정렬 기준
@@ -705,14 +707,14 @@ const Branch360Dashboard = () => {
   
   const currentAgentStatus = {
     total: 47, // 총 소속 설계사
-    active: 29, // 당월 가동 설계사 (12+6+5+6=29명)
+    active: 25, // 당월 가동 설계사
     newThisMonth: 2, // 당월 신규 위촉 (새로 입사한 설계사)
     resignedThisMonth: 1, // 당월 해촉
     netChange: 1, // 순증감 (신규위촉2 - 해촉1)
     continuous6Months: 8, // 6개월 연속 가동 (순수 6개월만)
     continuous3Months: 15, // 3개월 연속 가동 (6개월 8명 + 3개월 7명 = 15명)
-    continuous2Months: 23, // 2개월 연속 가동 (3개월 15명 + 2개월 8명 = 23명)
-    newActive: 6 // 전월 미가동→가동 전환
+    continuous2Months: 21, // 2개월 연속 가동 (25명 가동 - 4명 신규가동 = 21명)
+    newActive: 4 // 신규 가동 (AG024, AG025, AG026, AG027)
   };
 
 
@@ -755,230 +757,232 @@ const Branch360Dashboard = () => {
       // TOP 5 우수 설계사
       {
         name: '이지은', agentCode: 'AG001', experience: '8.5년차', commissionMonth:'102개월', insuranceCareer: '8.5년',
-        currentMonth: { premium: 96, contracts: 13, rank: 1 },
-        previousMonth: { premium: 186, contracts: 11, rank: 2 },
-        threeMonthAverage: { premium: 195, contracts: 12 },
+        currentMonth: { premium: 160, contracts: 13, rank: 1 },
+        previousMonth: { premium: 367, contracts: 11, rank: 2 },
+        threeMonthAverage: { premium: 383, contracts: 12 },
         productMix: { health: 70, life: 30 }, isActive: true
       },
       {
         name: '김선호', agentCode: 'AG002', experience: '6.2년차', commissionMonth:'74개월', insuranceCareer: '6.2년',
-        currentMonth: { premium: 86, contracts: 12, rank: 2 },
-        previousMonth: { premium: 192, contracts: 13, rank: 1 },
-        threeMonthAverage: { premium: 189, contracts: 12 },
+        currentMonth: { premium: 142, contracts: 12, rank: 2 },
+        previousMonth: { premium: 377, contracts: 13, rank: 1 },
+        threeMonthAverage: { premium: 373, contracts: 12 },
         productMix: { health: 55, life: 45 }, isActive: true
       },
       {
         name: '김준영', agentCode: 'AG003', experience: '12.8년차', commissionMonth:'153개월', insuranceCareer: '12.8년',
-        currentMonth: { premium: 79, contracts: 11, rank: 3 },
-        previousMonth: { premium: 164, contracts: 10, rank: 3 },
-        threeMonthAverage: { premium: 168, contracts: 10 },
+        currentMonth: { premium: 128, contracts: 11, rank: 3 },
+        previousMonth: { premium: 323, contracts: 10, rank: 3 },
+        threeMonthAverage: { premium: 331, contracts: 10 },
         productMix: { health: 65, life: 35 }, isActive: true
       },
       {
         name: '이하늘', agentCode: 'AG004', experience: '4.3년차', commissionMonth:'51개월', insuranceCareer: '4.3년',
-        currentMonth: { premium: 73, contracts: 9, rank: 4 },
-        previousMonth: { premium: 152, contracts: 8, rank: 4 },
-        threeMonthAverage: { premium: 155, contracts: 8 },
+        currentMonth: { premium: 120, contracts: 9, rank: 4 },
+        previousMonth: { premium: 300, contracts: 8, rank: 4 },
+        threeMonthAverage: { premium: 305, contracts: 8 },
         productMix: { health: 40, life: 60 }, isActive: true
       },
       {
         name: '박상호', agentCode: 'AG005', experience: '7.6년차', commissionMonth:'91개월', insuranceCareer: '7.6년',
-        currentMonth: { premium: 67, contracts: 10, rank: 5 },
-        previousMonth: { premium: 139, contracts: 9, rank: 5 },
-        threeMonthAverage: { premium: 142, contracts: 9 },
+        currentMonth: { premium: 110, contracts: 10, rank: 5 },
+        previousMonth: { premium: 273, contracts: 9, rank: 5 },
+        threeMonthAverage: { premium: 280, contracts: 9 },
         productMix: { health: 80, life: 20 }, isActive: true
       },
 
       // 6-12위: 연속 가동 설계사
       {
         name: '정미선', agentCode: 'AG006', experience: '5.4년차', commissionMonth:'65개월', insuranceCareer: '5.4년',
-        currentMonth: { premium: 61, contracts: 8, rank: 6 },
-        previousMonth: { premium: 125, contracts: 7, rank: 6 },
-        threeMonthAverage: { premium: 128, contracts: 7 },
+        currentMonth: { premium: 36, contracts: 8, rank: 6 },
+        previousMonth: { premium: 83, contracts: 7, rank: 6 },
+        threeMonthAverage: { premium: 85, contracts: 7 },
         productMix: { health: 55, life: 45 }, isActive: true
       },
       {
         name: '조영수', agentCode: 'AG007', experience: '3.7년차', commissionMonth:'44개월', insuranceCareer: '3.7년',
-        currentMonth: { premium: 54, contracts: 7, rank: 7 },
-        previousMonth: { premium: 114, contracts: 6, rank: 7 },
-        threeMonthAverage: { premium: 116, contracts: 6 },
+        currentMonth: { premium: 32, contracts: 7, rank: 7 },
+        previousMonth: { premium: 76, contracts: 6, rank: 7 },
+        threeMonthAverage: { premium: 77, contracts: 6 },
         productMix: { health: 75, life: 25 }, isActive: true
       },
       {
         name: '차서영', agentCode: 'AG008', experience: '10.2년차', commissionMonth:'122개월', insuranceCareer: '10.2년',
-        currentMonth: { premium: 48, contracts: 6, rank: 8 },
-        previousMonth: { premium: 98, contracts: 5, rank: 8 },
-        threeMonthAverage: { premium: 101, contracts: 5 },
+        currentMonth: { premium: 29, contracts: 6, rank: 8 },
+        previousMonth: { premium: 65, contracts: 5, rank: 8 },
+        threeMonthAverage: { premium: 67, contracts: 5 },
         productMix: { health: 60, life: 40 }, isActive: true
       },
       {
         name: '손민준', agentCode: 'AG009', experience: '2.9년차', commissionMonth:'35개월', insuranceCareer: '2.9년',
-        currentMonth: { premium: 42, contracts: 5, rank: 9 },
-        previousMonth: { premium: 87, contracts: 4, rank: 9 },
-        threeMonthAverage: { premium: 89, contracts: 4 },
+        currentMonth: { premium: 25, contracts: 5, rank: 9 },
+        previousMonth: { premium: 58, contracts: 4, rank: 9 },
+        threeMonthAverage: { premium: 59, contracts: 4 },
         productMix: { health: 45, life: 55 }, isActive: true
       },
       {
         name: '박지수', agentCode: 'AG010', experience: '6.8년차', commissionMonth:'81개월', insuranceCareer: '6.8년',
-        currentMonth: { premium: 39, contracts: 4, rank: 10 },
-        previousMonth: { premium: 79, contracts: 3, rank: 10 },
-        threeMonthAverage: { premium: 81, contracts: 3 },
+        currentMonth: { premium: 23, contracts: 4, rank: 10 },
+        previousMonth: { premium: 53, contracts: 3, rank: 10 },
+        threeMonthAverage: { premium: 54, contracts: 3 },
         productMix: { health: 85, life: 15 }, isActive: true
       },
       {
         name: '정동현', agentCode: 'AG011', experience: '4.5년차', commissionMonth:'54개월', insuranceCareer: '4.5년',
-        currentMonth: { premium: 35, contracts: 3, rank: 11 },
-        previousMonth: { premium: 72, contracts: 2, rank: 11 },
-        threeMonthAverage: { premium: 74, contracts: 2 },
+        currentMonth: { premium: 21, contracts: 3, rank: 11 },
+        previousMonth: { premium: 48, contracts: 2, rank: 11 },
+        threeMonthAverage: { premium: 49, contracts: 2 },
         productMix: { health: 50, life: 50 }, isActive: true
       },
       {
         name: '차민정', agentCode: 'AG012', experience: '1.8년차', commissionMonth:'21개월', insuranceCareer: '1.8년',
-        currentMonth: { premium: 31, contracts: 2, rank: 12 },
-        previousMonth: { premium: 65, contracts: 2, rank: 12 },
-        threeMonthAverage: { premium: 66, contracts: 2 },
+        currentMonth: { premium: 18, contracts: 2, rank: 12 },
+        previousMonth: { premium: 43, contracts: 2, rank: 12 },
+        threeMonthAverage: { premium: 44, contracts: 2 },
         productMix: { health: 70, life: 30 }, isActive: true
       },
 
       // 13-20위: 연속 가동 설계사 (3개월)
       {
         name: '김배태', agentCode: 'AG013', experience: '4.1년차', commissionMonth:'1개월', insuranceCareer: '4.1년',
-        currentMonth: { premium: 28, contracts: 2, rank: 13 },
+        currentMonth: { premium: 25, contracts: 2, rank: 13 },
         previousMonth: { premium: 0, contracts: 0, rank: null },
         threeMonthAverage: { premium: 59, contracts: 1 },
         productMix: { health: 65, life: 35 }, isActive: true
       },
       {
         name: '박예진', agentCode: 'AG014', experience: '1.3년차', commissionMonth:'1개월', insuranceCareer: '1.3년',
-        currentMonth: { premium: 25, contracts: 1, rank: 14 },
+        currentMonth: { premium: 22, contracts: 1, rank: 14 },
         previousMonth: { premium: 0, contracts: 0, rank: null },
         threeMonthAverage: { premium: 53, contracts: 1 },
         productMix: { health: 55, life: 45 }, isActive: true
       },
       {
         name: '박지영', agentCode: 'AG015', experience: '3.2년차', commissionMonth:'38개월', insuranceCareer: '3.2년',
-        currentMonth: { premium: 22, contracts: 1, rank: 15 },
+        currentMonth: { premium: 20, contracts: 1, rank: 15 },
         previousMonth: { premium: 45, contracts: 1, rank: 15 },
         threeMonthAverage: { premium: 46, contracts: 1 },
         productMix: { health: 80, life: 20 }, isActive: true
       },
       {
         name: '정예린', agentCode: 'AG016', experience: '5.7년차', commissionMonth:'68개월', insuranceCareer: '5.7년',
-        currentMonth: { premium: 19, contracts: 1, rank: 16 },
+        currentMonth: { premium: 17, contracts: 1, rank: 16 },
         previousMonth: { premium: 39, contracts: 1, rank: 16 },
         threeMonthAverage: { premium: 40, contracts: 1 },
         productMix: { health: 40, life: 60 }, isActive: true
       },
       {
         name: '조은경', agentCode: 'AG017', experience: '2.5년차', commissionMonth:'30개월', insuranceCareer: '2.5년',
-        currentMonth: { premium: 17, contracts: 1, rank: 17 },
+        currentMonth: { premium: 15, contracts: 1, rank: 17 },
         previousMonth: { premium: 34, contracts: 1, rank: 17 },
         threeMonthAverage: { premium: 35, contracts: 1 },
         productMix: { health: 75, life: 25 }, isActive: true
       },
       {
         name: '손지원', agentCode: 'AG018', experience: '4.1년차', commissionMonth:'49개월', insuranceCareer: '4.1년',
-        currentMonth: { premium: 14, contracts: 1, rank: 18 },
+        currentMonth: { premium: 13, contracts: 1, rank: 18 },
         previousMonth: { premium: 28, contracts: 1, rank: 18 },
         threeMonthAverage: { premium: 29, contracts: 1 },
         productMix: { health: 60, life: 40 }, isActive: true
       },
       {
         name: '김동현', agentCode: 'AG019', experience: '7.3년차', commissionMonth:'87개월', insuranceCareer: '7.3년',
-        currentMonth: { premium: 12, contracts: 1, rank: 19 },
+        currentMonth: { premium: 11, contracts: 1, rank: 19 },
         previousMonth: { premium: 24, contracts: 1, rank: 19 },
         threeMonthAverage: { premium: 25, contracts: 1 },
         productMix: { health: 50, life: 50 }, isActive: true
       },
       {
         name: '이민지', agentCode: 'AG020', experience: '1.9년차', commissionMonth:'23개월', insuranceCareer: '1.9년',
-        currentMonth: { premium: 10, contracts: 1, rank: 20 },
+        currentMonth: { premium: 8, contracts: 1, rank: 20 },
         previousMonth: { premium: 20, contracts: 1, rank: 20 },
         threeMonthAverage: { premium: 21, contracts: 1 },
         productMix: { health: 85, life: 15 }, isActive: true
       },
 
-      // 21-25위: 연속 가동 설계사 (2개월)
-      {
-        name: '박형준', agentCode: 'AG021', experience: '6.5년차', commissionMonth:'78개월', insuranceCareer: '6.5년',
-        currentMonth: { premium: 8, contracts: 1, rank: 21 },
-        previousMonth: { premium: 16, contracts: 1, rank: 21 },
-        threeMonthAverage: { premium: 17, contracts: 1 },
-        productMix: { health: 45, life: 55 }, isActive: true
-      },
-      {
-        name: '김나영', agentCode: 'AG022', experience: '3.8년차', commissionMonth:'45개월', insuranceCareer: '3.8년',
-        currentMonth: { premium: 7, contracts: 1, rank: 22 },
-        previousMonth: { premium: 13, contracts: 1, rank: 22 },
-        threeMonthAverage: { premium: 14, contracts: 1 },
-        productMix: { health: 70, life: 30 }, isActive: true
-      },
+      // 21위: 연속 가동 설계사 (2개월)
       {
         name: '이성민', agentCode: 'AG023', experience: '8.1년차', commissionMonth:'97개월', insuranceCareer: '8.1년',
-        currentMonth: { premium: 6, contracts: 1, rank: 23 },
+        currentMonth: { premium: 5, contracts: 1, rank: 21 },
         previousMonth: { premium: 10, contracts: 1, rank: 23 },
         threeMonthAverage: { premium: 11, contracts: 1 },
         productMix: { health: 55, life: 45 }, isActive: true
       },
+
+      // 22-25위: 신규 가동 (당월 처음 실적)
       {
         name: '정주영', agentCode: 'AG024', experience: '2.3년차', commissionMonth:'27개월', insuranceCareer: '2.3년',
-        currentMonth: { premium: 0, contracts: 0, rank: null }, // 당월 무실적
-        previousMonth: { premium: 8, contracts: 1, rank: 24 },
-        threeMonthAverage: { premium: 8, contracts: 1 },
+        currentMonth: { premium: 5, contracts: 1, rank: 22 },
+        previousMonth: { premium: 0, contracts: 0, rank: null },
+        threeMonthAverage: { premium: 3, contracts: 0 },
         productMix: { health: 80, life: 20 }, isActive: true
       },
       {
         name: '조민석', agentCode: 'AG025', experience: '5.2년차', commissionMonth:'62개월', insuranceCareer: '5.2년',
-        currentMonth: { premium: 0, contracts: 0, rank: null }, // 당월 무실적
-        previousMonth: { premium: 6, contracts: 1, rank: 25 },
-        threeMonthAverage: { premium: 6, contracts: 1 },
+        currentMonth: { premium: 5, contracts: 1, rank: 23 },
+        previousMonth: { premium: 0, contracts: 0, rank: null },
+        threeMonthAverage: { premium: 2, contracts: 0 },
         productMix: { health: 65, life: 35 }, isActive: true
       },
-
-      // 26-29위: 신규 가동 (당월 처음 실적)
       {
         name: '최지후', agentCode: 'AG026', experience: '1.5년차', commissionMonth:'18개월', insuranceCareer: '1.5년',
-        currentMonth: { premium: 5, contracts: 1, rank: 26 },
+        currentMonth: { premium: 5, contracts: 1, rank: 24 },
         previousMonth: { premium: 0, contracts: 0, rank: null },
         threeMonthAverage: { premium: 2, contracts: 0 },
         productMix: { health: 40, life: 60 }, isActive: true
       },
       {
         name: '김대우', agentCode: 'AG027', experience: '4.7년차', commissionMonth:'56개월', insuranceCareer: '4.7년',
-        currentMonth: { premium: 4, contracts: 1, rank: 27 },
+        currentMonth: { premium: 5, contracts: 1, rank: 25 },
         previousMonth: { premium: 0, contracts: 0, rank: null },
         threeMonthAverage: { premium: 2, contracts: 0 },
         productMix: { health: 75, life: 25 }, isActive: true
       },
+
+      // 26-27위: 전월 가동→미가동 전환 (당월 무실적)
+      {
+        name: '박형준', agentCode: 'AG021', experience: '6.5년차', commissionMonth:'78개월', insuranceCareer: '6.5년',
+        currentMonth: { premium: 0, contracts: 0, rank: null },
+        previousMonth: { premium: 16, contracts: 1, rank: 21 },
+        threeMonthAverage: { premium: 17, contracts: 1 },
+        productMix: { health: 45, life: 55 }, isActive: false
+      },
+      {
+        name: '김나영', agentCode: 'AG022', experience: '3.8년차', commissionMonth:'45개월', insuranceCareer: '3.8년',
+        currentMonth: { premium: 0, contracts: 0, rank: null },
+        previousMonth: { premium: 13, contracts: 1, rank: 22 },
+        threeMonthAverage: { premium: 14, contracts: 1 },
+        productMix: { health: 70, life: 30 }, isActive: false
+      },
+
+      // 28-31위: 전월 가동→미가동 전환 (당월 무실적)
       {
         name: '이예진', agentCode: 'AG028', experience: '7.9년차', commissionMonth:'94개월', insuranceCareer: '7.9년',
-        currentMonth: { premium: 3, contracts: 1, rank: 28 },
-        previousMonth: { premium: 0, contracts: 0, rank: null },
-        threeMonthAverage: { premium: 1, contracts: 0 },
-        productMix: { health: 60, life: 40 }, isActive: true
+        currentMonth: { premium: 0, contracts: 0, rank: null },
+        previousMonth: { premium: 30, contracts: 1, rank: 28 },
+        threeMonthAverage: { premium: 10, contracts: 0 },
+        productMix: { health: 60, life: 40 }, isActive: false
       },
       {
         name: '박시원', agentCode: 'AG029', experience: '3.4년차', commissionMonth:'41개월', insuranceCareer: '3.4년',
-        currentMonth: { premium: 2, contracts: 1, rank: 29 },
-        previousMonth: { premium: 0, contracts: 0, rank: null },
-        threeMonthAverage: { premium: 1, contracts: 0 },
-        productMix: { health: 50, life: 50 }, isActive: true
+        currentMonth: { premium: 0, contracts: 0, rank: null },
+        previousMonth: { premium: 20, contracts: 1, rank: 29 },
+        threeMonthAverage: { premium: 7, contracts: 0 },
+        productMix: { health: 50, life: 50 }, isActive: false
       },
-
-      // 30-31위: 신규 위촉 (당월 입사, 실적 있음)
       {
         name: '정민준', agentCode: 'AG030', experience: '9.2년차', commissionMonth:'110개월', insuranceCareer: '9.2년',
-        currentMonth: { premium: 1, contracts: 1, rank: 30 },
-        previousMonth: { premium: 0, contracts: 0, rank: null },
-        threeMonthAverage: { premium: 0, contracts: 0 },
-        productMix: { health: 85, life: 15 }, isActive: true
+        currentMonth: { premium: 0, contracts: 0, rank: null },
+        previousMonth: { premium: 15, contracts: 1, rank: 30 },
+        threeMonthAverage: { premium: 5, contracts: 0 },
+        productMix: { health: 85, life: 15 }, isActive: false
       },
       {
         name: '조상원', agentCode: 'AG031', experience: '5.9년차', commissionMonth:'70개월', insuranceCareer: '5.9년',
-        currentMonth: { premium: 1, contracts: 1, rank: 31 },
-        previousMonth: { premium: 0, contracts: 0, rank: null },
-        threeMonthAverage: { premium: 0, contracts: 0 },
-        productMix: { health: 45, life: 55 }, isActive: true
+        currentMonth: { premium: 0, contracts: 0, rank: null },
+        previousMonth: { premium: 10, contracts: 1, rank: 31 },
+        threeMonthAverage: { premium: 3, contracts: 0 },
+        productMix: { health: 45, life: 55 }, isActive: false
       },
 
       // 32-35위: 전월 가동→미가동 전환
@@ -1556,14 +1560,14 @@ const Branch360Dashboard = () => {
                   <span className="group relative cursor-help">
                     {formatCurrency(corePerformance.currentApe * 10000)}
                     <span className="invisible group-hover:visible absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap z-10">
-                      {(corePerformance.currentApe * 10000).toLocaleString()}원
+                      {(performanceType === 'MMP' ? Math.round((corePerformance.currentApe * 10000) / 12) : (corePerformance.currentApe * 10000)).toLocaleString()}원
                     </span>
                   </span>
                   {' / '}
                   <span className="group relative cursor-help">
                     {formatCurrency(corePerformance.targetApe * 10000)}
                     <span className="invisible group-hover:visible absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap z-10">
-                      {(corePerformance.targetApe * 10000).toLocaleString()}원
+                      {(performanceType === 'MMP' ? Math.round((corePerformance.targetApe * 10000) / 12) : (corePerformance.targetApe * 10000)).toLocaleString()}원
                     </span>
                   </span>
                 </div>
@@ -1580,8 +1584,8 @@ const Branch360Dashboard = () => {
                       className="absolute -top-16 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded px-3 py-2 whitespace-nowrap z-20 shadow-lg text-left"
                     >
                       <div>9월 - {performanceType}</div>
-                      <div>NB Plan: {(corePerformance.targetApe * 10000).toLocaleString()}원</div>
-                      <div>Actual: {(corePerformance.currentApe * 10000).toLocaleString()}원</div>
+                      <div>NB Plan: {(performanceType === 'MMP' ? Math.round((corePerformance.targetApe * 10000) / 12) : (corePerformance.targetApe * 10000)).toLocaleString()}원</div>
+                      <div>Actual: {(performanceType === 'MMP' ? Math.round((corePerformance.currentApe * 10000) / 12) : (corePerformance.currentApe * 10000)).toLocaleString()}원</div>
                       <div>{corePerformance.achievementRate.toFixed(1)}% 달성</div>
                       <div className="text-yellow-300">전체평균 59.4%</div>
                       <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
@@ -1615,7 +1619,7 @@ const Branch360Dashboard = () => {
                   <div className="font-semibold text-lg text-blue-600 group relative cursor-help">
                     {formatCurrency(Math.abs(corePerformance.targetApe - corePerformance.currentApe) * 10000)}
                     <span className="invisible group-hover:visible absolute bottom-full right-0 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap z-10">
-                      {formatCurrencyFull(Math.abs(corePerformance.targetApe - corePerformance.currentApe) * 10000)}
+                      {(performanceType === 'MMP' ? Math.round(Math.abs(corePerformance.targetApe - corePerformance.currentApe) * 10000 / 12) : Math.abs(corePerformance.targetApe - corePerformance.currentApe) * 10000).toLocaleString()}원
                     </span>
                   </div>
                   <div className="text-xs text-gray-500">
@@ -1633,7 +1637,7 @@ const Branch360Dashboard = () => {
                     <span className="inline-block mx-1 px-2 py-1 bg-blue-600 text-white rounded-md font-bold text-base group relative cursor-help">
                       {formatCurrency((corePerformance.targetApe - corePerformance.currentApe) / 7 * 10000)}
                       <span className="invisible group-hover:visible absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-gray-900 bg-white rounded whitespace-nowrap z-10 border border-gray-300">
-                        {formatCurrencyFull((corePerformance.targetApe - corePerformance.currentApe) / 7 * 10000)}
+                        {(performanceType === 'MMP' ? Math.round((corePerformance.targetApe - corePerformance.currentApe) / 7 * 10000 / 12) : Math.round((corePerformance.targetApe - corePerformance.currentApe) / 7 * 10000)).toLocaleString()}원
                       </span>
                     </span>
                     이 필요해요!
@@ -1656,8 +1660,8 @@ const Branch360Dashboard = () => {
 
                       {/* 툴팁 */}
                       <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-gray-800 text-white text-xs rounded px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-30 text-left whitespace-nowrap">
-                        <div>Plan(지점): {formatCurrencyFull(corePerformance.branchTargetApe * 10000)}</div>
-                        <div>Plan(담당자): {formatCurrencyFull(corePerformance.managerPersonalTarget * 10000)}</div>
+                        <div>Plan(지점): {(performanceType === 'MMP' ? Math.round((corePerformance.branchTargetApe * 10000) / 12) : (corePerformance.branchTargetApe * 10000)).toLocaleString()}원</div>
+                        <div>Plan(담당자): {(performanceType === 'MMP' ? Math.round((corePerformance.managerPersonalTarget * 10000) / 12) : (corePerformance.managerPersonalTarget * 10000)).toLocaleString()}원</div>
                         <div className="mt-1 pt-1 border-t border-gray-600">목표 담당: {corePerformance.managerPlanContribution.toFixed(1)}%</div>
                         <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
                       </div>
@@ -1668,8 +1672,8 @@ const Branch360Dashboard = () => {
 
                       {/* 툴팁 */}
                       <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-gray-800 text-white text-xs rounded px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-30 text-left whitespace-nowrap">
-                        <div>Actual(지점): {formatCurrencyFull(corePerformance.currentApe * 10000)}</div>
-                        <div>Actual(담당자): {formatCurrencyFull(corePerformance.managerApe * 10000)}</div>
+                        <div>Actual(지점): {(performanceType === 'MMP' ? Math.round((corePerformance.currentApe * 10000) / 12) : (corePerformance.currentApe * 10000)).toLocaleString()}원</div>
+                        <div>Actual(담당자): {(performanceType === 'MMP' ? Math.round((corePerformance.managerApe * 10000) / 12) : (corePerformance.managerApe * 10000)).toLocaleString()}원</div>
                         <div className="mt-1 pt-1 border-t border-gray-600">실적 담당: {corePerformance.managerContributionRate.toFixed(1)}%</div>
                         <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
                       </div>
@@ -1952,7 +1956,7 @@ const Branch360Dashboard = () => {
                     const yearData = {
                       '2023': [1200, 1150, 1300, 1100, 1250, 1180, 1350, 1200, 1100, 1050, 950, 800],
                       '2024': [900, 1000, 1100, 950, 1150, 1050, 1200, 1100, 1000, 850, 750, 650],
-                      '2025': [850, 920, 875, 1050, 980, 1120, 1030, 1180, 1090]
+                      '2025': [850, 920, 875, 1050, 980, 1120, 1030, 1180, 1000]
                     };
                     const contractData = {
                       '2023': [180, 175, 190, 165, 185, 170, 195, 180, 165, 155, 145, 130],
@@ -1977,7 +1981,7 @@ const Branch360Dashboard = () => {
                     const yearData = {
                       '2023': [1200, 1150, 1300, 1100, 1250, 1180, 1350, 1200, 1100, 1050, 950, 800],
                       '2024': [900, 1000, 1100, 950, 1150, 1050, 1200, 1100, 1000, 850, 750, 650],
-                      '2025': [850, 920, 875, 1050, 980, 1120, 1030, 1180, 1090]
+                      '2025': [850, 920, 875, 1050, 980, 1120, 1030, 1180, 1000]
                     };
                     const contractData = {
                       '2023': [180, 175, 190, 165, 185, 170, 195, 180, 165, 155, 145, 130],
@@ -2039,7 +2043,7 @@ const Branch360Dashboard = () => {
                     const yearData = {
                       '2023': [1200, 1150, 1300, 1100, 1250, 1180, 1350, 1200, 1100, 1050, 950, 800],
                       '2024': [900, 1000, 1100, 950, 1150, 1050, 1200, 1100, 1000, 850, 750, 650],
-                      '2025': [850, 920, 875, 1050, 980, 1120, 1030, 1180, 1090]
+                      '2025': [850, 920, 875, 1050, 980, 1120, 1030, 1180, 1000]
                     };
                     
                     const contractData = {
@@ -2785,7 +2789,7 @@ const Branch360Dashboard = () => {
                                 onClick={() => handleActiveTableSort('currentMMP')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors ml-auto"
                               >
-                                당월 MMP
+                                당월 {performanceType}
                                 {activeTableSortBy === 'currentMMP' && (
                                   <span className="text-gray-500">
                                     {activeTableSortOrder === 'desc' ? '↓' : '↑'}
@@ -2798,7 +2802,7 @@ const Branch360Dashboard = () => {
                                 onClick={() => handleActiveTableSort('previousMMP')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors ml-auto"
                               >
-                                전월 MMP
+                                전월 {performanceType}
                                 {activeTableSortBy === 'previousMMP' && (
                                   <span className="text-gray-500">
                                     {activeTableSortOrder === 'desc' ? '↓' : '↑'}
@@ -2814,9 +2818,11 @@ const Branch360Dashboard = () => {
                               <td className="px-2 py-2 text-gray-600 font-mono text-xs">{agent.agentCode}</td>
                               <td className="px-2 py-2 font-medium text-gray-800">{agent.name}</td>
                               <td className="px-2 py-2 text-right text-gray-600 text-xs">{agent.commissionMonth.replace('개월', '')}</td>
-                              <td className="px-2 py-2 text-right font-medium text-green-600 whitespace-nowrap">{agent.currentMonth.premium}</td>
+                              <td className="px-2 py-2 text-right font-medium text-green-600 whitespace-nowrap">
+                                {performanceType === 'MMP' ? agent.currentMonth.premium * 10 : agent.currentMonth.premium * 10 * 12}
+                              </td>
                               <td className="px-2 py-2 text-right text-gray-600 whitespace-nowrap">
-                                {agent.previousMonth.premium === 0 ? '-' : agent.previousMonth.premium}
+                                {agent.previousMonth.premium === 0 ? '-' : (performanceType === 'MMP' ? agent.previousMonth.premium * 10 : agent.previousMonth.premium * 10 * 12)}
                               </td>
                             </tr>
                           )) : (
@@ -2927,7 +2933,7 @@ const Branch360Dashboard = () => {
                                 onClick={() => handleInactiveTableSort('currentMMP')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors ml-auto"
                               >
-                                당월 MMP
+                                당월 {performanceType}
                                 {inactiveTableSortBy === 'currentMMP' && (
                                   <span className="text-gray-500">
                                     {inactiveTableSortOrder === 'desc' ? '↓' : '↑'}
@@ -2940,7 +2946,7 @@ const Branch360Dashboard = () => {
                                 onClick={() => handleInactiveTableSort('previousMMP')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors ml-auto"
                               >
-                                전월 MMP
+                                전월 {performanceType}
                                 {inactiveTableSortBy === 'previousMMP' && (
                                   <span className="text-gray-500">
                                     {inactiveTableSortOrder === 'desc' ? '↓' : '↑'}
@@ -2958,7 +2964,7 @@ const Branch360Dashboard = () => {
                               <td className="px-2 py-2 text-right text-gray-600 text-xs">{agent.commissionMonth.replace('개월', '')}</td>
                               <td className="px-2 py-2 text-right text-gray-400">-</td>
                               <td className="px-2 py-2 text-right text-gray-600 whitespace-nowrap">
-                                {agent.previousMonth.premium === 0 ? '-' : agent.previousMonth.premium}
+                                {agent.previousMonth.premium === 0 ? '-' : (performanceType === 'MMP' ? Math.round(agent.previousMonth.premium * 10 / 12) : agent.previousMonth.premium * 10)}
                               </td>
                             </tr>
                           )) : (
@@ -3493,7 +3499,7 @@ const Branch360Dashboard = () => {
           <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">위촉 설계사</h3>
-              <button 
+              <button
                 onClick={() => setShowAllAgentsModal(false)}
                 className="text-gray-500 hover:text-gray-700 text-xl"
               >
@@ -3501,10 +3507,39 @@ const Branch360Dashboard = () => {
               </button>
             </div>
 
+            {/* APE/MMP 토글 */}
+            <div className="mb-2 flex items-center gap-4">
+              <span className="text-sm text-gray-700">실적 기준:</span>
+              <div className="flex items-center gap-4">
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="radio"
+                    name="modalPerformanceTypeAll"
+                    value="APE"
+                    checked={modalPerformanceType === 'APE'}
+                    onChange={(e) => setModalPerformanceType(e.target.value as 'APE' | 'MMP')}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">APE</span>
+                </label>
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="radio"
+                    name="modalPerformanceTypeAll"
+                    value="MMP"
+                    checked={modalPerformanceType === 'MMP'}
+                    onChange={(e) => setModalPerformanceType(e.target.value as 'APE' | 'MMP')}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">MMP</span>
+                </label>
+              </div>
+            </div>
+
             <div className="flex-1 overflow-y-auto">
               {/* 단위 표시 */}
               <div className="flex justify-end mb-2">
-                <span className="text-xs text-gray-500">[단위: 천원]</span>
+                <span className="text-xs text-gray-500">[단위: 원]</span>
               </div>
 
               {/* 테이블 헤더 */}
@@ -3586,7 +3621,7 @@ const Branch360Dashboard = () => {
                     }}
                     className="text-left hover:text-blue-600 transition-colors"
                   >
-                    당월MMP {agentSortBy === 'currentActive' && (agentSortOrder === 'desc' ? '↓' : '↑')}
+                    당월{modalPerformanceType} {agentSortBy === 'currentActive' && (agentSortOrder === 'desc' ? '↓' : '↑')}
                   </button>
                   <button
                     onClick={() => {
@@ -3599,7 +3634,7 @@ const Branch360Dashboard = () => {
                     }}
                     className="text-left hover:text-blue-600 transition-colors"
                   >
-                    전월MMP {agentSortBy === 'previousActive' && (agentSortOrder === 'desc' ? '↓' : '↑')}
+                    전월{modalPerformanceType} {agentSortBy === 'previousActive' && (agentSortOrder === 'desc' ? '↓' : '↑')}
                   </button>
                 </div>
               </div>
@@ -3629,12 +3664,20 @@ const Branch360Dashboard = () => {
                     </div>
                     <div className="flex items-center justify-center">
                       <span className="text-xs text-gray-600">
-                        {agent.isActive && agent.currentMonth.premium > 0 ? agent.currentMonth.premium : '-'}
+                        {agent.isActive && agent.currentMonth.premium > 0
+                          ? (modalPerformanceType === 'MMP'
+                            ? (agent.currentMonth.premium * 10000).toLocaleString()
+                            : (agent.currentMonth.premium * 10000 * 12).toLocaleString())
+                          : '-'}
                       </span>
                     </div>
                     <div className="flex items-center justify-center">
                       <span className="text-xs text-gray-600">
-                        {agent.previousMonth.premium > 0 ? agent.previousMonth.premium : '-'}
+                        {agent.previousMonth.premium > 0
+                          ? (modalPerformanceType === 'MMP'
+                            ? (agent.previousMonth.premium * 10000).toLocaleString()
+                            : (agent.previousMonth.premium * 10000 * 12).toLocaleString())
+                          : '-'}
                       </span>
                     </div>
                     </div>
@@ -3656,22 +3699,54 @@ const Branch360Dashboard = () => {
           <div className="bg-white rounded-lg p-6 max-w-full w-full mx-4 max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">가동 설계사</h3>
+              <button
+                onClick={() => setShowActiveAgentsModal(false)}
+                className="text-gray-500 hover:text-gray-700 text-xl"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* APE/MMP 토글 */}
+            <div className="mb-2 flex items-center gap-4">
+              <span className="text-sm text-gray-700">실적 기준:</span>
               <div className="flex items-center gap-4">
-                <span className="text-xs text-gray-500">[단위: 천원]</span>
-                <button
-                  onClick={() => setShowActiveAgentsModal(false)}
-                  className="text-gray-500 hover:text-gray-700 text-xl"
-                >
-                  ✕
-                </button>
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="radio"
+                    name="modalPerformanceType"
+                    value="APE"
+                    checked={modalPerformanceType === 'APE'}
+                    onChange={(e) => setModalPerformanceType(e.target.value as 'APE' | 'MMP')}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">APE</span>
+                </label>
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="radio"
+                    name="modalPerformanceType"
+                    value="MMP"
+                    checked={modalPerformanceType === 'MMP'}
+                    onChange={(e) => setModalPerformanceType(e.target.value as 'APE' | 'MMP')}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">MMP</span>
+                </label>
               </div>
             </div>
 
             <div className="flex-1 overflow-auto">
+              <div className="mb-2 text-right">
+                <span className="text-xs text-gray-500">[단위: 원, 건]</span>
+              </div>
               <table className="w-full text-xs border-collapse">
                 <thead className="bg-gray-50 sticky top-0">
                   {/* First row: Group headers */}
                   <tr>
+                    <th rowSpan={2} className="px-2 py-3 text-center font-semibold text-gray-700 border-b whitespace-nowrap min-w-[50px]">
+                      번호
+                    </th>
                     <th rowSpan={2} className="px-2 py-3 text-left font-semibold text-gray-700 border-b whitespace-nowrap min-w-[100px]">
                       <button
                         onClick={() => {
@@ -3733,7 +3808,7 @@ const Branch360Dashboard = () => {
                       </button>
                     </th>
                     <th colSpan={6} className="px-2 py-2 text-center font-bold text-gray-800 border-b border-l-2 border-gray-300 bg-gray-100">
-                      MMP
+                      {modalPerformanceType}
                     </th>
                     <th colSpan={6} className="px-2 py-2 text-center font-bold text-gray-800 border-b border-l-2 border-gray-300 bg-gray-100">
                       청약건수
@@ -3963,8 +4038,19 @@ const Branch360Dashboard = () => {
                       };
                     };
 
-                    // 0을 '-'로 표시하는 함수
-                    const formatValue = (value) => value === 0 ? '-' : value;
+                    // 0을 '-'로 표시하는 함수 (원 단위로 변환)
+                    const formatValue = (value) => {
+                      if (value === 0) return '-';
+                      // value는 MMP 기준 만원 단위
+                      if (modalPerformanceType === 'MMP') {
+                        return (value * 10000).toLocaleString(); // MMP 만원 → 원
+                      } else {
+                        return (value * 10000 * 12).toLocaleString(); // MMP 만원 → APE 원
+                      }
+                    };
+
+                    // 청약건수용 포맷 함수
+                    const formatCount = (value) => value === 0 ? '-' : value;
 
                     // 정렬 함수
                     const getSortedActiveAgents = () => {
@@ -4058,6 +4144,7 @@ const Branch360Dashboard = () => {
                           key={idx}
                           className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
                         >
+                          <td className="px-2 py-3 text-center text-gray-600">{idx + 1}</td>
                           <td className="px-2 py-3 font-mono text-gray-600">{agent.agentCode}</td>
                           <td className="px-2 py-3 font-medium text-gray-900">{agent.name}</td>
                           <td className="px-2 py-3 text-gray-600">{agent.insuranceCareer}</td>
@@ -4068,12 +4155,12 @@ const Branch360Dashboard = () => {
                           <td className="px-2 py-3 text-center text-gray-600">{formatValue(monthlyData.M3)}</td>
                           <td className="px-2 py-3 text-center text-gray-600">{formatValue(monthlyData.M4)}</td>
                           <td className="px-2 py-3 text-center text-gray-600 border-r-2 border-gray-200">{formatValue(monthlyData.M5)}</td>
-                          <td className="px-2 py-3 text-center text-gray-900 font-medium">{formatValue(monthlyData['M0건'])}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{formatValue(monthlyData['M1건'])}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{formatValue(monthlyData['M2건'])}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{formatValue(monthlyData['M3건'])}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{formatValue(monthlyData['M4건'])}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{formatValue(monthlyData['M5건'])}</td>
+                          <td className="px-2 py-3 text-center text-gray-900 font-medium">{formatCount(monthlyData['M0건'])}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatCount(monthlyData['M1건'])}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatCount(monthlyData['M2건'])}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatCount(monthlyData['M3건'])}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatCount(monthlyData['M4건'])}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatCount(monthlyData['M5건'])}</td>
                         </tr>
                       );
                     });
@@ -4095,22 +4182,54 @@ const Branch360Dashboard = () => {
           <div className="bg-white rounded-lg p-6 max-w-full w-full mx-4 max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">미가동 설계사</h3>
+              <button
+                onClick={() => setShowInactiveAgentsModal(false)}
+                className="text-gray-500 hover:text-gray-700 text-xl"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* APE/MMP 토글 */}
+            <div className="mb-2 flex items-center gap-4">
+              <span className="text-sm text-gray-700">실적 기준:</span>
               <div className="flex items-center gap-4">
-                <span className="text-xs text-gray-500">[단위: 천원]</span>
-                <button
-                  onClick={() => setShowInactiveAgentsModal(false)}
-                  className="text-gray-500 hover:text-gray-700 text-xl"
-                >
-                  ✕
-                </button>
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="radio"
+                    name="modalPerformanceTypeInactive"
+                    value="APE"
+                    checked={modalPerformanceType === 'APE'}
+                    onChange={(e) => setModalPerformanceType(e.target.value as 'APE' | 'MMP')}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">APE</span>
+                </label>
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="radio"
+                    name="modalPerformanceTypeInactive"
+                    value="MMP"
+                    checked={modalPerformanceType === 'MMP'}
+                    onChange={(e) => setModalPerformanceType(e.target.value as 'APE' | 'MMP')}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">MMP</span>
+                </label>
               </div>
             </div>
 
             <div className="flex-1 overflow-auto">
+              <div className="mb-2 text-right">
+                <span className="text-xs text-gray-500">[단위: 원, 건]</span>
+              </div>
               <table className="w-full text-xs border-collapse">
                 <thead className="bg-gray-50 sticky top-0">
                   {/* First row: Group headers */}
                   <tr>
+                    <th rowSpan={2} className="px-2 py-3 text-center font-semibold text-gray-700 border-b whitespace-nowrap min-w-[50px]">
+                      번호
+                    </th>
                     <th rowSpan={2} className="px-2 py-3 text-left font-semibold text-gray-700 border-b whitespace-nowrap min-w-[100px]">
                       <button
                         onClick={() => {
@@ -4172,7 +4291,7 @@ const Branch360Dashboard = () => {
                       </button>
                     </th>
                     <th colSpan={6} className="px-2 py-2 text-center font-bold text-gray-800 border-b border-l-2 border-gray-300 bg-gray-100">
-                      MMP
+                      {modalPerformanceType}
                     </th>
                     <th colSpan={6} className="px-2 py-2 text-center font-bold text-gray-800 border-b border-l-2 border-gray-300 bg-gray-100">
                       청약건수
@@ -4404,8 +4523,19 @@ const Branch360Dashboard = () => {
                       };
                     };
 
-                    // 0을 '-'로 표시하는 함수
-                    const formatInactiveValue = (value) => value === 0 ? '-' : value;
+                    // 0을 '-'로 표시하는 함수 (원 단위로 변환)
+                    const formatInactiveValue = (value) => {
+                      if (value === 0) return '-';
+                      // value는 MMP 기준 만원 단위
+                      if (modalPerformanceType === 'MMP') {
+                        return (value * 10000).toLocaleString(); // MMP 만원 → 원
+                      } else {
+                        return (value * 10000 * 12).toLocaleString(); // MMP 만원 → APE 원
+                      }
+                    };
+
+                    // 청약건수용 포맷 함수
+                    const formatInactiveCount = (value) => value === 0 ? '-' : value;
 
                     // 정렬 함수
                     const getSortedInactiveAgents = () => {
@@ -4499,6 +4629,7 @@ const Branch360Dashboard = () => {
                           key={idx}
                           className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
                         >
+                          <td className="px-2 py-3 text-center text-gray-600">{idx + 1}</td>
                           <td className="px-2 py-3 font-mono text-gray-600">{agent.agentCode}</td>
                           <td className="px-2 py-3 font-medium text-gray-900">{agent.name}</td>
                           <td className="px-2 py-3 text-gray-600">{agent.insuranceCareer}</td>
@@ -4509,12 +4640,12 @@ const Branch360Dashboard = () => {
                           <td className="px-2 py-3 text-center text-gray-600">{formatInactiveValue(monthlyData.M3)}</td>
                           <td className="px-2 py-3 text-center text-gray-600">{formatInactiveValue(monthlyData.M4)}</td>
                           <td className="px-2 py-3 text-center text-gray-600 border-r-2 border-gray-200">{formatInactiveValue(monthlyData.M5)}</td>
-                          <td className="px-2 py-3 text-center text-red-600 font-medium">{formatInactiveValue(monthlyData['M0건'])}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{formatInactiveValue(monthlyData['M1건'])}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{formatInactiveValue(monthlyData['M2건'])}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{formatInactiveValue(monthlyData['M3건'])}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{formatInactiveValue(monthlyData['M4건'])}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{formatInactiveValue(monthlyData['M5건'])}</td>
+                          <td className="px-2 py-3 text-center text-red-600 font-medium">{formatInactiveCount(monthlyData['M0건'])}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatInactiveCount(monthlyData['M1건'])}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatInactiveCount(monthlyData['M2건'])}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatInactiveCount(monthlyData['M3건'])}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatInactiveCount(monthlyData['M4건'])}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatInactiveCount(monthlyData['M5건'])}</td>
                         </tr>
                       );
                     });
