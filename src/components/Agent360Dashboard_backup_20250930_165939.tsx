@@ -677,25 +677,25 @@ const Agent360Dashboard = () => {
   // 지점 순위 데이터
   const getBranchRankings = (getAllData = false, kpi = 'APE') => {
     const currentMonthData = [
-      { agency: '글로벌금융판매', branch: '글로벌화이브스타', achievement: 115.2, ape: 28000000, previousApe: 25000000, isActive: true },
-      { agency: '글로벌금융판매', branch: '하나돔', achievement: 112.8, ape: 19000000, previousApe: 17000000, isActive: true },
-      { agency: '글로벌금융판매', branch: '리더스에프엔', achievement: 1001.0, ape: 6006000, previousApe: 5000000, isActive: true },
-      { agency: '지금용코리아', branch: '서울', achievement: 741.0, ape: 5187000, previousApe: 4500000, isActive: true },
+      { agency: '글로벌금융판매', branch: '글로벌화이브스타', achievement: 115.2, ape: 1450000, previousApe: 1320000, isActive: true },
+      { agency: '글로벌금융판매', branch: '하나돔', achievement: 112.8, ape: 1380000, previousApe: 960000, isActive: true },
+      { agency: '글로벌금융판매', branch: '리더스에프엔', achievement: 108.5, ape: 1330000, previousApe: 1190000, isActive: true },
+      { agency: '지금용코리아', branch: '서울', achievement: 105.7, ape: 1280000, previousApe: 850000, isActive: true },
       { agency: '메타리치', branch: '보험스토어', achievement: 103.2, ape: 1260000, previousApe: 1030000, isActive: true },
       { agency: '더블유에셋', branch: '일산센터', achievement: 101.5, ape: 1220000, isActive: true },
       { agency: '글로벌금융판매', branch: '하나돔강북', achievement: 98.9, ape: 1180000, isActive: true },
       { agency: '글로벌금융판매', branch: '리더스일산', achievement: 96.4, ape: 1150000, isActive: true },
-      { agency: '지금용코리아', branch: '대원', achievement: 94.7, ape: 850000, isActive: true },
-      { agency: '한국지에이금융서비스', branch: '일산지사', achievement: 92.1, ape: 720000, isActive: true },
-      { agency: '글로벌금융판매', branch: '화이브스타성화', achievement: 89.8, ape: 580000, isActive: true },
-      { agency: '글로벌금융판매', branch: '리더스마이보험체크', achievement: 87.5, ape: 420000, isActive: true },
-      { agency: '글로벌금융판매', branch: '이센트럴마포', achievement: 85.2, ape: 380000, isActive: true },
-      { agency: '글로벌금융판매', branch: '케이엘아이은평', achievement: 83.1, ape: 280000, isActive: true },
-      { agency: '글로벌금옵판매', branch: '케이엘아이운정', achievement: 80.9, ape: 180000, isActive: true },
-      { agency: '지금용코리아', branch: '그레이트탑', achievement: 92.5, ape: 120000, isActive: true },
-      { agency: '지금용코리아', branch: '사랑', achievement: 89.2, ape: 95000, isActive: true },
-      { agency: '메타리치', branch: '골드자산관리센터', achievement: 86.7, ape: 70000, isActive: true },
-      { agency: '메타리치', branch: '리치골드', achievement: 84.3, ape: 60000, isActive: true },
+      { agency: '지금용코리아', branch: '대원', achievement: 94.7, ape: 1120000, isActive: true },
+      { agency: '한국지에이금융서비스', branch: '일산지사', achievement: 92.1, ape: 1080000, isActive: true },
+      { agency: '글로벌금융판매', branch: '화이브스타성화', achievement: 89.8, ape: 1050000, isActive: true },
+      { agency: '글로벌금융판매', branch: '리더스마이보험체크', achievement: 87.5, ape: 1020000, isActive: true },
+      { agency: '글로벌금융판매', branch: '이센트럴마포', achievement: 85.2, ape: 980000, isActive: true },
+      { agency: '글로벌금융판매', branch: '케이엘아이은평', achievement: 83.1, ape: 950000, isActive: true },
+      { agency: '글로벌금옵판매', branch: '케이엘아이운정', achievement: 80.9, ape: 920000, isActive: true },
+      { agency: '지금용코리아', branch: '그레이트탑', achievement: 92.5, ape: 1680000, isActive: true },
+      { agency: '지금용코리아', branch: '사랑', achievement: 89.2, ape: 1620000, isActive: true },
+      { agency: '메타리치', branch: '골드자산관리센터', achievement: 86.7, ape: 1580000, isActive: true },
+      { agency: '메타리치', branch: '리치골드', achievement: 84.3, ape: 1550000, isActive: true },
       { agency: '지에이스타금융서비스', branch: '부천코어', achievement: 82.1, ape: 1520000, isActive: true },
       { agency: '더블유에셋', branch: '1인지에이 일산2센터', achievement: 78.9, ape: 1820000, isActive: true },
       { agency: '더블유에셋', branch: '기업금융본부', achievement: 76.4, ape: 1750000, isActive: true },
@@ -906,11 +906,11 @@ const Agent360Dashboard = () => {
     
     const result = getAllData ? sorted : sorted.slice(0, 5);
 
-    // KPI에 따른 데이터 변환 (MMP일 때 12로 나눔)
+    // KPI에 따른 데이터 변환 (MMP일 때 12배)
     const transformedResult = result.map(branch => ({
       ...branch,
-      ape: kpi === 'MMP' ? Math.round(branch.ape / 12) : branch.ape,
-      previousApe: branch.previousApe ? (kpi === 'MMP' ? Math.round(branch.previousApe / 12) : branch.previousApe) : branch.previousApe
+      ape: kpi === 'MMP' ? Math.round(branch.ape * 12) : branch.ape,
+      previousApe: branch.previousApe ? (kpi === 'MMP' ? Math.round(branch.previousApe * 12) : branch.previousApe) : branch.previousApe
     }));
 
     // 가동 현황 정보와 함께 반환
@@ -1308,16 +1308,12 @@ const Agent360Dashboard = () => {
             </h2>
             
             {/* 목표달성률 (APE 기준) - 주요 지표 */}
-            <div
-              className="bg-white rounded-lg shadow-sm border p-6 relative"
-              onMouseEnter={() => setShowProgressTooltip(true)}
-              onMouseLeave={() => setShowProgressTooltip(false)}
-            >
+            <div className="bg-white rounded-lg shadow-sm border p-6 relative">
               <div className="flex justify-between items-start mb-4 border-b border-gray-100 pb-2">
                 <h3 className="text-base font-bold text-gray-800">목표달성률</h3>
                 <span className="text-xs text-black">{performanceType} 기준</span>
               </div>
-
+              
               <div className="text-center mb-4">
                 <div className="text-5xl font-black text-blue-600 mb-2">{myKPI.goalAchievement.current.toFixed(1)}%</div>
                 <div className="text-sm text-black  mb-4">
@@ -1332,21 +1328,31 @@ const Agent360Dashboard = () => {
                   {/* 프로그레스 바 툴팁 */}
                   {showProgressTooltip && (
                     <div
-                      className="absolute -top-16 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded px-3 py-2 whitespace-nowrap z-20 shadow-lg text-left"
+                      className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded px-3 py-2 whitespace-nowrap z-20 shadow-lg"
                     >
-                      <div>9월 - {performanceType}</div>
-                      <div>NB Plan: {(performanceType === 'MMP' ? Math.round(myKPI.goalAchievement.target / 12) : myKPI.goalAchievement.target).toLocaleString()}원</div>
-                      <div>Actual: {(performanceType === 'MMP' ? Math.round(myKPI.goalAchievement.actual / 12) : myKPI.goalAchievement.actual).toLocaleString()}원</div>
-                      <div>{myKPI.goalAchievement.current.toFixed(1)}% 달성</div>
-                      <div className="text-yellow-300">전체평균 {myKPI.goalAchievement.hqAvg}%</div>
+                      <div className="font-bold mb-1">목표 달성률 {myKPI.goalAchievement.current.toFixed(1)}%</div>
+                      <div className="text-gray-300">
+                        {formatCurrency(myKPI.goalAchievement.actual, performanceType)} / {formatCurrency(myKPI.goalAchievement.target, performanceType)}
+                      </div>
                       <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
                     </div>
                   )}
                   {/* 전체 평균선 (65%) */}
                   <div
-                    className="absolute top-0 h-5 w-0.5 bg-orange-500 z-10"
+                    className="absolute top-0 h-5 w-0.5 bg-orange-500 z-10 cursor-pointer"
                     style={{left: `65%`}}
+                    onMouseEnter={() => setShowExpectedProgressTooltip(true)}
+                    onMouseLeave={() => setShowExpectedProgressTooltip(false)}
                   />
+                  {/* 전체 평균 툴팁 */}
+                  {showExpectedProgressTooltip && (
+                    <div
+                      className="absolute top-6 bg-gray-800 text-white text-xs rounded px-3 py-2 whitespace-nowrap z-20 shadow-lg"
+                      style={{left: `65%`, transform: 'translateX(-50%)'}}
+                    >
+                      <div className="font-bold mb-1">전체 지점 평균 65.2%</div>
+                    </div>
+                  )}
                 </div>
 
                 {/* 평균 표시 텍스트 */}
@@ -1528,7 +1534,7 @@ const Agent360Dashboard = () => {
                             {selectedKPI === 'nb_plan' ? (
                               <div>
                                 <div>{data.month} - {performanceType}</div>
-                                <div>NB Plan: {(data.target * 10000).toLocaleString()}원</div>
+                                <div>Bf Plan: {(data.target * 10000).toLocaleString()}원</div>
                                 <div>Actual: {(data.actual * 10000).toLocaleString()}원</div>
                                 <div>{data.value.toFixed(1)}% 달성</div>
                                 <div className="text-yellow-300">전체평균 {data.hqAvg}%</div>
@@ -1706,7 +1712,7 @@ const Agent360Dashboard = () => {
                               {yearlyKPI === 'nb_plan' ? (
                                 <div>
                                   <div>{data.year === '2025' ? '2025년 (~9월)' : `${data.year}년`} - {performanceType}</div>
-                                  <div>NB Plan: {(data.nb_plan_target * 10000).toLocaleString()}원</div>
+                                  <div>Bf Plan: {(data.nb_plan_target * 10000).toLocaleString()}원</div>
                                   <div>Actual: {(data.nb_plan_achieved * 10000).toLocaleString()}원</div>
                                   <div>{value.toFixed(1)}% 달성</div>
                                   <div className="text-yellow-300">전체평균 {avgValue.toFixed(1)}%</div>
@@ -1785,20 +1791,12 @@ const Agent360Dashboard = () => {
             <div className="space-y-4">
               <div className="bg-white rounded-lg shadow-sm border p-4">
                 <h4 className="text-sm font-semibold text-gray-700 mb-3">{performanceType}</h4>
-                <div className="text-center mb-3 relative group">
+                <div className="text-center mb-3">
                   <div className="text-2xl font-bold text-blue-600">{formatCurrency(getFilteredData('ape') * 10000, performanceType)}</div>
-                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs py-1 px-2 rounded whitespace-nowrap z-10">
-                    {(getFilteredData('ape') * 10000).toLocaleString()}원
-                  </div>
                 </div>
                 <div className="text-center">
                   <span className="text-xs text-black">전월 동기 대비 </span>
-                  <span className="text-sm text-blue-600 relative group">
-                    ▲ {formatCurrency(getFilteredData('apeGrowthAmount') * 10000, performanceType)}
-                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs py-1 px-2 rounded whitespace-nowrap z-10">
-                      {(getFilteredData('apeGrowthAmount') * 10000).toLocaleString()}원
-                    </div>
-                  </span>
+                  <span className="text-sm text-blue-600">▲ {formatCurrency(getFilteredData('apeGrowthAmount') * 10000, performanceType)}</span>
                 </div>
               </div>
               
@@ -2079,7 +2077,7 @@ const Agent360Dashboard = () => {
                         {hoveredProduct && hoveredProduct.idx === idx && (
                           <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-30 mb-2">
                             <div>{item.name}</div>
-                            <div>{performanceType}: {item.amount.toLocaleString()}원</div>
+                            <div>금액: {item.amount.toLocaleString()}원</div>
                             <div>건수: {item.count}건</div>
                             <div>비중: {item.value.toFixed(1)}%</div>
                           </div>
@@ -2228,8 +2226,7 @@ const Agent360Dashboard = () => {
                     {/* 컬럼 헤더 */}
                     <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg mb-2 text-xs  text-gray-700 border-b border-gray-200">
                       <div className="min-w-[35px] shrink-0">날짜</div>
-                      <div className="min-w-[120px] shrink-0">대리점</div>
-                      <div className="min-w-[120px] shrink-0">지점</div>
+                      <div className="min-w-[240px] shrink-0">대리점 {'>'} 지점</div>
                       <div className="flex-1 min-w-0">활동 내용</div>
                     </div>
 
@@ -2242,11 +2239,14 @@ const Agent360Dashboard = () => {
                           <div className="text-black min-w-[35px] shrink-0 font-mono">
                             {item.date}
                           </div>
-                          <div className="min-w-[120px] shrink-0 truncate text-gray-900">
-                            {item.agency}
-                          </div>
-                          <div className="min-w-[120px] shrink-0 truncate text-gray-700">
-                            {item.branch}
+                          <div className="min-w-[240px] shrink-0 flex items-center">
+                            <span className=" text-gray-900 truncate max-w-[115px]">
+                              {item.agency}
+                            </span>
+                            <ChevronRight className="w-3 h-3 text-gray-400 mx-1 shrink-0" />
+                            <span className="text-gray-700 truncate max-w-[115px]">
+                              {item.branch}
+                            </span>
                           </div>
                           <div className="text-black flex-1 min-w-0 truncate">
                             {item.detail}
@@ -2470,14 +2470,14 @@ const Agent360Dashboard = () => {
 
               {/* 단위 표시 */}
               <div className="mb-2 text-right">
-                <span className="text-xs text-gray-600">[단위: 백만원]</span>
+                <span className="text-xs text-gray-600">[단위: 천원]</span>
               </div>
 
               {/* 테이블 형태 */}
               <div className="overflow-hidden">
                 {/* 헤더 */}
-                <div className="grid gap-3 pb-3 border-b border-gray-200 mb-2" style={{gridTemplateColumns: '50px 1fr 100px 110px'}}>
-                  <div className="text-xs font-semibold text-gray-700 text-center">순위</div>
+                <div className="grid gap-3 pb-3 border-b border-gray-200 mb-2" style={{gridTemplateColumns: '50px 1fr 90px 90px'}}>
+                  <div className="text-xs font-semibold text-gray-700 text-center">번호</div>
                   <div className="text-xs font-semibold text-gray-700">지점명</div>
                   <button
                     onClick={() => {
@@ -2510,7 +2510,7 @@ const Agent360Dashboard = () => {
                       branchSortBy === 'achievement' ? 'text-blue-600' : 'text-gray-700'
                     }`}
                   >
-                    목표달성률
+                    달성률
                     {branchSortBy === 'achievement' && (
                       branchSortOrder === 'desc' ? <ArrowDown className="w-3 h-3" /> : <ArrowUp className="w-3 h-3" />
                     )}
@@ -2519,11 +2519,11 @@ const Agent360Dashboard = () => {
 
                 {/* 데이터 행 */}
                 <div className="space-y-0.5">
-                  {getBranchRankings(false, performanceType).data.map((branch, idx) => (
+                  {getBranchRankings().data.map((branch, idx) => (
                     <div
                       key={idx}
                       className="grid gap-3 py-2.5 px-2 hover:bg-blue-50 rounded cursor-pointer transition-all"
-                      style={{gridTemplateColumns: '50px 1fr 100px 110px'}}
+                      style={{gridTemplateColumns: '50px 1fr 90px 90px'}}
                       onClick={() => handleBranchClick(branch.agency, branch.branch)}
                     >
                       <div className="flex items-center justify-center">
@@ -2535,13 +2535,10 @@ const Agent360Dashboard = () => {
                         <div className="text-xs text-gray-600 leading-tight">{branch.agency}</div>
                         <div className="text-sm font-medium text-gray-900 leading-tight">{branch.branch}</div>
                       </div>
-                      <div className="flex items-center justify-end relative group">
+                      <div className="flex items-center justify-end">
                         <div className={`text-sm font-medium ${
                           branchSortBy === 'ape' ? 'text-blue-600' : 'text-gray-900'
-                        }`}>{performanceType === 'MMP' ? `${(branch.ape / 1000000).toFixed(1)}` : `${Math.round(branch.ape / 1000000).toLocaleString()}`}</div>
-                        <div className="absolute bottom-full right-0 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs py-1 px-2 rounded whitespace-nowrap z-10">
-                          {branch.ape.toLocaleString()}원
-                        </div>
+                        }`}>{`${Math.round(branch.ape / 1000).toLocaleString()}`}</div>
                       </div>
                       <div className="flex items-center justify-end">
                         <div className={`text-sm font-medium ${
