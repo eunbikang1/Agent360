@@ -734,8 +734,8 @@ const Branch360Dashboard = () => {
       '이지은', '김선호', '김준영', '이하늘', '박상호', '정미선', '조영수', '차서영',
       // 3개월 순수
       '손민준', '박지수', '정동현', '차민정', '박지영', '정예린', '조은경',
-      // 2개월 순수
-      '손지원', '김동현', '이민지', '박형준', '김나영', '이성민', '정주영', '조민석'
+      // 2개월 순수 (실제 당월 가동 설계사만)
+      '손지원', '김동현', '이민지', '박형준', '김나영', '이성민', '김배태', '박예진'
     ],
     newActive: [
       '김배태', '박예진', '최지후', '김대우', '이예진', '박시원' // 전월 미가동→가동 전환
@@ -1649,8 +1649,8 @@ const Branch360Dashboard = () => {
 
                       {/* 툴팁 */}
                       <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-gray-800 text-white text-xs rounded px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-30 text-left whitespace-nowrap">
-                        <div>Bf Plan(지점): {formatCurrencyFull(corePerformance.branchTargetApe * 10000)}</div>
-                        <div>Bf Plan(담당자): {formatCurrencyFull(corePerformance.managerPersonalTarget * 10000)}</div>
+                        <div>Plan(지점): {formatCurrencyFull(corePerformance.branchTargetApe * 10000)}</div>
+                        <div>Plan(담당자): {formatCurrencyFull(corePerformance.managerPersonalTarget * 10000)}</div>
                         <div className="mt-1 pt-1 border-t border-gray-600">목표 담당: {corePerformance.managerPlanContribution.toFixed(1)}%</div>
                         <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
                       </div>
@@ -1661,8 +1661,8 @@ const Branch360Dashboard = () => {
 
                       {/* 툴팁 */}
                       <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-gray-800 text-white text-xs rounded px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-30 text-left whitespace-nowrap">
-                        <div>Bf {performanceType}(지점): {formatCurrencyFull(corePerformance.currentApe * 10000)}</div>
-                        <div>Bf {performanceType}(담당자): {formatCurrencyFull(corePerformance.managerApe * 10000)}</div>
+                        <div>Actual(지점): {formatCurrencyFull(corePerformance.currentApe * 10000)}</div>
+                        <div>Actual(담당자): {formatCurrencyFull(corePerformance.managerApe * 10000)}</div>
                         <div className="mt-1 pt-1 border-t border-gray-600">실적 담당: {corePerformance.managerContributionRate.toFixed(1)}%</div>
                         <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
                       </div>
@@ -1692,7 +1692,7 @@ const Branch360Dashboard = () => {
 
               {/* 체결률 화살표 */}
               {(() => {
-                const contractCount = 96; // 청약 건수 (96건)
+                const contractCount = 95; // 청약 건수 (95건)
                 const conversionRate = Math.round((contractCount / corePerformance.proposalCount) * 100);
 
                 return (
@@ -2357,7 +2357,7 @@ const Branch360Dashboard = () => {
                         {hoveredProduct && hoveredProduct.idx === idx && (
                           <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-30 mb-2">
                             <div>{item.name}</div>
-                            <div>금액: {item.amount.toLocaleString()}원</div>
+                            <div>{performanceType}: {item.amount.toLocaleString()}원</div>
                             <div>건수: {item.count}건</div>
                             <div>비중: {item.value.toFixed(1)}%</div>
                           </div>
@@ -2734,7 +2734,7 @@ const Branch360Dashboard = () => {
                       <table className="w-full text-xs">
                         <thead className="bg-gray-50 sticky top-0">
                           <tr>
-                            <th className="px-2 py-2 text-left font-medium text-gray-700 w-20">
+                            <th className="px-2 py-2 text-left font-medium text-gray-700 w-28">
                               <button
                                 onClick={() => handleActiveTableSort('agentCode')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors"
@@ -2747,7 +2747,7 @@ const Branch360Dashboard = () => {
                                 )}
                               </button>
                             </th>
-                            <th className="px-2 py-2 text-left font-medium text-gray-700">
+                            <th className="px-2 py-2 text-left font-medium text-gray-700 w-24">
                               <button
                                 onClick={() => handleActiveTableSort('name')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors"
@@ -2760,7 +2760,7 @@ const Branch360Dashboard = () => {
                                 )}
                               </button>
                             </th>
-                            <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap">
+                            <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap w-20">
                               <button
                                 onClick={() => handleActiveTableSort('commissionMonth')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors ml-auto"
@@ -2773,7 +2773,7 @@ const Branch360Dashboard = () => {
                                 )}
                               </button>
                             </th>
-                            <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap">
+                            <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap w-20">
                               <button
                                 onClick={() => handleActiveTableSort('currentMMP')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors ml-auto"
@@ -2786,7 +2786,7 @@ const Branch360Dashboard = () => {
                                 )}
                               </button>
                             </th>
-                            <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap">
+                            <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap w-20">
                               <button
                                 onClick={() => handleActiveTableSort('previousMMP')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors ml-auto"
@@ -2876,7 +2876,7 @@ const Branch360Dashboard = () => {
                       <table className="w-full text-xs">
                         <thead className="bg-gray-50 sticky top-0">
                           <tr>
-                            <th className="px-2 py-2 text-left font-medium text-gray-700 w-20">
+                            <th className="px-2 py-2 text-left font-medium text-gray-700 w-28">
                               <button
                                 onClick={() => handleInactiveTableSort('agentCode')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors"
@@ -2889,7 +2889,7 @@ const Branch360Dashboard = () => {
                                 )}
                               </button>
                             </th>
-                            <th className="px-2 py-2 text-left font-medium text-gray-700">
+                            <th className="px-2 py-2 text-left font-medium text-gray-700 w-24">
                               <button
                                 onClick={() => handleInactiveTableSort('name')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors"
@@ -2902,7 +2902,7 @@ const Branch360Dashboard = () => {
                                 )}
                               </button>
                             </th>
-                            <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap">
+                            <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap w-20">
                               <button
                                 onClick={() => handleInactiveTableSort('commissionMonth')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors ml-auto"
@@ -2915,7 +2915,7 @@ const Branch360Dashboard = () => {
                                 )}
                               </button>
                             </th>
-                            <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap">
+                            <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap w-20">
                               <button
                                 onClick={() => handleInactiveTableSort('currentMMP')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors ml-auto"
@@ -2928,7 +2928,7 @@ const Branch360Dashboard = () => {
                                 )}
                               </button>
                             </th>
-                            <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap">
+                            <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap w-20">
                               <button
                                 onClick={() => handleInactiveTableSort('previousMMP')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors ml-auto"

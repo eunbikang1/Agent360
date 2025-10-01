@@ -1534,7 +1534,7 @@ const Agent360Dashboard = () => {
                             {selectedKPI === 'nb_plan' ? (
                               <div>
                                 <div>{data.month} - {performanceType}</div>
-                                <div>Bf Plan: {(data.target * 10000).toLocaleString()}원</div>
+                                <div>NB Plan: {(data.target * 10000).toLocaleString()}원</div>
                                 <div>Actual: {(data.actual * 10000).toLocaleString()}원</div>
                                 <div>{data.value.toFixed(1)}% 달성</div>
                                 <div className="text-yellow-300">전체평균 {data.hqAvg}%</div>
@@ -1712,7 +1712,7 @@ const Agent360Dashboard = () => {
                               {yearlyKPI === 'nb_plan' ? (
                                 <div>
                                   <div>{data.year === '2025' ? '2025년 (~9월)' : `${data.year}년`} - {performanceType}</div>
-                                  <div>Bf Plan: {(data.nb_plan_target * 10000).toLocaleString()}원</div>
+                                  <div>NB Plan: {(data.nb_plan_target * 10000).toLocaleString()}원</div>
                                   <div>Actual: {(data.nb_plan_achieved * 10000).toLocaleString()}원</div>
                                   <div>{value.toFixed(1)}% 달성</div>
                                   <div className="text-yellow-300">전체평균 {avgValue.toFixed(1)}%</div>
@@ -2077,7 +2077,7 @@ const Agent360Dashboard = () => {
                         {hoveredProduct && hoveredProduct.idx === idx && (
                           <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-30 mb-2">
                             <div>{item.name}</div>
-                            <div>금액: {item.amount.toLocaleString()}원</div>
+                            <div>{performanceType}: {item.amount.toLocaleString()}원</div>
                             <div>건수: {item.count}건</div>
                             <div>비중: {item.value.toFixed(1)}%</div>
                           </div>
@@ -2226,7 +2226,8 @@ const Agent360Dashboard = () => {
                     {/* 컬럼 헤더 */}
                     <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg mb-2 text-xs  text-gray-700 border-b border-gray-200">
                       <div className="min-w-[35px] shrink-0">날짜</div>
-                      <div className="min-w-[240px] shrink-0">대리점 {'>'} 지점</div>
+                      <div className="min-w-[120px] shrink-0">대리점</div>
+                      <div className="min-w-[120px] shrink-0">지점</div>
                       <div className="flex-1 min-w-0">활동 내용</div>
                     </div>
 
@@ -2239,14 +2240,11 @@ const Agent360Dashboard = () => {
                           <div className="text-black min-w-[35px] shrink-0 font-mono">
                             {item.date}
                           </div>
-                          <div className="min-w-[240px] shrink-0 flex items-center">
-                            <span className=" text-gray-900 truncate max-w-[115px]">
-                              {item.agency}
-                            </span>
-                            <ChevronRight className="w-3 h-3 text-gray-400 mx-1 shrink-0" />
-                            <span className="text-gray-700 truncate max-w-[115px]">
-                              {item.branch}
-                            </span>
+                          <div className="min-w-[120px] shrink-0 truncate text-gray-900">
+                            {item.agency}
+                          </div>
+                          <div className="min-w-[120px] shrink-0 truncate text-gray-700">
+                            {item.branch}
                           </div>
                           <div className="text-black flex-1 min-w-0 truncate">
                             {item.detail}
@@ -2477,7 +2475,7 @@ const Agent360Dashboard = () => {
               <div className="overflow-hidden">
                 {/* 헤더 */}
                 <div className="grid gap-3 pb-3 border-b border-gray-200 mb-2" style={{gridTemplateColumns: '50px 1fr 90px 90px'}}>
-                  <div className="text-xs font-semibold text-gray-700 text-center">번호</div>
+                  <div className="text-xs font-semibold text-gray-700 text-center">순위</div>
                   <div className="text-xs font-semibold text-gray-700">지점명</div>
                   <button
                     onClick={() => {
