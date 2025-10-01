@@ -505,25 +505,25 @@ const Branch360Dashboard = () => {
   const corePerformance = {
     // 목표 달성률 (APE/MMP 기준)
     achievementRate: 32.67, // 98/300
-    currentApe: performanceType === 'MMP' ? 98 / 12 : 98, // 만원 단위 (98만원)
-    targetApe: performanceType === 'MMP' ? 300 / 12 : 300, // 만원 단위 (300만원)
+    currentApe: 98, // 만원 단위 (98만원) - APE 기준
+    targetApe: 300, // 만원 단위 (300만원) - APE 기준
     achievementVsLastMonth: 8.5, // 전월 동기 대비 %p
 
     // 지점장 실적 기여도
     managerContributionRate: 0.28, // 역삼지점 실적(98만원) ÷ 지점장 전체 실적(3.5억 = 35000만원) * 100
-    managerApe: performanceType === 'MMP' ? 35000 / 12 : 35000, // 지점장 개인 실적 (만원) 3.5억
+    managerApe: 35000, // 지점장 개인 실적 (만원) 3.5억 - APE 기준
     managerName: '김영수', // 지점장 이름
-    managerPersonalTarget: performanceType === 'MMP' ? 50000 / 12 : 50000, // 지점장 개인 목표 (만원) 5억
-    branchTargetApe: performanceType === 'MMP' ? 300 / 12 : 300, // 역삼지점 목표 APE (만원) 300만원
+    managerPersonalTarget: 50000, // 지점장 개인 목표 (만원) 5억 - APE 기준
+    branchTargetApe: 300, // 역삼지점 목표 APE (만원) 300만원 - APE 기준
     managerPlanContribution: 0.6, // 역삼지점 목표(300만원) ÷ 지점장 목표(5억 = 50000만원) * 100
     managerContribVsLastMonth: -2.3, // 전월 동기 대비 %p
-    totalBranchApe: performanceType === 'MMP' ? 98 / 12 : 98, // 역삼지점 실적 APE (만원) 98만원
+    totalBranchApe: 98, // 역삼지점 실적 APE (만원) 98만원 - APE 기준
 
     // 월누적 APE
-    monthlyApeAmount: performanceType === 'MMP' ? 98 / 12 : 98, // 만원
-    apeGrowthAmount: performanceType === 'MMP' ? 20 / 12 : 20, // 전월 동기 대비 증가분 (만원)
+    monthlyApeAmount: 98, // 만원 - APE 기준
+    apeGrowthAmount: 20, // 전월 동기 대비 증가분 (만원) - APE 기준
     apeGrowthPercent: 25.6, // 전월 동기 대비 %
-    apeDailyAverage: performanceType === 'MMP' ? Math.round(98/12/15) : Math.round(98/15), // 일평균 APE (만원)
+    apeDailyAverage: Math.round(98/15), // 일평균 APE (만원) - APE 기준, formatCurrency에서 변환
 
     // 월누적 설계
     proposalCount: 162,
@@ -630,6 +630,7 @@ const Branch360Dashboard = () => {
   const [dailyMetric, setDailyMetric] = useState<'APE' | 'MMP' | '청약' | '설계'>(performanceType); // 일별 차트 지표
   const [hoveredAverage, setHoveredAverage] = useState<{type: 'daily' | 'monthly', value: number} | null>(null); // 평균선 호버
   const [showExpectedProgressTooltip, setShowExpectedProgressTooltip] = useState(false); // 기대진도 툴팁
+  const [showProgressTooltip, setShowProgressTooltip] = useState(false); // 프로그레스바 툴팁
 
   // performanceType 변경 시 selectedMetric과 dailyMetric도 함께 업데이트
   useEffect(() => {
@@ -1555,36 +1556,42 @@ const Branch360Dashboard = () => {
                   <span className="group relative cursor-help">
                     {formatCurrency(corePerformance.currentApe * 10000)}
                     <span className="invisible group-hover:visible absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap z-10">
-                      {formatCurrencyFull(corePerformance.currentApe * 10000)}
+                      {(corePerformance.currentApe * 10000).toLocaleString()}원
                     </span>
                   </span>
                   {' / '}
                   <span className="group relative cursor-help">
                     {formatCurrency(corePerformance.targetApe * 10000)}
                     <span className="invisible group-hover:visible absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap z-10">
-                      {formatCurrencyFull(corePerformance.targetApe * 10000)}
+                      {(corePerformance.targetApe * 10000).toLocaleString()}원
                     </span>
                   </span>
                 </div>
 
-                <div className="w-full bg-gray-200 rounded-full h-5 mb-2 relative">
+                <div
+                  className="w-full bg-gray-200 rounded-full h-5 mb-2 relative"
+                  onMouseEnter={() => setShowProgressTooltip(true)}
+                  onMouseLeave={() => setShowProgressTooltip(false)}
+                >
                   <div className="bg-blue-500 h-5 rounded-full transition-all" style={{width: `${corePerformance.achievementRate}%`}}></div>
-                  {/* 전체 평균선 (59%) */}
-                  <div
-                    className="absolute top-0 h-5 w-0.5 bg-orange-500 z-10 cursor-pointer"
-                    style={{left: `59%`}}
-                    onMouseEnter={() => setShowExpectedProgressTooltip(true)}
-                    onMouseLeave={() => setShowExpectedProgressTooltip(false)}
-                  />
-                  {/* 전체 평균 툴팁 */}
-                  {showExpectedProgressTooltip && (
+                  {/* 프로그레스 바 툴팁 */}
+                  {showProgressTooltip && (
                     <div
-                      className="absolute top-6 bg-gray-800 text-white text-xs rounded px-3 py-2 whitespace-nowrap z-20 shadow-lg"
-                      style={{left: `59%`, transform: 'translateX(-50%)'}}
+                      className="absolute -top-16 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded px-3 py-2 whitespace-nowrap z-20 shadow-lg text-left"
                     >
-                      <div className="font-bold mb-1">전체 지점 평균 59.4%</div>
+                      <div>9월 - {performanceType}</div>
+                      <div>NB Plan: {(corePerformance.targetApe * 10000).toLocaleString()}원</div>
+                      <div>Actual: {(corePerformance.currentApe * 10000).toLocaleString()}원</div>
+                      <div>{corePerformance.achievementRate.toFixed(1)}% 달성</div>
+                      <div className="text-yellow-300">전체평균 59.4%</div>
+                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
                     </div>
                   )}
+                  {/* 전체 평균선 (59%) */}
+                  <div
+                    className="absolute top-0 h-5 w-0.5 bg-orange-500 z-10"
+                    style={{left: `59%`}}
+                  />
                 </div>
 
                 {/* 평균 표시 텍스트 */}

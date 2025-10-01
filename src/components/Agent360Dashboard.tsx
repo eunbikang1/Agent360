@@ -1308,11 +1308,7 @@ const Agent360Dashboard = () => {
             </h2>
             
             {/* 목표달성률 (APE 기준) - 주요 지표 */}
-            <div
-              className="bg-white rounded-lg shadow-sm border p-6 relative"
-              onMouseEnter={() => setShowProgressTooltip(true)}
-              onMouseLeave={() => setShowProgressTooltip(false)}
-            >
+            <div className="bg-white rounded-lg shadow-sm border p-6 relative">
               <div className="flex justify-between items-start mb-4 border-b border-gray-100 pb-2">
                 <h3 className="text-base font-bold text-gray-800">목표달성률</h3>
                 <span className="text-xs text-black">{performanceType} 기준</span>
@@ -1324,7 +1320,11 @@ const Agent360Dashboard = () => {
                   {formatCurrency(myKPI.goalAchievement.actual, performanceType)} / {formatCurrency(myKPI.goalAchievement.target, performanceType)}
                 </div>
 
-                <div className="w-full bg-gray-200 rounded-full h-5 mb-2 relative group">
+                <div
+                  className="w-full bg-gray-200 rounded-full h-5 mb-2 relative group"
+                  onMouseEnter={() => setShowProgressTooltip(true)}
+                  onMouseLeave={() => setShowProgressTooltip(false)}
+                >
                   <div
                     className="bg-blue-500 h-5 rounded-full transition-all"
                     style={{width: `${myKPI.goalAchievement.current}%`}}
