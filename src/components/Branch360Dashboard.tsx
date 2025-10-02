@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Building, Users, Phone, MapPin, Calendar, TrendingUp, ChevronDown, User, ArrowDown, Download, Briefcase, AlertTriangle, TrendingDown, UserPlus, Search, ChevronRight } from 'lucide-react';
+import {
+  generateBranchPerformance,
+  generateAgentCount,
+  generateManagerName,
+  generateBranchAddress,
+  generateBranchPhone
+} from '../data/branchDataGenerator';
 
 const Branch360Dashboard = () => {
   const { agency, branchName } = useParams<{ agency?: string; branchName: string }>();
@@ -41,7 +48,7 @@ const Branch360Dashboard = () => {
   };
 
   const [selectedProduct, setSelectedProduct] = useState<'전체' | '건강' | '종신/정기'>(searchParams.get('product') as '전체' | '건강' | '종신/정기' || '전체');
-  const [performanceType, setPerformanceType] = useState<'APE' | 'MMP'>('APE');
+  const [performanceType, setPerformanceType] = useState<'APE' | 'MMP'>((searchParams.get('performanceType') as 'APE' | 'MMP') || 'APE');
 
   // 테이블 정렬을 위한 state - 가동/미가동 설계사 별도 상태
   const [activeTableSortBy, setActiveTableSortBy] = useState<string>('currentMMP');
@@ -139,6 +146,7 @@ const Branch360Dashboard = () => {
   const [selectedActivityType, setSelectedActivityType] = useState<'최근' | '교육' | '방문'>('최근');
   const [showConversionTooltip, setShowConversionTooltip] = useState(false);
   const [hoveredProduct, setHoveredProduct] = useState<any>(null);
+  const [showProgressTooltip, setShowProgressTooltip] = useState(false);
 
   // 상세 활동 데이터
   const detailedEducationData = [
@@ -408,6 +416,19 @@ const Branch360Dashboard = () => {
     // 더블유에셋 > 일산센터
     else if (agency === '더블유에셋' && branch === '일산센터') {
       alerts.push({
+        type: '위험',
+        title: '계약 품질 이슈',
+        description: '최근 3 영업일 동안 인수거절/청약철회 2건 이상 발생',
+        icon: <AlertTriangle className="w-3 h-3" />,
+        color: 'text-red-600',
+        bgColor: 'bg-red-100',
+        priority: 1
+      });
+    }
+
+    // 글로벌금융판매 > 리더스일산
+    else if (agency === '글로벌금융판매' && branch === '리더스일산') {
+      alerts.push({
         type: '기회',
         title: '실적 급상승',
         description: '전월 동기 대비 APE +30% 이상 급등',
@@ -416,6 +437,10 @@ const Branch360Dashboard = () => {
         bgColor: 'bg-green-100',
         priority: 2
       });
+    }
+
+    // 어센틱금융그룹 > 구미 스튜디오
+    else if (agency === '어센틱금융그룹' && branch === '구미 스튜디오') {
       alerts.push({
         type: '기회',
         title: '고액 계약 체결',
@@ -427,8 +452,8 @@ const Branch360Dashboard = () => {
       });
     }
 
-    // 지에이스타금융서비스 > 그레이트탑
-    else if (agency === '지에이스타금융서비스' && branch === '그레이트탑') {
+    // 라이프파트너스 > 부산센터
+    else if (agency === '라이프파트너스' && branch === '부산센터') {
       alerts.push({
         type: '기회',
         title: '신규 가동',
@@ -440,8 +465,8 @@ const Branch360Dashboard = () => {
       });
     }
 
-    // 한국지에이금융서비스 > 케이엘아이케이베스트
-    else if (agency === '한국지에이금융서비스' && branch === '케이엘아이케이베스트') {
+    // 한국지에이금융서비스 > 일산지사
+    else if (agency === '한국지에이금융서비스' && branch === '일산지사') {
       alerts.push({
         type: '변화',
         title: '연속 가동자 이탈',
@@ -453,8 +478,8 @@ const Branch360Dashboard = () => {
       });
     }
 
-    // 메가 > 사랑
-    else if (agency === '메가' && branch === '사랑') {
+    // 지에이스타금융서비스 > 부천코어
+    else if (agency === '지에이스타금융서비스' && branch === '부천코어') {
       alerts.push({
         type: '변화',
         title: '신규 위촉 발생',
@@ -466,8 +491,8 @@ const Branch360Dashboard = () => {
       });
     }
 
-    // 지금용코리아 > 서울
-    else if (agency === '지금용코리아' && branch === '서울') {
+    // 메가 > 인슈에셋고양
+    else if (agency === '메가' && branch === '인슈에셋고양') {
       alerts.push({
         type: '변화',
         title: '포트폴리오 급변',
@@ -476,6 +501,71 @@ const Branch360Dashboard = () => {
         color: 'text-blue-600',
         bgColor: 'bg-blue-100',
         priority: 3
+      });
+    }
+
+    // 글로벌금융판매 > 브릿지재무설계
+    else if (agency === '글로벌금융판매' && branch === '브릿지재무설계') {
+      alerts.push({
+        type: '기회',
+        title: '고객 만족도 상승',
+        description: '고객 만족도가 상승하는 추세',
+        icon: <TrendingUp className="w-3 h-3" />,
+        color: 'text-green-600',
+        bgColor: 'bg-green-100',
+        priority: 2
+      });
+    }
+
+    // 한국지에이금융서비스 > 김포지사
+    else if (agency === '한국지에이금융서비스' && branch === '김포지사') {
+      alerts.push({
+        type: '기회',
+        title: '계약 품질 개선',
+        description: '계약 품질이 개선되는 추세',
+        icon: <TrendingUp className="w-3 h-3" />,
+        color: 'text-green-600',
+        bgColor: 'bg-green-100',
+        priority: 2
+      });
+    }
+
+    // 메타리치 > 리치골드
+    else if (agency === '메타리치' && branch === '리치골드') {
+      alerts.push({
+        type: '위험',
+        title: '장기 미관리 상태',
+        description: '6개월 이상 방문/교육 없고 실적도 없는 상태',
+        icon: <AlertTriangle className="w-3 h-3" />,
+        color: 'text-red-600',
+        bgColor: 'bg-red-100',
+        priority: 1
+      });
+    }
+
+    // 어센틱금융그룹 > 대구센터
+    else if (agency === '어센틱금융그룹' && branch === '대구센터') {
+      alerts.push({
+        type: '변화',
+        title: '신입 설계사 급증',
+        description: '신입 설계사가 급증하는 추세',
+        icon: <UserPlus className="w-3 h-3" />,
+        color: 'text-blue-600',
+        bgColor: 'bg-blue-100',
+        priority: 3
+      });
+    }
+
+    // 라이프파트너스 > 대전센터
+    else if (agency === '라이프파트너스' && branch === '대전센터') {
+      alerts.push({
+        type: '위험',
+        title: '실적 부진 지속',
+        description: '실적 부진이 지속되는 상태',
+        icon: <TrendingDown className="w-3 h-3" />,
+        color: 'text-red-600',
+        bgColor: 'bg-red-100',
+        priority: 1
       });
     }
 
@@ -501,38 +591,102 @@ const Branch360Dashboard = () => {
     setShowBranchDropdown(false);
   };
 
-  // 핵심 성과 지표 (전일 마감 기준)
+  // 핵심 성과 지표 (전일 마감 기준) - 동적 생성
+  const branchPerformanceData = generateBranchPerformance(selectedAgency, selectedBranch);
+  const managerName = generateManagerName(selectedAgency, selectedBranch);
+
+  // Agent360Dashboard와 동일한 목표 계산 로직
+  const calculateBranchTarget = (agency: string, branch: string, currentMonthAPE: number) => {
+    const seed = agency.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) +
+                 branch.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const targetRandom = ((seed * 9301 + 49297) % 233280) / 233280;
+
+    let target = 30; // 기본 30백만원
+    const apeInMillions = currentMonthAPE / 1000000;
+
+    if (apeInMillions > 15) {
+      target = 15 + Math.floor(targetRandom * 25);
+      if (targetRandom > 0.6) target = Math.floor(apeInMillions * 0.8);
+    } else if (apeInMillions > 5) {
+      target = 5 + Math.floor(targetRandom * 15);
+      if (targetRandom > 0.5) target = Math.floor(apeInMillions * 0.85);
+    } else if (apeInMillions > 1) {
+      target = 3 + Math.floor(targetRandom * 12);
+      if (targetRandom > 0.4) target = Math.floor(apeInMillions * 0.9);
+    } else if (apeInMillions > 0) {
+      target = 2 + Math.floor(targetRandom * 8);
+      if (targetRandom < 0.3) target = Math.floor(apeInMillions * 1.2);
+    }
+
+    return Math.max(target, 2); // 최소 2백만원
+  };
+
+  // 현재 지점의 목표 계산
+  const currentBranchTarget = calculateBranchTarget(selectedAgency, selectedBranch, branchPerformanceData.currentMonthAPE);
+  const targetApeInWon = currentBranchTarget * 1000000; // 원 단위
+
+  // 전체 지점 데이터 생성하여 기여도 계산
+  const totalBranches = 160;
+  const allBranchesData = [];
+
+  for (let i = 0; i < totalBranches; i++) {
+    const agencyIndex = i % agencies.length;
+    const branchIndex = i % branchNames.length;
+    const suffixes = ['', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+    const suffix = suffixes[Math.floor(i / branchNames.length)];
+
+    const agency = agencies[agencyIndex];
+    const branch = branchNames[branchIndex] + suffix;
+    const performance = generateBranchPerformance(agency, branch);
+    const target = calculateBranchTarget(agency, branch, performance.currentMonthAPE);
+
+    allBranchesData.push({
+      agency,
+      branch,
+      currentMonthAPE: performance.currentMonthAPE,
+      target: target * 1000000 // 원 단위
+    });
+  }
+
+  const totalTargetSum = allBranchesData.reduce((sum, b) => sum + b.target, 0);
+  const totalPerformanceSum = allBranchesData.reduce((sum, b) => sum + b.currentMonthAPE, 0);
+
+  const targetContribution = totalTargetSum > 0 ? (targetApeInWon / totalTargetSum) * 100 : 0;
+  const performanceContribution = totalPerformanceSum > 0 ? (branchPerformanceData.currentMonthAPE / totalPerformanceSum) * 100 : 0;
+
   const corePerformance = {
     // 목표 달성률 (APE/MMP 기준)
-    achievementRate: 50.0, // 1000/2000
-    currentApe: 1000, // 만원 단위 (1000만원 = 1억) - APE 기준
-    targetApe: 2000, // 만원 단위 (2000만원 = 2억) - APE 기준
-    achievementVsLastMonth: 8.5, // 전월 동기 대비 %p
+    achievementRate: targetApeInWon > 0 ? (branchPerformanceData.currentMonthAPE / targetApeInWon) * 100 : 0,
+    currentApe: branchPerformanceData.currentMonthAPE / 10000, // 만원 단위
+    targetApe: targetApeInWon / 10000, // 만원 단위
+    achievementVsLastMonth: branchPerformanceData.currentMonthAPE > branchPerformanceData.previousMonthAPE ? 8.5 : -5.2,
 
     // 지점장 실적 기여도
-    managerContributionRate: 2.9, // 역삼지점 실적(1000만원) ÷ 지점장 전체 실적(3.5억 = 35000만원) * 100
-    managerApe: 35000, // 지점장 개인 실적 (만원) 3.5억 - APE 기준
-    managerName: '김영수', // 지점장 이름
-    managerPersonalTarget: 50000, // 지점장 개인 목표 (만원) 5억 - APE 기준
-    branchTargetApe: 2000, // 역삼지점 목표 APE (만원) 2000만원 - APE 기준
-    managerPlanContribution: 4.0, // 역삼지점 목표(2000만원) ÷ 지점장 목표(5억 = 50000만원) * 100
-    managerContribVsLastMonth: -2.3, // 전월 동기 대비 %p
-    totalBranchApe: 1000, // 역삼지점 실적 APE (만원) 1000만원 - APE 기준
+    managerContributionRate: performanceContribution,
+    managerApe: 35000, // 지점장 개인 실적 (만원) 3.5억
+    managerName: managerName,
+    managerPersonalTarget: 50000, // 지점장 개인 목표 (만원) 5억
+    branchTargetApe: targetApeInWon / 10000,
+    managerPlanContribution: targetContribution,
+    managerContribVsLastMonth: -2.3,
+    totalBranchApe: branchPerformanceData.currentMonthAPE / 10000, // 만원 단위
 
     // 월누적 APE
-    monthlyApeAmount: 1000, // 만원 - APE 기준
-    apeGrowthAmount: 200, // 전월 동기 대비 증가분 (만원) - APE 기준
-    apeGrowthPercent: 25.0, // 전월 동기 대비 %
-    apeDailyAverage: Math.round(1000/15), // 일평균 APE (만원) - APE 기준, formatCurrency에서 변환
+    monthlyApeAmount: branchPerformanceData.currentMonthAPE / 10000, // 만원
+    apeGrowthAmount: (branchPerformanceData.currentMonthAPE - branchPerformanceData.previousMonthAPE) / 10000,
+    apeGrowthPercent: branchPerformanceData.previousMonthAPE > 0
+      ? ((branchPerformanceData.currentMonthAPE - branchPerformanceData.previousMonthAPE) / branchPerformanceData.previousMonthAPE * 100)
+      : 0,
+    apeDailyAverage: Math.round(branchPerformanceData.currentMonthAPE / 10000 / 15),
 
     // 월누적 설계
     proposalCount: 250,
-    proposalGrowth: 18, // 전월 동기 대비
+    proposalGrowth: 18,
     proposalDailyAverage: Math.round(250/15),
 
     // 월누적 청약
     contractCount: 150,
-    contractGrowth: 12, // 전월 동기 대비
+    contractGrowth: 12,
     contractDailyAverage: Math.round(150/15)
   };
 
@@ -631,7 +785,6 @@ const Branch360Dashboard = () => {
   const [dailyMetric, setDailyMetric] = useState<'APE' | 'MMP' | '청약' | '설계'>(performanceType); // 일별 차트 지표
   const [hoveredAverage, setHoveredAverage] = useState<{type: 'daily' | 'monthly', value: number} | null>(null); // 평균선 호버
   const [showExpectedProgressTooltip, setShowExpectedProgressTooltip] = useState(false); // 기대진도 툴팁
-  const [showProgressTooltip, setShowProgressTooltip] = useState(false); // 프로그레스바 툴팁
 
   // performanceType 변경 시 selectedMetric과 dailyMetric도 함께 업데이트
   useEffect(() => {
@@ -705,19 +858,6 @@ const Branch360Dashboard = () => {
   const [inactiveSortBy, setInactiveSortBy] = useState<'name' | 'code' | 'tenure' | 'commissionMonth' | 'previousMMP' | 'M0' | 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M0건' | 'M1건' | 'M2건' | 'M3건' | 'M4건' | 'M5건'>('commissionMonth'); // 미가동 설계사 정렬 기준
   const [inactiveSortOrder, setInactiveSortOrder] = useState<'asc' | 'desc'>('desc'); // 미가동 설계사 정렬 순서
   
-  const currentAgentStatus = {
-    total: 47, // 총 소속 설계사
-    active: 19, // 당월 가동 설계사 (AG001-AG019)
-    newThisMonth: 2, // 당월 신규 위촉 (새로 입사한 설계사)
-    resignedThisMonth: 1, // 당월 해촉
-    netChange: 1, // 순증감 (신규위촉2 - 해촉1)
-    continuous6Months: 8, // 6개월 연속 가동 (순수 6개월만)
-    continuous3Months: 15, // 3개월 연속 가동 (6개월 8명 + 3개월 7명 = 15명)
-    continuous2Months: 17, // 2개월 연속 가동 (19명 가동 - 2명 신규가동 AG013,AG014 = 17명)
-    newActive: 2 // 신규 가동 (AG013, AG014 - 전월 무실적에서 당월 가동)
-  };
-
-
   // 에이전트 리스트 데이터 (포함 관계로 정리)
   const baseAgentLists = {
     // 6개월 연속 가동 (순수 6개월만)
@@ -741,7 +881,7 @@ const Branch360Dashboard = () => {
       '손지원', '김동현', '이민지', '박형준', '김나영', '이성민', '김배태', '박예진'
     ],
     newActive: [
-      '김배태', '박예진', '최지후', '김대우', '이예진', '박시원' // 전월 미가동→가동 전환
+      '김배태', '박예진', '최지후' // 전월 미가동→가동 전환
     ],
     newCommissioned: [
       '정민준', '조상원' // 당월 신규 위촉 (새로 입사한 설계사)
@@ -751,171 +891,210 @@ const Branch360Dashboard = () => {
     ]
   };
 
+  const currentAgentStatus = {
+    total: 47, // 총 소속 설계사
+    active: baseAgentLists.continuous2Months.length + baseAgentLists.newActive.length, // 당월 가동 설계사 (26명 = 23 + 3)
+    newThisMonth: 2, // 당월 신규 위촉
+    resignedThisMonth: 1, // 당월 해촉
+    netChange: 1, // 순증감
+    continuous6Months: baseAgentLists.continuous6Months.length, // 6개월 연속 가동 (8명)
+    continuous3Months: baseAgentLists.continuous3Months.length, // 3개월 연속 가동 (15명)
+    continuous2Months: baseAgentLists.continuous2Months.length, // 2개월 연속 가동 (23명)
+    newActive: baseAgentLists.newActive.length // 신규 가동 (3명)
+  };
+
   // 전체 47명 설계사 데이터 생성 (완전 고정 데이터)
   const generateAllAgentsData = () => {
-    return [
-      // TOP 5 우수 설계사
+    // 기본 데이터 (비율 유지용)
+    const baseData = [
+      // 6개월 연속 가동 (8명)
       {
         name: '이지은', agentCode: 'AG001', experience: '8.5년차', commissionMonth:'102개월', insuranceCareer: '8.5년',
         currentMonth: { premium: 10, contracts: 13, rank: 1 },
         previousMonth: { premium: 26, contracts: 11, rank: 2 },
         threeMonthAverage: { premium: 27, contracts: 12 },
-        productMix: { health: 70, life: 30 }, isActive: true
+        productMix: { health: 70, life: 30 }, isActive: true, continuousMonths: 6
       },
       {
         name: '김선호', agentCode: 'AG002', experience: '6.2년차', commissionMonth:'74개월', insuranceCareer: '6.2년',
         currentMonth: { premium: 9, contracts: 12, rank: 2 },
         previousMonth: { premium: 26, contracts: 13, rank: 1 },
         threeMonthAverage: { premium: 26, contracts: 12 },
-        productMix: { health: 55, life: 45 }, isActive: true
+        productMix: { health: 55, life: 45 }, isActive: true, continuousMonths: 6
       },
       {
         name: '김준영', agentCode: 'AG003', experience: '12.8년차', commissionMonth:'153개월', insuranceCareer: '12.8년',
         currentMonth: { premium: 8, contracts: 11, rank: 3 },
         previousMonth: { premium: 23, contracts: 10, rank: 3 },
         threeMonthAverage: { premium: 23, contracts: 10 },
-        productMix: { health: 65, life: 35 }, isActive: true
+        productMix: { health: 65, life: 35 }, isActive: true, continuousMonths: 6
       },
       {
         name: '이하늘', agentCode: 'AG004', experience: '4.3년차', commissionMonth:'51개월', insuranceCareer: '4.3년',
         currentMonth: { premium: 7, contracts: 9, rank: 4 },
         previousMonth: { premium: 21, contracts: 8, rank: 4 },
         threeMonthAverage: { premium: 21, contracts: 8 },
-        productMix: { health: 40, life: 60 }, isActive: true
+        productMix: { health: 40, life: 60 }, isActive: true, continuousMonths: 6
       },
       {
         name: '박상호', agentCode: 'AG005', experience: '7.6년차', commissionMonth:'91개월', insuranceCareer: '7.6년',
         currentMonth: { premium: 7, contracts: 10, rank: 5 },
         previousMonth: { premium: 19, contracts: 9, rank: 5 },
         threeMonthAverage: { premium: 19, contracts: 9 },
-        productMix: { health: 80, life: 20 }, isActive: true
+        productMix: { health: 80, life: 20 }, isActive: true, continuousMonths: 6
       },
-
-      // 6-12위: 연속 가동 설계사
       {
         name: '정미선', agentCode: 'AG006', experience: '5.4년차', commissionMonth:'65개월', insuranceCareer: '5.4년',
         currentMonth: { premium: 3, contracts: 8, rank: 6 },
         previousMonth: { premium: 6, contracts: 7, rank: 6 },
         threeMonthAverage: { premium: 6, contracts: 7 },
-        productMix: { health: 55, life: 45 }, isActive: true
+        productMix: { health: 55, life: 45 }, isActive: true, continuousMonths: 6
       },
       {
         name: '조영수', agentCode: 'AG007', experience: '3.7년차', commissionMonth:'44개월', insuranceCareer: '3.7년',
         currentMonth: { premium: 3, contracts: 7, rank: 7 },
         previousMonth: { premium: 6, contracts: 6, rank: 7 },
         threeMonthAverage: { premium: 6, contracts: 6 },
-        productMix: { health: 75, life: 25 }, isActive: true
+        productMix: { health: 75, life: 25 }, isActive: true, continuousMonths: 6
       },
       {
         name: '차서영', agentCode: 'AG008', experience: '10.2년차', commissionMonth:'122개월', insuranceCareer: '10.2년',
         currentMonth: { premium: 3, contracts: 6, rank: 8 },
         previousMonth: { premium: 5, contracts: 5, rank: 8 },
         threeMonthAverage: { premium: 6, contracts: 5 },
-        productMix: { health: 60, life: 40 }, isActive: true
+        productMix: { health: 60, life: 40 }, isActive: true, continuousMonths: 6
       },
+
+      // 3개월 연속 가동 추가 (7명)
       {
         name: '손민준', agentCode: 'AG009', experience: '2.9년차', commissionMonth:'35개월', insuranceCareer: '2.9년',
         currentMonth: { premium: 3, contracts: 5, rank: 9 },
         previousMonth: { premium: 5, contracts: 4, rank: 9 },
         threeMonthAverage: { premium: 5, contracts: 4 },
-        productMix: { health: 45, life: 55 }, isActive: true
+        productMix: { health: 45, life: 55 }, isActive: true, continuousMonths: 3
       },
       {
         name: '박지수', agentCode: 'AG010', experience: '6.8년차', commissionMonth:'81개월', insuranceCareer: '6.8년',
         currentMonth: { premium: 3, contracts: 4, rank: 10 },
         previousMonth: { premium: 5, contracts: 3, rank: 10 },
         threeMonthAverage: { premium: 5, contracts: 3 },
-        productMix: { health: 85, life: 15 }, isActive: true
+        productMix: { health: 85, life: 15 }, isActive: true, continuousMonths: 3
       },
       {
         name: '정동현', agentCode: 'AG011', experience: '4.5년차', commissionMonth:'54개월', insuranceCareer: '4.5년',
         currentMonth: { premium: 3, contracts: 3, rank: 11 },
         previousMonth: { premium: 5, contracts: 2, rank: 11 },
         threeMonthAverage: { premium: 5, contracts: 2 },
-        productMix: { health: 50, life: 50 }, isActive: true
+        productMix: { health: 50, life: 50 }, isActive: true, continuousMonths: 3
       },
       {
         name: '차민정', agentCode: 'AG012', experience: '1.8년차', commissionMonth:'21개월', insuranceCareer: '1.8년',
         currentMonth: { premium: 3, contracts: 2, rank: 12 },
         previousMonth: { premium: 5, contracts: 2, rank: 12 },
         threeMonthAverage: { premium: 5, contracts: 2 },
-        productMix: { health: 70, life: 30 }, isActive: true
+        productMix: { health: 70, life: 30 }, isActive: true, continuousMonths: 3
       },
-
-      // 13-20위: 연속 가동 설계사 (3개월)
       {
-        name: '김배태', agentCode: 'AG013', experience: '4.1년차', commissionMonth:'1개월', insuranceCareer: '4.1년',
-        currentMonth: { premium: 3, contracts: 2, rank: 13 },
-        previousMonth: { premium: 0, contracts: 0, rank: null },
+        name: '박지영', agentCode: 'AG013', experience: '3.2년차', commissionMonth:'38개월', insuranceCareer: '3.2년',
+        currentMonth: { premium: 3, contracts: 1, rank: 13 },
+        previousMonth: { premium: 5, contracts: 1, rank: 13 },
         threeMonthAverage: { premium: 5, contracts: 1 },
-        productMix: { health: 65, life: 35 }, isActive: true
+        productMix: { health: 80, life: 20 }, isActive: true, continuousMonths: 3
       },
       {
-        name: '박예진', agentCode: 'AG014', experience: '1.3년차', commissionMonth:'1개월', insuranceCareer: '1.3년',
+        name: '정예린', agentCode: 'AG014', experience: '5.7년차', commissionMonth:'68개월', insuranceCareer: '5.7년',
         currentMonth: { premium: 3, contracts: 1, rank: 14 },
-        previousMonth: { premium: 0, contracts: 0, rank: null },
+        previousMonth: { premium: 5, contracts: 1, rank: 14 },
         threeMonthAverage: { premium: 5, contracts: 1 },
-        productMix: { health: 55, life: 45 }, isActive: true
+        productMix: { health: 40, life: 60 }, isActive: true, continuousMonths: 3
       },
       {
-        name: '박지영', agentCode: 'AG015', experience: '3.2년차', commissionMonth:'38개월', insuranceCareer: '3.2년',
+        name: '조은경', agentCode: 'AG015', experience: '2.5년차', commissionMonth:'30개월', insuranceCareer: '2.5년',
         currentMonth: { premium: 3, contracts: 1, rank: 15 },
         previousMonth: { premium: 5, contracts: 1, rank: 15 },
         threeMonthAverage: { premium: 5, contracts: 1 },
-        productMix: { health: 80, life: 20 }, isActive: true
+        productMix: { health: 75, life: 25 }, isActive: true, continuousMonths: 3
       },
+
+      // 2개월 연속 가동 추가 (8명)
       {
-        name: '정예린', agentCode: 'AG016', experience: '5.7년차', commissionMonth:'68개월', insuranceCareer: '5.7년',
+        name: '손지원', agentCode: 'AG016', experience: '4.1년차', commissionMonth:'49개월', insuranceCareer: '4.1년',
         currentMonth: { premium: 3, contracts: 1, rank: 16 },
         previousMonth: { premium: 5, contracts: 1, rank: 16 },
         threeMonthAverage: { premium: 5, contracts: 1 },
-        productMix: { health: 40, life: 60 }, isActive: true
+        productMix: { health: 60, life: 40 }, isActive: true, continuousMonths: 2
       },
       {
-        name: '조은경', agentCode: 'AG017', experience: '2.5년차', commissionMonth:'30개월', insuranceCareer: '2.5년',
+        name: '김동현', agentCode: 'AG017', experience: '7.3년차', commissionMonth:'87개월', insuranceCareer: '7.3년',
         currentMonth: { premium: 3, contracts: 1, rank: 17 },
         previousMonth: { premium: 5, contracts: 1, rank: 17 },
         threeMonthAverage: { premium: 5, contracts: 1 },
-        productMix: { health: 75, life: 25 }, isActive: true
+        productMix: { health: 50, life: 50 }, isActive: true, continuousMonths: 2
       },
       {
-        name: '손지원', agentCode: 'AG018', experience: '4.1년차', commissionMonth:'49개월', insuranceCareer: '4.1년',
+        name: '이민지', agentCode: 'AG018', experience: '1.9년차', commissionMonth:'23개월', insuranceCareer: '1.9년',
         currentMonth: { premium: 3, contracts: 1, rank: 18 },
-        previousMonth: { premium: 5, contracts: 1, rank: 18 },
-        threeMonthAverage: { premium: 5, contracts: 1 },
-        productMix: { health: 60, life: 40 }, isActive: true
+        previousMonth: { premium: 2, contracts: 1, rank: 18 },
+        threeMonthAverage: { premium: 2, contracts: 1 },
+        productMix: { health: 85, life: 15 }, isActive: true, continuousMonths: 2
       },
       {
-        name: '김동현', agentCode: 'AG019', experience: '7.3년차', commissionMonth:'87개월', insuranceCareer: '7.3년',
+        name: '박형준', agentCode: 'AG019', experience: '5.2년차', commissionMonth:'62개월', insuranceCareer: '5.2년',
         currentMonth: { premium: 3, contracts: 1, rank: 19 },
-        previousMonth: { premium: 5, contracts: 1, rank: 19 },
-        threeMonthAverage: { premium: 5, contracts: 1 },
-        productMix: { health: 50, life: 50 }, isActive: true
+        previousMonth: { premium: 2, contracts: 1, rank: 19 },
+        threeMonthAverage: { premium: 2, contracts: 1 },
+        productMix: { health: 65, life: 35 }, isActive: true, continuousMonths: 2
       },
       {
-        name: '이민지', agentCode: 'AG020', experience: '1.9년차', commissionMonth:'23개월', insuranceCareer: '1.9년',
-        currentMonth: { premium: 0, contracts: 0, rank: null },
+        name: '김나영', agentCode: 'AG020', experience: '3.6년차', commissionMonth:'43개월', insuranceCareer: '3.6년',
+        currentMonth: { premium: 3, contracts: 1, rank: 20 },
         previousMonth: { premium: 2, contracts: 1, rank: 20 },
         threeMonthAverage: { premium: 2, contracts: 1 },
-        productMix: { health: 85, life: 15 }, isActive: false
+        productMix: { health: 70, life: 30 }, isActive: true, continuousMonths: 2
+      },
+      {
+        name: '이성민', agentCode: 'AG021', experience: '2.1년차', commissionMonth:'25개월', insuranceCareer: '2.1년',
+        currentMonth: { premium: 3, contracts: 1, rank: 21 },
+        previousMonth: { premium: 2, contracts: 1, rank: 21 },
+        threeMonthAverage: { premium: 2, contracts: 1 },
+        productMix: { health: 50, life: 50 }, isActive: true, continuousMonths: 2
+      },
+      {
+        name: '김배태', agentCode: 'AG022', experience: '4.1년차', commissionMonth:'2개월', insuranceCareer: '4.1년',
+        currentMonth: { premium: 3, contracts: 2, rank: 22 },
+        previousMonth: { premium: 2, contracts: 1, rank: 22 },
+        threeMonthAverage: { premium: 2, contracts: 1 },
+        productMix: { health: 65, life: 35 }, isActive: true, continuousMonths: 2
+      },
+      {
+        name: '박예진', agentCode: 'AG023', experience: '1.3년차', commissionMonth:'2개월', insuranceCareer: '1.3년',
+        currentMonth: { premium: 3, contracts: 1, rank: 23 },
+        previousMonth: { premium: 2, contracts: 1, rank: 23 },
+        threeMonthAverage: { premium: 2, contracts: 1 },
+        productMix: { health: 55, life: 45 }, isActive: true, continuousMonths: 2
       },
 
-      // 21위: 연속 가동 설계사 (2개월)
+      // 신규 가동 (3명) - M1~M5 모두 0
       {
-        name: '이성민', agentCode: 'AG023', experience: '8.1년차', commissionMonth:'97개월', insuranceCareer: '8.1년',
-        currentMonth: { premium: 0, contracts: 0, rank: null },
-        previousMonth: { premium: 1, contracts: 1, rank: 23 },
-        threeMonthAverage: { premium: 1, contracts: 1 },
-        productMix: { health: 55, life: 45 }, isActive: false
-      },
-
-      // 22-25위: 신규 가동 (당월 처음 실적)
-      {
-        name: '정주영', agentCode: 'AG024', experience: '2.3년차', commissionMonth:'27개월', insuranceCareer: '2.3년',
-        currentMonth: { premium: 0, contracts: 0, rank: null },
+        name: '최지후', agentCode: 'AG024', experience: '2.3년차', commissionMonth:'1개월', insuranceCareer: '2.3년',
+        currentMonth: { premium: 2, contracts: 1, rank: 24 },
         previousMonth: { premium: 0, contracts: 0, rank: null },
-        threeMonthAverage: { premium: 0, contracts: 0 },
-        productMix: { health: 80, life: 20 }, isActive: false
+        threeMonthAverage: { premium: 1, contracts: 0 },
+        productMix: { health: 60, life: 40 }, isActive: true, continuousMonths: 1
+      },
+      {
+        name: '김대우', agentCode: 'AG025', experience: '3.1년차', commissionMonth:'1개월', insuranceCareer: '3.1년',
+        currentMonth: { premium: 2, contracts: 1, rank: 25 },
+        previousMonth: { premium: 0, contracts: 0, rank: null },
+        threeMonthAverage: { premium: 1, contracts: 0 },
+        productMix: { health: 50, life: 50 }, isActive: true, continuousMonths: 1
+      },
+      {
+        name: '이예진', agentCode: 'AG026', experience: '1.5년차', commissionMonth:'1개월', insuranceCareer: '1.5년',
+        currentMonth: { premium: 2, contracts: 1, rank: 26 },
+        previousMonth: { premium: 0, contracts: 0, rank: null },
+        threeMonthAverage: { premium: 1, contracts: 0 },
+        productMix: { health: 80, life: 20 }, isActive: true, continuousMonths: 1
       },
       {
         name: '조민석', agentCode: 'AG025', experience: '5.2년차', commissionMonth:'62개월', insuranceCareer: '5.2년',
@@ -1029,6 +1208,36 @@ const Branch360Dashboard = () => {
       { name: '정민규', agentCode: 'AG046', experience: '7.8년차', commissionMonth:'93개월', insuranceCareer: '7.8년', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 60, life: 40 }, isActive: false },
       { name: '조예림', agentCode: 'AG047', experience: '5.6년차', commissionMonth:'67개월', insuranceCareer: '5.6년', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 50, life: 50 }, isActive: false }
     ];
+
+    // 가동 설계사들의 기본 실적 합계 계산 (백만원 단위)
+    const activeAgentsBasePremiumSum = baseData
+      .filter(agent => agent.isActive)
+      .reduce((sum, agent) => sum + agent.currentMonth.premium, 0);
+
+    // 지점 APE를 백만원 단위로 변환
+    const branchAPEInMillions = branchPerformanceData.currentMonthAPE / 1000000;
+
+    // 스케일 팩터 계산
+    const scaleFactor = activeAgentsBasePremiumSum > 0 ? branchAPEInMillions / activeAgentsBasePremiumSum : 1;
+
+    // 모든 설계사의 실적에 스케일 팩터 적용
+    const scaledData = baseData.map(agent => ({
+      ...agent,
+      currentMonth: {
+        ...agent.currentMonth,
+        premium: Math.round(agent.currentMonth.premium * scaleFactor * 10) / 10 // 소수점 1자리
+      },
+      previousMonth: {
+        ...agent.previousMonth,
+        premium: Math.round(agent.previousMonth.premium * scaleFactor * 10) / 10
+      },
+      threeMonthAverage: {
+        ...agent.threeMonthAverage,
+        premium: Math.round(agent.threeMonthAverage.premium * scaleFactor * 10) / 10
+      }
+    }));
+
+    return scaledData;
   };
 
   const allAgentsData = generateAllAgentsData();
@@ -1238,7 +1447,10 @@ const Branch360Dashboard = () => {
 
 
 
-  // 지점 특성
+  // 지점 특성 - 동적 생성
+  const branchAddress = generateBranchAddress(selectedAgency, selectedBranch);
+  const branchPhone = generateBranchPhone(selectedAgency, selectedBranch);
+
   const branchProfile = {
     partnershipDate: '2022.10.24',
     partnershipMonths: 23,
@@ -1253,14 +1465,14 @@ const Branch360Dashboard = () => {
     },
     salesProcess: {
       monthlyProposal: 162,
-      monthlyApplication: 104, 
+      monthlyApplication: 104,
       monthlyContract: 95,
       conversionRate: 64.2, // 설계→청약 전환율
       contractRate: 91.3, // 청약→체결률
       rejectionRate: 8.7 // 인수거절률
     },
-    address: '서울특별시 강남구 테헤란로 123 역삼빌딩 5층',
-    phone: '02-1234-5678'
+    address: branchAddress,
+    phone: branchPhone
   };
 
   // 고객/계약 특성 데이터 (이번달 vs 3개월 평균)
@@ -1577,7 +1789,7 @@ const Branch360Dashboard = () => {
                   onMouseEnter={() => setShowProgressTooltip(true)}
                   onMouseLeave={() => setShowProgressTooltip(false)}
                 >
-                  <div className="bg-blue-500 h-5 rounded-full transition-all" style={{width: `${corePerformance.achievementRate}%`}}></div>
+                  <div className="bg-blue-500 h-5 rounded-full transition-all" style={{width: `${Math.min(corePerformance.achievementRate, 100)}%`}}></div>
                   {/* 프로그레스 바 툴팁 */}
                   {showProgressTooltip && (
                     <div
@@ -1615,7 +1827,9 @@ const Branch360Dashboard = () => {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-xs text-gray-500 mb-1">목표까지</div>
+                  <div className="text-xs text-gray-500 mb-1">
+                    {corePerformance.currentApe >= corePerformance.targetApe ? '목표 초과' : '목표까지'}
+                  </div>
                   <div className="font-semibold text-lg text-blue-600 group relative cursor-help">
                     {formatCurrency(Math.abs(corePerformance.targetApe - corePerformance.currentApe) * 10000)}
                     <span className="invisible group-hover:visible absolute bottom-full right-0 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap z-10">
@@ -1631,17 +1845,26 @@ const Branch360Dashboard = () => {
               {/* 하루 평균 필요 금액 안내 */}
               <div className="bg-blue-50 rounded-lg p-4 border border-blue-200 shadow-sm">
                 <div className="text-sm font-medium text-blue-800 text-center">
-                  <div className="mb-1">이번달 목표 달성을 위해</div>
-                  <div>
-                    하루 평균
-                    <span className="inline-block mx-1 px-2 py-1 bg-blue-600 text-white rounded-md font-bold text-base group relative cursor-help">
-                      {formatCurrency((corePerformance.targetApe - corePerformance.currentApe) / 7 * 10000)}
-                      <span className="invisible group-hover:visible absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-gray-900 bg-white rounded whitespace-nowrap z-10 border border-gray-300">
-                        {(performanceType === 'MMP' ? Math.round((corePerformance.targetApe - corePerformance.currentApe) / 7 * 10000 / 12) : Math.round((corePerformance.targetApe - corePerformance.currentApe) / 7 * 10000)).toLocaleString()}원
-                      </span>
-                    </span>
-                    이 필요해요!
-                  </div>
+                  {corePerformance.currentApe >= corePerformance.targetApe ? (
+                    <div>
+                      <div className="mb-1">🎉 축하합니다!</div>
+                      <div className="text-lg font-bold">이번달 목표를 달성했어요!</div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="mb-1">이번달 목표 달성을 위해</div>
+                      <div>
+                        하루 평균
+                        <span className="inline-block mx-1 px-2 py-1 bg-blue-600 text-white rounded-md font-bold text-base group relative cursor-help">
+                          {formatCurrency((corePerformance.targetApe - corePerformance.currentApe) / 7 * 10000)}
+                          <span className="invisible group-hover:visible absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-gray-900 bg-white rounded whitespace-nowrap z-10 border border-gray-300">
+                            {(performanceType === 'MMP' ? Math.round((corePerformance.targetApe - corePerformance.currentApe) / 7 * 10000 / 12) : Math.round((corePerformance.targetApe - corePerformance.currentApe) / 7 * 10000)).toLocaleString()}원
+                          </span>
+                        </span>
+                        이 필요해요!
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -1650,7 +1873,7 @@ const Branch360Dashboard = () => {
                 <div className="bg-blue-50 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className="text-sm font-semibold text-gray-700">기여도</div>
-                    <div className="text-xs text-gray-600 bg-white px-2 py-1 rounded">글로벌화이브스타 지점</div>
+                    <div className="text-xs text-gray-600 bg-white px-2 py-1 rounded">{selectedAgency} {selectedBranch}</div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
@@ -1799,9 +2022,11 @@ const Branch360Dashboard = () => {
                       : currentData.map(d => d.designCount);
                     const average = values.reduce((sum, val) => sum + val, 0) / values.length;
                     return dailyMetric === performanceType
-                      ? `${(average / 1000).toFixed(1)}백만원`
-                      : `${average.toFixed(1)}건`;
-                  })()} 
+                      ? performanceType === 'MMP'
+                        ? `${(average / 1000).toFixed(1)}백만원`
+                        : `${Math.round(average / 1000)}백만원`
+                      : `${Math.round(average)}건`;
+                  })()}
                 </div>
                 {/* 평균선 */}
                 <svg className="absolute inset-6 w-[calc(100%-3rem)] h-[calc(100%-3rem)]" viewBox="0 0 100 100" preserveAspectRatio="none" style={{zIndex: 1, pointerEvents: 'none'}}>
@@ -4013,20 +4238,36 @@ const Branch360Dashboard = () => {
                     const generateMonthlyData = (agent) => {
                       const baseValue = agent.currentMonth.premium;
                       const baseContracts = agent.currentMonth.contracts;
+                      const continuousMonths = agent.continuousMonths || 0;
 
-                      // 각 월의 청약건수 먼저 계산
-                      const m1Contracts = Math.max(0, baseContracts + Math.floor(Math.random() * 7) - 3);
-                      const m2Contracts = Math.max(0, baseContracts + Math.floor(Math.random() * 5) - 2);
-                      const m3Contracts = Math.max(0, baseContracts + Math.floor(Math.random() * 7) - 3);
-                      const m4Contracts = Math.max(0, baseContracts + Math.floor(Math.random() * 5) - 2);
-                      const m5Contracts = Math.max(0, baseContracts + Math.floor(Math.random() * 7) - 3);
+                      // continuousMonths에 따라 M1~M5 설정
+                      let m1Mmp = 0, m2Mmp = 0, m3Mmp = 0, m4Mmp = 0, m5Mmp = 0;
+                      let m1Contracts = 0, m2Contracts = 0, m3Contracts = 0, m4Contracts = 0, m5Contracts = 0;
 
-                      // 청약이 있으면 MMP도 있어야 함, 청약이 없으면 MMP도 0
-                      const m1Mmp = m1Contracts > 0 ? Math.max(30, Math.round(baseValue * (0.85 + Math.random() * 0.3))) : 0;
-                      const m2Mmp = m2Contracts > 0 ? Math.max(30, Math.round(baseValue * (0.8 + Math.random() * 0.4))) : 0;
-                      const m3Mmp = m3Contracts > 0 ? Math.max(30, Math.round(baseValue * (0.85 + Math.random() * 0.3))) : 0;
-                      const m4Mmp = m4Contracts > 0 ? Math.max(30, Math.round(baseValue * (0.9 + Math.random() * 0.2))) : 0;
-                      const m5Mmp = m5Contracts > 0 ? Math.max(30, Math.round(baseValue * (0.8 + Math.random() * 0.4))) : 0;
+                      if (continuousMonths >= 6) {
+                        // 6개월 연속: M1~M5 모두 실적 있음
+                        m1Contracts = Math.max(1, baseContracts + Math.floor(Math.random() * 7) - 3);
+                        m2Contracts = Math.max(1, baseContracts + Math.floor(Math.random() * 5) - 2);
+                        m3Contracts = Math.max(1, baseContracts + Math.floor(Math.random() * 7) - 3);
+                        m4Contracts = Math.max(1, baseContracts + Math.floor(Math.random() * 5) - 2);
+                        m5Contracts = Math.max(1, baseContracts + Math.floor(Math.random() * 7) - 3);
+                        m1Mmp = Math.max(30, Math.round(baseValue * (0.85 + Math.random() * 0.3)));
+                        m2Mmp = Math.max(30, Math.round(baseValue * (0.8 + Math.random() * 0.4)));
+                        m3Mmp = Math.max(30, Math.round(baseValue * (0.85 + Math.random() * 0.3)));
+                        m4Mmp = Math.max(30, Math.round(baseValue * (0.9 + Math.random() * 0.2)));
+                        m5Mmp = Math.max(30, Math.round(baseValue * (0.8 + Math.random() * 0.4)));
+                      } else if (continuousMonths >= 3) {
+                        // 3개월 연속: M1~M2만 실적 있음
+                        m1Contracts = Math.max(1, baseContracts + Math.floor(Math.random() * 7) - 3);
+                        m2Contracts = Math.max(1, baseContracts + Math.floor(Math.random() * 5) - 2);
+                        m1Mmp = Math.max(30, Math.round(baseValue * (0.85 + Math.random() * 0.3)));
+                        m2Mmp = Math.max(30, Math.round(baseValue * (0.8 + Math.random() * 0.4)));
+                      } else if (continuousMonths >= 2) {
+                        // 2개월 연속: M1만 실적 있음
+                        m1Contracts = Math.max(1, baseContracts + Math.floor(Math.random() * 7) - 3);
+                        m1Mmp = Math.max(30, Math.round(baseValue * (0.85 + Math.random() * 0.3)));
+                      }
+                      // continuousMonths === 1 또는 0: 신규가동, M1~M5 모두 0
 
                       return {
                         M0: baseValue,

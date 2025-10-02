@@ -1,16 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Trophy, Download, Building, ChevronRight, ChevronDown, ChevronUp, ArrowUp, ArrowDown, Activity, AlertTriangle, HelpCircle, X, Search, Users } from 'lucide-react';
+import {
+  generateBranchPerformance,
+  generateAgentCount,
+  generateBranchAddress,
+  generateBranchPhone
+} from '../data/branchDataGenerator';
 
 const Agent360Dashboard = () => {
   const navigate = useNavigate();
-  const [selectedKPI, setSelectedKPI] = useState('nb_plan');
+  const [searchParams] = useSearchParams();
+
+  const [selectedKPI, setSelectedKPI] = useState(searchParams.get('kpi') || 'nb_plan');
   const [yearlyKPI, setYearlyKPI] = useState('nb_plan'); // 연간 차트용 KPI
   const [selectedYear] = useState('2025'); // eslint-disable-line @typescript-eslint/no-unused-vars
-  const [selectedProduct, setSelectedProduct] = useState('전체');
+  const [selectedProduct, setSelectedProduct] = useState(searchParams.get('product') || '전체');
   const [productSortBy, setProductSortBy] = useState('amount');
   const [hoveredProduct, setHoveredProduct] = useState<any>(null);
-  const [performanceType, setPerformanceType] = useState<'APE' | 'MMP'>('APE');
+  const [performanceType, setPerformanceType] = useState<'APE' | 'MMP'>((searchParams.get('performanceType') as 'APE' | 'MMP') || 'APE');
 
   // 지능형 단위 포매팅 함수
   const formatCurrency = (amount: number, kpi: 'APE' | 'MMP' = 'APE') => {
@@ -214,117 +222,6 @@ const Agent360Dashboard = () => {
   // 월별 데이터만 사용 (헤더와 연동 가능하도록)
   const kpiData = monthlyTrend[2025][selectedKPI as keyof typeof monthlyTrend[2025]] || [];
 
-  // 지점 기본정보 데이터 함수
-  const getBranchInfoData = (kpi = 'APE') => {
-    // 기존 지점 순위 데이터에서 전체 160개 지점 가져오기 (가동 + 비가동)
-    const rankingData = getBranchRankings(true).data;
-
-    // 기본 주소, 연락처, 제휴일자 정보 매핑
-    const branchInfoMap = {
-      '글로벌화이브스타': { address: '인천 연수구 컨벤시아대로 234', phone: '032-567-8901', partnershipDate: '2021.12.20' },
-      '하나돔': { address: '부산 해운대구 해운대로 456', phone: '051-345-6789', partnershipDate: '2023.01.08' },
-      '리더스에프엔': { address: '대구 중구 동성로 78', phone: '053-456-7890', partnershipDate: '2022.07.03' },
-      '서울': { address: '서울 강남구 테헤란로 123', phone: '02-567-8901', partnershipDate: '2021.08.22' },
-      '보험스토어': { address: '서울 마포구 월드컵로 234', phone: '02-678-9012', partnershipDate: '2022.03.15' },
-      '일산센터': { address: '경기 고양시 일산서구 주엽로 345', phone: '031-789-0123', partnershipDate: '2020.11.10' },
-      '하나돔강북': { address: '서울 강북구 도봉로 456', phone: '02-890-1234', partnershipDate: '2021.07.16' },
-      '리더스일산': { address: '경기 고양시 일산동구 중앙로 567', phone: '031-901-2345', partnershipDate: '2022.05.14' },
-      '대원': { address: '서울 송파구 올림픽로 678', phone: '02-012-3456', partnershipDate: '2020.09.20' },
-      '일산지사': { address: '경기 고양시 덕양구 화정로 789', phone: '031-123-4567', partnershipDate: '2021.04.12' },
-      '화이브스타성화': { address: '서울 성동구 왕십리로 890', phone: '02-234-5678', partnershipDate: '2022.11.08' },
-      '리더스마이보험체크': { address: '서울 구로구 디지털로 123', phone: '02-345-6789', partnershipDate: '2021.12.22' },
-      '이센트럴마포': { address: '서울 마포구 상암로 234', phone: '02-456-7890', partnershipDate: '2020.06.15' },
-      '케이엘아이은평': { address: '서울 은평구 진관로 345', phone: '02-567-8901', partnershipDate: '2023.02.28' },
-      '케이엘아이운정': { address: '경기 파주시 경의로 456', phone: '031-678-9012', partnershipDate: '2022.08.18' }
-    };
-
-    // 기본 정보가 없는 지점들을 위한 기본값
-    const getDefaultInfo = (index) => ({
-      address: `서울 강남구 테헤란로 ${100 + index * 10}`,
-      phone: `02-${String(100 + index).padStart(3, '0')}-${String(1000 + index * 10).padStart(4, '0')}`,
-      partnershipDate: ['2020.01.15', '2021.03.22', '2022.05.10', '2023.07.08'][index % 4]
-    });
-
-    // 지점 데이터 변환 (160개로 제한)
-    const branches = rankingData.slice(0, 160).map((branch, index) => {
-      const branchKey = branch.branch;
-      const info = branchInfoMap[branchKey] || getDefaultInfo(index);
-
-      // 설계사 수 고정 생성 (기준별 재계산 방지)
-      let totalAgents, activeAgents;
-      const branchHash = (branchKey || '').split('').reduce((acc, char) => acc + char.charCodeAt(0), index);
-
-      // 위촉설계사는 브랜치별로 고정된 값 (20~200 사이)
-      totalAgents = 20 + (branchHash % 181);
-
-      // 가동설계사 계산 (0이 될 수 있음)
-      const hasPerformance = (branch.ape || 0) > 0.5; // 0.5 이상일 때만 실적 있음
-      if (hasPerformance) {
-        activeAgents = Math.floor(totalAgents * 0.2) + ((branchHash + index) % 12); // 위촉설계사의 20~40% 정도가 가동
-        activeAgents = Math.min(activeAgents, totalAgents);
-        // 일부는 가동설계사가 0인 경우도 있음
-        if ((branchHash + index) % 15 === 0) activeAgents = 0;
-      } else {
-        activeAgents = 0;
-      }
-
-      // 실적값 계산 (가동설계사가 0이면 실적도 0)
-      let performanceValue = 0;
-      if (activeAgents > 0 && hasPerformance) {
-        const randomFactor1 = (branchHash % 100) / 100; // 0~1
-        const randomFactor2 = ((branchHash + index) % 100) / 100; // 0~1
-        const randomFactor3 = ((branchHash * 2 + index) % 100) / 100; // 0~1
-
-        // 목표에 비례한 실적 분포 (목표의 60~120% 사이)
-        let baseValue;
-
-        // 상위 10개: 큰 실적 (800만~2500만)
-        if (index < 10) {
-          baseValue = 8000000 + Math.floor(17000000 * randomFactor1);
-        }
-        // 다음 20개: 중상위 실적 (400만~800만)
-        else if (index < 30) {
-          baseValue = 4000000 + Math.floor(4000000 * randomFactor1);
-        }
-        // 다음 30개: 중간 실적 (150만~400만)
-        else if (index < 60) {
-          baseValue = 1500000 + Math.floor(2500000 * randomFactor1);
-        }
-        // 다음 70개: 작은 실적 (30만~150만)
-        else if (index < 130) {
-          baseValue = 300000 + Math.floor(1200000 * randomFactor1);
-        }
-        // 나머지 30개: 매우 작거나 0인 실적
-        else {
-          if (randomFactor1 < 0.5) {
-            baseValue = 0; // 50%는 실적 0
-          } else {
-            baseValue = 50000 + Math.floor(250000 * randomFactor2);
-          }
-        }
-
-        // 10만원 단위로 반올림
-        baseValue = Math.round(baseValue / 100000) * 100000;
-
-        performanceValue = kpi === 'MMP' ? Math.round(baseValue / 12) : baseValue;
-      }
-
-      return {
-        no: index + 1,
-        agency: branch.agency,
-        branch: branch.branch,
-        address: info.address,
-        phone: info.phone,
-        partnershipDate: info.partnershipDate,
-        totalAgents: totalAgents,
-        activeAgents: activeAgents,
-        currentMonthAPE: performanceValue
-      };
-    });
-
-    return branches;
-  };
-
   // 방문 추천 지점 (간단하고 직관적)
   // 메인 대시보드용 알림 시스템 (Branch360Dashboard와 동일한 로직)
   const getMainDashboardBranchAlerts = (agency: string, branch: string) => {
@@ -337,30 +234,62 @@ const Agent360Dashboard = () => {
         { type: '위험', title: '목표달성 미달', priority: 1 },
         { type: '기회', title: '신규 위촉 발생', priority: 2 }
       );
-    } else if (agency === '삼성화재' && branch === '역삼지점') {
-      alerts.push(
-        { type: '위험', title: '3개월 연속 실적 하락', priority: 1 },
-        { type: '위험', title: '목표달성 미달', priority: 1 }
-      );
-    } else if (agency === '삼성화재' && branch === '강남지점') {
-      alerts.push(
-        { type: '기회', title: '실적 급상승', priority: 2 },
-        { type: '기회', title: '고액 계약 체결', priority: 2 }
-      );
-    } else if (agency === '삼성화재' && branch === '서초지점') {
-      alerts.push(
-        { type: '변화', title: '신규 위촉 발생', priority: 3 }
-      );
     } else if (agency === '글로벌금융판매' && branch === '케이에스에프에스동대문') {
       alerts.push(
         { type: '위험', title: '목표달성 미달', priority: 1 },
         { type: '위험', title: '계약 품질 이슈', priority: 1 }
       );
+    } else if (agency === '지금용코리아' && branch === '대원') {
+      alerts.push(
+        { type: '위험', title: '핵심인력 해촉', priority: 1 }
+      );
+    } else if (agency === '더블유에셋' && branch === '일산센터') {
+      alerts.push(
+        { type: '위험', title: '계약 품질 이슈', priority: 1 }
+      );
     } else if (agency === '글로벌금융판매' && branch === '리더스일산') {
       alerts.push(
-        { type: '기회', title: '실적 급상승', priority: 2 },
-        { type: '변화', title: '신규 위촉 발생', priority: 3 },
+        { type: '기회', title: '실적 급상승', priority: 2 }
+      );
+    } else if (agency === '어센틱금융그룹' && branch === '구미 스튜디오') {
+      alerts.push(
         { type: '기회', title: '고액 계약 체결', priority: 2 }
+      );
+    } else if (agency === '라이프파트너스' && branch === '부산센터') {
+      alerts.push(
+        { type: '기회', title: '신규 가동', priority: 2 }
+      );
+    } else if (agency === '한국지에이금융서비스' && branch === '일산지사') {
+      alerts.push(
+        { type: '변화', title: '연속 가동자 이탈', priority: 3 }
+      );
+    } else if (agency === '지에이스타금융서비스' && branch === '부천코어') {
+      alerts.push(
+        { type: '변화', title: '신규 위촉 발생', priority: 3 }
+      );
+    } else if (agency === '메가' && branch === '인슈에셋고양') {
+      alerts.push(
+        { type: '변화', title: '포트폴리오 급변', priority: 3 }
+      );
+    } else if (agency === '글로벌금융판매' && branch === '브릿지재무설계') {
+      alerts.push(
+        { type: '기회', title: '고객 만족도 상승', priority: 2 }
+      );
+    } else if (agency === '한국지에이금융서비스' && branch === '김포지사') {
+      alerts.push(
+        { type: '기회', title: '계약 품질 개선', priority: 2 }
+      );
+    } else if (agency === '메타리치' && branch === '리치골드') {
+      alerts.push(
+        { type: '위험', title: '장기 미관리 상태', priority: 1 }
+      );
+    } else if (agency === '어센틱금융그룹' && branch === '대구센터') {
+      alerts.push(
+        { type: '변화', title: '신입 설계사 급증', priority: 3 }
+      );
+    } else if (agency === '라이프파트너스' && branch === '대전센터') {
+      alerts.push(
+        { type: '위험', title: '실적 부진 지속', priority: 1 }
       );
     }
 
@@ -368,131 +297,39 @@ const Agent360Dashboard = () => {
   };
 
 
-  const managementFocus = [
-    {
-      id: 1,
-      agency: '메타리치',
-      branch: '보험스토어',
-      issue: '3개월 연속 실적 하락 (외 2건)',
-      detail: '',
-      type: 'risk',
-      alerts: getMainDashboardBranchAlerts('메타리치', '보험스토어')
-    },
-    {
-      id: 2,
-      agency: '글로벌금융판매',
-      branch: '케이에스에프에스동대문',
-      issue: '목표달성 미달 (외 1건)',
-      detail: '',
-      type: 'risk',
-      alerts: getMainDashboardBranchAlerts('글로벌금융판매', '케이에스에프에스동대문')
-    },
-    {
-      id: 3,
-      agency: '지금용코리아',
-      branch: '대원',
-      issue: '핵심인력 해촉',
-      detail: '',
-      type: 'risk'
-    },
-    {
-      id: 4,
-      agency: '더블유에셋',
-      branch: '일산센터',
-      issue: '계약 품질 이슈',
-      detail: '',
-      type: 'risk'
-    },
-    {
-      id: 5,
-      agency: '글로벌금융판매',
-      branch: '리더스일산',
-      issue: '실적 급상승 (외 2건)',
-      detail: '',
-      type: 'opportunity',
-      alerts: getMainDashboardBranchAlerts('글로벌금융판매', '리더스일산')
-    },
-    {
-      id: 6,
-      agency: '어센틱금융그룹',
-      branch: '구미 스튜디오',
-      issue: '고액 계약 체결',
-      detail: '',
-      type: 'opportunity'
-    },
-    {
-      id: 7,
-      agency: '라이프파트너스',
-      branch: '부산센터',
-      issue: '신규 가동',
-      detail: '',
-      type: 'opportunity'
-    },
-    {
-      id: 8,
-      agency: '한국지에이금융서비스',
-      branch: '일산지사',
-      issue: '연속 가동자 이탈',
-      detail: '',
-      type: 'change'
-    },
-    {
-      id: 9,
-      agency: '지에이스타금융서비스',
-      branch: '부천코어',
-      issue: '신규 위촉 발생',
-      detail: '',
-      type: 'change'
-    },
-    {
-      id: 10,
-      agency: '메가',
-      branch: '인슈에셋고양',
-      issue: '가동률 급하락',
-      detail: '',
-      type: 'risk'
-    },
-    {
-      id: 11,
-      agency: '글로벌금융판매',
-      branch: '브릿지재무설계',
-      issue: '고객 만족도 상승',
-      detail: '',
-      type: 'opportunity'
-    },
-    {
-      id: 12,
-      agency: '한국지에이금융서비스',
-      branch: '김포지사',
-      issue: '계약 품질 개선',
-      detail: '',
-      type: 'opportunity'
-    },
-    {
-      id: 13,
-      agency: '메타리치',
-      branch: '리치골드',
-      issue: '장기 미관리 상태',
-      detail: '',
-      type: 'risk'
-    },
-    {
-      id: 14,
-      agency: '어센틱금융그룹',
-      branch: '대구센터',
-      issue: '신입 설계사 급증',
-      detail: '',
-      type: 'change'
-    },
-    {
-      id: 15,
-      agency: '라이프파트너스',
-      branch: '대전센터',
-      issue: '실적 부진 지속',
-      detail: '',
-      type: 'risk'
-    }
-  ];
+  const managementFocus = (() => {
+    const branches = [
+      { id: 1, agency: '메타리치', branch: '보험스토어', type: 'risk' },
+      { id: 2, agency: '글로벌금융판매', branch: '케이에스에프에스동대문', type: 'risk' },
+      { id: 3, agency: '지금용코리아', branch: '대원', type: 'risk' },
+      { id: 4, agency: '더블유에셋', branch: '일산센터', type: 'risk' },
+      { id: 5, agency: '글로벌금융판매', branch: '리더스일산', type: 'opportunity' },
+      { id: 6, agency: '어센틱금융그룹', branch: '구미 스튜디오', type: 'opportunity' },
+      { id: 7, agency: '라이프파트너스', branch: '부산센터', type: 'opportunity' },
+      { id: 8, agency: '한국지에이금융서비스', branch: '일산지사', type: 'change' },
+      { id: 9, agency: '지에이스타금융서비스', branch: '부천코어', type: 'change' },
+      { id: 10, agency: '메가', branch: '인슈에셋고양', type: 'change' },
+      { id: 11, agency: '글로벌금융판매', branch: '브릿지재무설계', type: 'opportunity' },
+      { id: 12, agency: '한국지에이금융서비스', branch: '김포지사', type: 'opportunity' },
+      { id: 13, agency: '메타리치', branch: '리치골드', type: 'risk' },
+      { id: 14, agency: '어센틱금융그룹', branch: '대구센터', type: 'change' },
+      { id: 15, agency: '라이프파트너스', branch: '대전센터', type: 'risk' }
+    ];
+
+    return branches.map(b => {
+      const alerts = getMainDashboardBranchAlerts(b.agency, b.branch);
+      const firstAlert = alerts[0]?.title || '';
+      const remainingCount = alerts.length - 1;
+      const issue = remainingCount > 0 ? `${firstAlert} (외 ${remainingCount}건)` : firstAlert;
+
+      return {
+        ...b,
+        issue,
+        detail: '',
+        alerts
+      };
+    });
+  })();
 
   const getKPIData = () => {
     // 월별 데이터는 선택된 월까지만 표시 (헤더와 연동)
@@ -512,7 +349,7 @@ const Agent360Dashboard = () => {
   const [showExpectedProgressTooltip, setShowExpectedProgressTooltip] = useState(false);
   const [showProgressTooltip, setShowProgressTooltip] = useState(false);
   const [hoveredDayData, setHoveredDayData] = useState<any>(null);
-  const [branchSortBy, setBranchSortBy] = useState('achievement');
+  const [branchSortBy, setBranchSortBy] = useState('ape');
   const [branchSortOrder, setBranchSortOrder] = useState<'desc' | 'asc'>('desc');
   const [showCriteriaTooltip, setShowCriteriaTooltip] = useState(false);
   const [modalSize, setModalSize] = useState({ width: 700, height: 500 });
@@ -579,10 +416,10 @@ const Agent360Dashboard = () => {
   const [branchInfoSortOrder, setBranchInfoSortOrder] = useState<'asc' | 'desc'>('desc');
   const [modalKPI, setModalKPI] = useState<'APE' | 'MMP'>('APE'); // 모달용 KPI 상태
   const [branchRankingKPI, setBranchRankingKPI] = useState<'APE' | 'MMP'>('APE'); // 지점 순위 모달용 KPI 상태
-  const [modalSortBy, setModalSortBy] = useState('achievement');
+  const [modalSortBy, setModalSortBy] = useState('currentMonth');
   const [modalSortOrder, setModalSortOrder] = useState<'desc' | 'asc'>('desc');
-  const [tempSelectedMonth, setTempSelectedMonth] = useState('2025-09'); // 드롭다운에서 선택한 월
-  const [appliedMonth, setAppliedMonth] = useState('2025-09'); // 실제 적용된 월
+  const [tempSelectedMonth, setTempSelectedMonth] = useState(searchParams.get('period') || '2025-09'); // 드롭다운에서 선택한 월
+  const [appliedMonth, setAppliedMonth] = useState(searchParams.get('period') || '2025-09'); // 실제 적용된 월
   const [expandedRecommendations, setExpandedRecommendations] = useState(false);
 
   // 현재 날짜 기준으로 실시간 데이터인지 판단
@@ -674,131 +511,78 @@ const Agent360Dashboard = () => {
     }
   }
 
-  // 지점 순위 데이터
+  // 지점 순위 데이터 - 공통 데이터 생성 함수 사용
   const getBranchRankings = (getAllData = false, kpi = 'APE') => {
-    const currentMonthData = [
-      { agency: '글로벌금융판매', branch: '글로벌화이브스타', achievement: 115.2, ape: 28000000, previousApe: 25000000, isActive: true },
-      { agency: '글로벌금융판매', branch: '하나돔', achievement: 112.8, ape: 19000000, previousApe: 17000000, isActive: true },
-      { agency: '글로벌금융판매', branch: '리더스에프엔', achievement: 1001.0, ape: 6006000, previousApe: 5000000, isActive: true },
-      { agency: '지금용코리아', branch: '서울', achievement: 741.0, ape: 5187000, previousApe: 4500000, isActive: true },
-      { agency: '메타리치', branch: '보험스토어', achievement: 103.2, ape: 1260000, previousApe: 1030000, isActive: true },
-      { agency: '더블유에셋', branch: '일산센터', achievement: 101.5, ape: 1220000, isActive: true },
-      { agency: '글로벌금융판매', branch: '하나돔강북', achievement: 98.9, ape: 1180000, isActive: true },
-      { agency: '글로벌금융판매', branch: '리더스일산', achievement: 96.4, ape: 1150000, isActive: true },
-      { agency: '지금용코리아', branch: '대원', achievement: 94.7, ape: 850000, isActive: true },
-      { agency: '한국지에이금융서비스', branch: '일산지사', achievement: 92.1, ape: 720000, isActive: true },
-      { agency: '글로벌금융판매', branch: '화이브스타성화', achievement: 89.8, ape: 580000, isActive: true },
-      { agency: '글로벌금융판매', branch: '리더스마이보험체크', achievement: 87.5, ape: 420000, isActive: true },
-      { agency: '글로벌금융판매', branch: '이센트럴마포', achievement: 85.2, ape: 380000, isActive: true },
-      { agency: '글로벌금융판매', branch: '케이엘아이은평', achievement: 83.1, ape: 280000, isActive: true },
-      { agency: '글로벌금옵판매', branch: '케이엘아이운정', achievement: 80.9, ape: 180000, isActive: true },
-      { agency: '지금용코리아', branch: '그레이트탑', achievement: 92.5, ape: 120000, isActive: true },
-      { agency: '지금용코리아', branch: '사랑', achievement: 89.2, ape: 95000, isActive: true },
-      { agency: '메타리치', branch: '골드자산관리센터', achievement: 86.7, ape: 70000, isActive: true },
-      { agency: '메타리치', branch: '리치골드', achievement: 84.3, ape: 60000, isActive: true },
-      { agency: '지에이스타금융서비스', branch: '부천코어', achievement: 82.1, ape: 1520000, isActive: true },
-      { agency: '더블유에셋', branch: '1인지에이 일산2센터', achievement: 78.9, ape: 1820000, isActive: true },
-      { agency: '더블유에셋', branch: '기업금융본부', achievement: 76.4, ape: 1750000, isActive: true },
-      { agency: '글로벌금융판매', branch: '케이에스드래곤슬', achievement: 74.2, ape: 720000, isActive: true },
-      { agency: '글로벌금융판매', branch: '케이에스드래곤행신', achievement: 72.8, ape: 680000, isActive: true },
-      { agency: '글로벌금융판매', branch: '수도디아이씨', achievement: 70.5, ape: 650000, isActive: true },
-      { agency: '글로벌금융판매', branch: '글로벌인슈몽산', achievement: 95.8, ape: 880000, isActive: true },
-      { agency: '글로벌금융판매', branch: '글로벌인슈고양', achievement: 93.4, ape: 850000, isActive: true },
-      { agency: '글로벌금융판매', branch: '글로벌인슈에이치', achievement: 91.2, ape: 820000, isActive: true },
-      { agency: '글로벌금융판매', branch: '브릿지재무설계', achievement: 88.9, ape: 780000, isActive: true },
-      { agency: '글로벌금융판매', branch: '인스라이트서클강북', achievement: 86.7, ape: 750000, isActive: true }
-    ];
-
-    const previousMonthData = [
-      { agency: '메타리치', branch: '골드자산관리센터', achievement: 118.5, ape: 950000, isActive: true },
-      { agency: '글로벌금융판매', branch: '리더스에이치비', achievement: 116.2, ape: 920000, isActive: true },
-      { agency: '지에이스타금융서비스', branch: '부천코어', achievement: 114.8, ape: 9.0, isActive: true },
-      { agency: '더블유에셋', branch: '서울지사', achievement: 112.3, ape: 880000, isActive: true },
-      { agency: '한국지에이금융서비스', branch: '일산지사', achievement: 110.1, ape: 850000, isActive: true },
-      { agency: '글로벌금융판매', branch: '케이엘아이케이베스트', achievement: 108.9, ape: 820000, isActive: true },
-      { agency: '메타리치', branch: '리치골드', achievement: 107.5, ape: 8.0, isActive: true },
-      { agency: '지금용코리아', branch: '그레이트탑', achievement: 106.2, ape: 780000, isActive: true },
-      { agency: '더블유에셋', branch: '기업금융본부', achievement: 104.8, ape: 750000, isActive: true },
-      { agency: '글로벌금융판매', branch: '브릿지재무설계', achievement: 103.5, ape: 720000, isActive: true },
-      { agency: '글로벌금융판매', branch: '굿브즈스카이', achievement: 102.1, ape: 720000, isActive: true },
-      { agency: '글로벌금융판매', branch: '인슈에셋자오선', achievement: 100.8, ape: 70, isActive: true },
-      { agency: '메타리치', branch: '보험스토어A', achievement: 99.4, ape: 680000, isActive: true },
-      { agency: '지금용코리아', branch: '서울A', achievement: 98.1, ape: 650000, isActive: true },
-      { agency: '지금용코리아', branch: '대원A', achievement: 96.8, ape: 62, isActive: true },
-      { agency: '지금용코리아', branch: '그레이트탑A', achievement: 95.4, ape: 62, isActive: true },
-      { agency: '지금용코리아', branch: '사랑A', achievement: 94.1, ape: 58, isActive: true },
-      { agency: '더블유에셋', branch: '일산센터A', achievement: 92.8, ape: 58, isActive: true },
-      { agency: '더블유에셋', branch: '서울지사A', achievement: 91.4, ape: 55, isActive: true },
-      { agency: '더블유에셋', branch: '기업금융본부A', achievement: 90.1, ape: 52, isActive: true },
-      { agency: '한국지에이금융서비스', branch: '일산지사A', achievement: 88.8, ape: 52, isActive: true },
-      { agency: '메가', branch: '인슈에셋고양', achievement: 87.4, ape: 48, isActive: true },
-      { agency: '메가', branch: '인슈에셋고양A', achievement: 86.1, ape: 45, isActive: true },
-      { agency: '글로벌금융판매', branch: '하나돔A', achievement: 84.8, ape: 45, isActive: true },
-      { agency: '글로벌금융판매', branch: '하나돔강북A', achievement: 83.4, ape: 42, isActive: true },
-      { agency: '글로벌금융판매', branch: '리더스에프엔A', achievement: 82.1, ape: 42, isActive: true },
-      { agency: '글로벌금융판매', branch: '리더스에이치비A', achievement: 80.8, ape: 38, isActive: true },
-      { agency: '글로벌금융판매', branch: '리더스마이보험A', achievement: 79.4, ape: 35, isActive: true },
-      { agency: '글로벌금융판매', branch: '리더스일산A', achievement: 78.1, ape: 32, isActive: true },
-      { agency: '글로벌금융판매', branch: '케이엘아이케이베스트A', achievement: 76.8, ape: 28, isActive: true }
-    ];
-    
-    // 현재 선택된 기간에 따라 데이터 선택
-    const baseData = branchPeriod === 'current' ? currentMonthData : previousMonthData;
-    
-    // 160개 지점까지 확장 (고정된 데이터)
-    const additionalBranches = [];
     const agencies = ['지금용코리아', '글로벌금융판매', '메타리치', '지에이스타금융서비스', '더블유에셋', '한국지에이금융서비스', '메가'];
     const branchNames = ['서울', '대원', '그레이트탑', '사랑', '케이엘아이케이베스트', '글로벌화이브스타', '화이브스타성화', '하나돔', '하나돔강북', '리더스에프엔', '리더스에이치비', '리더스마이보험체크', '리더스일산', '리더스마이보험', '이센트럴마포', '케이에스에프에스동대문', '케이에스에프에스군자', '케이엘아이은평', '케이엘아이운정', '지금용', '케이에스드래곤슬', '케이에스드래곤행신', '수도디아이씨', '글로벌인슈몽산', '글로벌인슈고양', '글로벌인슈에이치', '브릿지재무설계', '인스라이트서클강북', '굿브즈스카이', '인슈에셋자오선', '보험스토어', '골드자산관리센터', '리치골드', '부천코어', '일산센터', '1인지에이 일산2센터', '서울지사', '기업금융본부', '일산지사', '인슈에셋고양'];
-    
-    // 당월/전월에 따라 총 지점 수와 가동 지점 수 설정
-    const totalBranches = branchPeriod === 'current' ? 160 : 158;
-    const activeBranchCount = branchPeriod === 'current' ? 95 : 120;
-    
-    for (let i = baseData.length; i < totalBranches; i++) {
-      const agency = agencies[i % agencies.length];
-      const suffixes = ['', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
-      const branch = branchNames[i % branchNames.length] + suffixes[Math.floor(i / branchNames.length)];
-      
-      // 가동/비가동 구분 (일부 지점은 실적 없음)
-      const isActive = i < activeBranchCount;
-      
-      if (isActive) {
-        // 가동 지점 - 실적 있음
-        let achievement, ape;
-        if (branchPeriod === 'current') {
-          achievement = Math.round((85 - (i * 0.4)) * 10) / 10; // 85%에서 점진적 감소
-          ape = Math.round(180 - (i * 0.8)); // 180에서 점진적 감소
-        } else {
-          achievement = Math.round((88 - (i * 0.5)) * 10) / 10; // 전월은 약간 다른 패턴
-          ape = Math.round(185 - (i * 0.9));
-        }
-        
-        additionalBranches.push({ 
-          agency, 
-          branch, 
-          achievement: Math.max(40, achievement), 
-          ape: Math.max(60, ape),
-          isActive: true
-        });
-      } else {
-        // 비가동 지점 - 실적 없음
-        additionalBranches.push({ 
-          agency, 
-          branch, 
-          achievement: 0, 
-          ape: 0,
-          isActive: false
-        });
-      }
-    }
-    
-    const allBranches = [...baseData, ...additionalBranches];
-    
-    // 가동 지점만 필터링 후 정렬 (정확히 95개)
-    const activeBranches = allBranches.filter(branch => branch.isActive).slice(0, 95);
 
-    // 실적 없는 지점 추가 (getAllData가 true일 때만)
-    const inactiveBranches = getAllData ? [
+    const totalBranches = 160;
+    const allBranches = [];
+
+    // 160개 지점 데이터 생성 (공통 함수 사용)
+    for (let i = 0; i < totalBranches; i++) {
+      const agencyIndex = i % agencies.length;
+      const branchIndex = i % branchNames.length;
+      const suffixes = ['', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+      const suffix = suffixes[Math.floor(i / branchNames.length)];
+
+      const agency = agencies[agencyIndex];
+      const branch = branchNames[branchIndex] + suffix;
+
+      // 공통 함수로 성과 데이터 생성
+      const performance = generateBranchPerformance(agency, branch);
+
+      const isActive = performance.currentMonthAPE > 0;
+
+      // 지점별 목표 설정 (백만원 단위) - 실적에 비례하여 다양하게
+      const seed = agency.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) +
+                   branch.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      const targetRandom = ((seed * 9301 + 49297) % 233280) / 233280;
+
+      let target = 30; // 기본 30백만원
+      const apeInMillions = performance.currentMonthAPE / 1000000;
+
+      if (apeInMillions > 15) {
+        // 상위 실적: 목표 15~40백만원, 일부 초과달성
+        target = 15 + Math.floor(targetRandom * 25);
+        if (targetRandom > 0.6) target = Math.floor(apeInMillions * 0.8); // 초과달성하도록
+      } else if (apeInMillions > 5) {
+        // 중상위 실적: 목표 5~20백만원
+        target = 5 + Math.floor(targetRandom * 15);
+        if (targetRandom > 0.5) target = Math.floor(apeInMillions * 0.85);
+      } else if (apeInMillions > 1) {
+        // 중위 실적: 목표 3~15백만원
+        target = 3 + Math.floor(targetRandom * 12);
+        if (targetRandom > 0.4) target = Math.floor(apeInMillions * 0.9);
+      } else if (apeInMillions > 0) {
+        // 하위 실적: 목표 2~10백만원, 대부분 미달성
+        target = 2 + Math.floor(targetRandom * 8);
+        if (targetRandom < 0.3) target = Math.floor(apeInMillions * 1.2); // 일부만 달성
+      }
+
+      allBranches.push({
+        agency,
+        branch,
+        achievement: performance.achievement,
+        ape: branchPeriod === 'previous' ? performance.previousMonthAPE : performance.currentMonthAPE,
+        previousApe: performance.previousMonthAPE,
+        currentApe: performance.currentMonthAPE,
+        target: Math.max(target, 2), // 최소 2백만원
+        isActive: branchPeriod === 'previous' ? performance.previousMonthAPE > 0 : performance.currentMonthAPE > 0
+      });
+    }
+
+    // APE 기준으로 정렬
+    const sortedBranches = allBranches.sort((a, b) => b.ape - a.ape);
+
+    // 가동 지점만 필터링
+    const activeBranches = sortedBranches.filter(branch => branch.isActive);
+
+    // 실적 없는 지점 필터링 (getAllData가 true일 때만)
+    const inactiveBranches = getAllData ? sortedBranches.filter(branch => !branch.isActive) : [];
+
+    // 나머지 하드코딩된 inactiveBranches는 삭제되었습니다
+    const additionalInactiveBranches = getAllData ? [
       { agency: '글로벌금융판매', branch: '케이엘아이신촌', achievement: 0, ape: 0, isActive: false, target: 120 },
       { agency: '글로벌금융판매', branch: '하나팍스', achievement: 0, ape: 0, isActive: false, target: 120 },
       { agency: '메타리치', branch: '골드에셋센터', achievement: 0, ape: 0, isActive: false, target: 120 },
@@ -867,29 +651,35 @@ const Agent360Dashboard = () => {
       { agency: '더블유에셋', branch: '남양주지사', achievement: 0, ape: 0, isActive: false, target: 120 }
     ] : [];
 
-    const allBranchesToShow = getAllData ? [...activeBranches, ...inactiveBranches] : activeBranches;
+    const allBranchesToShow = getAllData ? [...activeBranches, ...inactiveBranches, ...additionalInactiveBranches] : activeBranches;
 
     const sorted = allBranchesToShow.sort((a, b) => {
       let comparison = 0;
-      
+
       // 확장 시에도 현재 정렬 기준 사용
       if (getAllData) {
         const sortBy = branchSortBy;
         const sortOrder = branchSortOrder;
-        
+
         if (sortBy === 'achievement') {
-          comparison = b.achievement - a.achievement;
+          // 실제 달성률 계산해서 정렬
+          const achievementA = (a.ape / ((a.target || 120) * 1000000)) * 100;
+          const achievementB = (b.ape / ((b.target || 120) * 1000000)) * 100;
+          comparison = achievementB - achievementA;
         } else if (sortBy === 'ape') {
           comparison = b.ape - a.ape;
         } else if (sortBy === 'target') {
           comparison = (b.target || 120) - (a.target || 120);
         }
-        
+
         return sortOrder === 'desc' ? comparison : -comparison;
       } else {
         // TOP5에서도 다양한 정렬 기준 지원
         if (branchSortBy === 'achievement') {
-          comparison = b.achievement - a.achievement;
+          // 실제 달성률 계산해서 정렬
+          const achievementA = (a.ape / ((a.target || 120) * 1000000)) * 100;
+          const achievementB = (b.ape / ((b.target || 120) * 1000000)) * 100;
+          comparison = achievementB - achievementA;
         } else if (branchSortBy === 'ape') {
           comparison = b.ape - a.ape;
         } else if (branchSortBy === 'target') {
@@ -900,8 +690,8 @@ const Agent360Dashboard = () => {
     });
     
     // 가동 현황 정보를 함께 반환
-    const totalBranchesForStats = branchPeriod === 'current' ? 160 : 158;
-    const activeBranchesCountForStats = branchPeriod === 'current' ? 95 : 120;
+    const totalBranchesForStats = totalBranches;
+    const activeBranchesCountForStats = activeBranches.length;
     const activityRate = Math.round((activeBranchesCountForStats / totalBranchesForStats) * 1000) / 10;
     
     const result = getAllData ? sorted : sorted.slice(0, 5);
@@ -923,7 +713,56 @@ const Agent360Dashboard = () => {
       }
     } as any;
   };
-  
+
+  // 지점 기본정보 데이터 함수 - 공통 데이터 생성 함수 사용
+  const getBranchInfoData = (kpi = 'APE') => {
+    // 기존 지점 순위 데이터에서 전체 160개 지점 가져오기 (가동 + 비가동)
+    const rankingData = getBranchRankings(true).data;
+
+    // 지점 데이터 변환 (160개로 제한) - 공통 데이터 생성 함수 사용
+    const branches = rankingData.slice(0, 160).map((branch, index) => {
+      const agency = branch.agency;
+      const branchName = branch.branch;
+
+      // 공통 함수로 데이터 생성
+      const performance = generateBranchPerformance(agency, branchName);
+      const agentCount = generateAgentCount(agency, branchName);
+      const address = generateBranchAddress(agency, branchName);
+      const phone = generateBranchPhone(agency, branchName);
+
+      // 실적값 계산
+      const performanceValue = kpi === 'MMP'
+        ? Math.round(performance.currentMonthAPE / 12)
+        : performance.currentMonthAPE;
+
+      const previousPerformanceValue = kpi === 'MMP'
+        ? Math.round(performance.previousMonthAPE / 12)
+        : performance.previousMonthAPE;
+
+      // 목표는 ranking 데이터에서 가져옴 (백만원 단위 -> 원 단위로 변환)
+      const targetInWon = (branch.target || 0) * 1000000;
+      const targetValue = kpi === 'MMP'
+        ? Math.round(targetInWon / 12)
+        : targetInWon;
+
+      return {
+        no: index + 1,
+        agency: agency,
+        branch: branchName,
+        address: address,
+        phone: phone,
+        partnershipDate: ['2020.01.15', '2021.03.22', '2022.05.10', '2023.07.08'][index % 4],
+        totalAgents: agentCount.total,
+        activeAgents: agentCount.active,
+        currentMonthAPE: performanceValue,
+        previousMonthAPE: previousPerformanceValue,
+        target: targetValue
+      };
+    });
+
+    return branches;
+  };
+
   // 일별 데이터 - 월별로 다른 일수, APE/MMP 기준 적용
   const getDailyData = () => {
     const multiplier = performanceType === 'MMP' ? (1/12) : 1; // MMP = APE/12
@@ -1165,7 +1004,8 @@ const Agent360Dashboard = () => {
       period: appliedMonth,
       year: selectedYear,
       kpi: selectedKPI,
-      product: selectedProduct
+      product: selectedProduct,
+      performanceType: performanceType
     });
     navigate(`/branch/${encodedAgency}/${encodedBranch}?${queryParams.toString()}`);
   };
@@ -1383,7 +1223,9 @@ const Agent360Dashboard = () => {
                   )}
                 </div>
                 <div className="text-right">
-                  <div className="text-xs text-black mb-1">목표까지</div>
+                  <div className="text-xs text-black mb-1">
+                    {myKPI.goalAchievement.actual >= myKPI.goalAchievement.target ? '목표 초과' : '목표까지'}
+                  </div>
                   <div className="font-semibold text-lg text-blue-600">{formatCurrency(myKPI.goalAchievement.gap, performanceType)}</div>
                   <div className="text-xs text-black">
                     {myKPI.goalAchievement.actual >= myKPI.goalAchievement.target ? '목표 달성!' : '남은 금액'}
@@ -1395,15 +1237,24 @@ const Agent360Dashboard = () => {
               {/* 하루 평균 필요 금액 안내 - 현재월에만 표시 */}
               {isCurrentMonth && (
                 <div className="bg-blue-50 rounded-lg p-4 border border-blue-200 shadow-sm">
-                  <div className="text-sm  text-blue-800 text-center">
-                    <div className="mb-1">이번달 목표 달성을 위해</div>
-                    <div>
-                      하루 평균
-                      <div className="inline-block mx-1 px-2 py-1 bg-blue-600 text-white rounded-md font-bold text-base">
-                        {formatCurrency(myKPI.goalAchievement.dailyRequired, performanceType)}
+                  <div className="text-sm text-blue-800 text-center">
+                    {myKPI.goalAchievement.actual >= myKPI.goalAchievement.target ? (
+                      <div>
+                        <div className="mb-1">🎉 축하합니다!</div>
+                        <div className="text-lg font-bold">이번달 목표를 달성했어요!</div>
                       </div>
-                      이 필요해요!
-                    </div>
+                    ) : (
+                      <>
+                        <div className="mb-1">이번달 목표 달성을 위해</div>
+                        <div>
+                          하루 평균
+                          <div className="inline-block mx-1 px-2 py-1 bg-blue-600 text-white rounded-md font-bold text-base">
+                            {formatCurrency(myKPI.goalAchievement.dailyRequired, performanceType)}
+                          </div>
+                          이 필요해요!
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               )}
@@ -1911,9 +1762,9 @@ const Agent360Dashboard = () => {
                     <div className="absolute top-2 right-2 text-xs  flex items-center gap-1 z-20 text-black">
                       <div className="w-4 h-0.5" style={{backgroundColor: '#facc15'}}></div>
                       <span>일 평균: {
-                        dailyChartMetric === 'APE' ? `${average.toFixed(1)}백만원` :
+                        dailyChartMetric === 'APE' ? `${Math.round(average)}백만원` :
                         dailyChartMetric === 'MMP' ? `${(average / 12).toFixed(1)}백만원` :
-                        `${average.toFixed(1)}건`
+                        `${Math.round(average)}건`
                       }</span>
                     </div>
                   );
@@ -2476,7 +2327,7 @@ const Agent360Dashboard = () => {
               {/* 테이블 형태 */}
               <div className="overflow-hidden">
                 {/* 헤더 */}
-                <div className="grid gap-3 pb-3 border-b border-gray-200 mb-2" style={{gridTemplateColumns: '50px 1fr 100px 110px'}}>
+                <div className="grid gap-3 pb-3 border-b border-gray-200 mb-2" style={{gridTemplateColumns: '50px 1fr 100px 100px 110px'}}>
                   <div className="text-xs font-semibold text-gray-700 text-center">순위</div>
                   <div className="text-xs font-semibold text-gray-700">지점명</div>
                   <button
@@ -2494,6 +2345,24 @@ const Agent360Dashboard = () => {
                   >
                     {performanceType}
                     {branchSortBy === 'ape' && (
+                      branchSortOrder === 'desc' ? <ArrowDown className="w-3 h-3" /> : <ArrowUp className="w-3 h-3" />
+                    )}
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (branchSortBy === 'target') {
+                        setBranchSortOrder(branchSortOrder === 'desc' ? 'asc' : 'desc');
+                      } else {
+                        setBranchSortBy('target');
+                        setBranchSortOrder('desc');
+                      }
+                    }}
+                    className={`text-xs font-semibold hover:text-blue-600 transition-colors text-right flex items-center justify-end gap-1 ${
+                      branchSortBy === 'target' ? 'text-blue-600' : 'text-gray-700'
+                    }`}
+                  >
+                    목표
+                    {branchSortBy === 'target' && (
                       branchSortOrder === 'desc' ? <ArrowDown className="w-3 h-3" /> : <ArrowUp className="w-3 h-3" />
                     )}
                   </button>
@@ -2523,7 +2392,7 @@ const Agent360Dashboard = () => {
                     <div
                       key={idx}
                       className="grid gap-3 py-2.5 px-2 hover:bg-blue-50 rounded cursor-pointer transition-all"
-                      style={{gridTemplateColumns: '50px 1fr 100px 110px'}}
+                      style={{gridTemplateColumns: '50px 1fr 100px 100px 110px'}}
                       onClick={() => handleBranchClick(branch.agency, branch.branch)}
                     >
                       <div className="flex items-center justify-center">
@@ -2538,16 +2407,26 @@ const Agent360Dashboard = () => {
                       <div className="flex items-center justify-end relative group">
                         <div className={`text-sm font-medium ${
                           branchSortBy === 'ape' ? 'text-blue-600' : 'text-gray-900'
-                        }`}>{(branch.ape / 1000000).toFixed(1)}</div>
+                        }`}>{performanceType === 'MMP' ? (branch.ape / 12 / 1000000).toFixed(1) : Math.round(branch.ape / 1000000)}</div>
                         <div className="absolute bottom-full right-0 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs py-1 px-2 rounded whitespace-nowrap z-10">
-                          {branch.ape.toLocaleString()}원
+                          {performanceType === 'MMP' ? Math.round(branch.ape / 12).toLocaleString() : branch.ape.toLocaleString()}원
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-end relative group">
+                        <div className={`text-sm font-medium ${
+                          branchSortBy === 'target' ? 'text-blue-600' : 'text-gray-700'
+                        }`}>
+                          {performanceType === 'MMP' ? ((branch.target || 120) / 12).toFixed(1) : Math.round((branch.target || 120))}
+                        </div>
+                        <div className="absolute bottom-full right-0 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs py-1 px-2 rounded whitespace-nowrap z-10">
+                          {performanceType === 'MMP' ? Math.round((branch.target || 120) * 1000000 / 12).toLocaleString() : ((branch.target || 120) * 1000000).toLocaleString()}원
                         </div>
                       </div>
                       <div className="flex items-center justify-end">
                         <div className={`text-sm font-medium ${
                           branchSortBy === 'achievement' ? 'text-blue-600' : 'text-gray-900'
                         }`}>
-                          {branch.target ? Math.round((branch.ape / (branch.target || 120)) * 100 * 10) / 10 : branch.achievement}%
+                          {branch.target ? Math.round((branch.ape / ((branch.target || 120) * 1000000)) * 100) : Math.round(branch.achievement)}%
                         </div>
                       </div>
                     </div>
@@ -2558,7 +2437,10 @@ const Agent360Dashboard = () => {
               {/* 더보기 버튼 */}
               <div className="mt-3 pt-3 border-t border-gray-200">
                 <button
-                  onClick={() => setShowAllBranchesModal(true)}
+                  onClick={() => {
+                    setModalKPI(performanceType);
+                    setShowAllBranchesModal(true);
+                  }}
                   className="w-full text-center text-xs text-blue-600 hover:text-blue-800  transition-colors"
                 >
                   더보기 (전체 순위 보기)
@@ -2793,37 +2675,11 @@ const Agent360Dashboard = () => {
                       const totalPerformance = data.reduce((sum, b) => sum + b.currentMonthAPE, 0);
 
                       const enrichedData = data.map((branch, idx) => {
-                        const branchHash = (branch.branch || '').split('').reduce((acc, char) => acc + char.charCodeAt(0), idx);
+                        // 전월 실적은 데이터에서 가져옴
+                        const previousMonth = branch.previousMonthAPE || 0;
 
-                        // 30개 정도의 지점은 목표가 0 (전월 실적도 없음)
-                        const hasTarget = idx >= 30; // 처음 30개는 목표 0
-
-                        // 전월 실적 먼저 계산 (목표가 있는 지점만)
-                        let previousMonth = 0;
-                        if (hasTarget) {
-                          const randomFactor1 = (branchHash % 100) / 100;
-                          const randomFactor2 = ((branchHash + idx) % 100) / 100;
-                          const position = idx - 30; // 0~129
-
-                          // 전월 실적은 목표와 비슷한 패턴으로 생성
-                          if (position < 10) {
-                            previousMonth = 8000000 + Math.floor(17000000 * randomFactor1);
-                          } else if (position < 30) {
-                            previousMonth = 4000000 + Math.floor(4000000 * randomFactor1);
-                          } else if (position < 60) {
-                            previousMonth = 1500000 + Math.floor(2500000 * randomFactor1);
-                          } else {
-                            previousMonth = 300000 + Math.floor(1200000 * randomFactor1);
-                          }
-                          previousMonth = Math.round(previousMonth / 100000) * 100000;
-                        }
-
-                        // 목표: 전월 실적을 기반으로 설정 (전월의 80~120%)
-                        let target = 0;
-                        if (hasTarget && previousMonth > 0) {
-                          const targetRatio = 0.8 + ((branchHash % 40) / 100); // 0.8 ~ 1.2
-                          target = Math.round((previousMonth * targetRatio) / 100000) * 100000;
-                        }
+                        // 목표는 데이터에서 가져옴 (이미 계산되어 있음)
+                        const target = branch.target || 0;
 
                         // 달성률 = (실적 / 목표) * 100
                         const achievement = target > 0 ? (branch.currentMonthAPE / target) * 100 : 0;
@@ -2934,19 +2790,27 @@ const Agent360Dashboard = () => {
                         {/* 실적 - 당월 */}
                         <td className="py-3 px-2 text-center border-r border-gray-200 text-xs text-black">
                           {branch.currentMonthAPE > 0
-                            ? `${(modalKPI === 'MMP' ? Math.round(branch.currentMonthAPE / 12) : branch.currentMonthAPE).toLocaleString()}`
+                            ? modalKPI === 'MMP'
+                              ? (branch.currentMonthAPE / 12).toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1})
+                              : branch.currentMonthAPE.toLocaleString()
                             : '-'}
                         </td>
                         {/* 실적 - 전월 */}
                         <td className="py-3 px-2 text-center border-r border-gray-200 text-xs text-gray-600">
                           {branch.previousMonth > 0
-                            ? `${(modalKPI === 'MMP' ? Math.round(branch.previousMonth / 12) : branch.previousMonth).toLocaleString()}`
+                            ? modalKPI === 'MMP'
+                              ? (branch.previousMonth / 12).toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1})
+                              : branch.previousMonth.toLocaleString()
                             : '-'}
                         </td>
 
                         {/* 당월 목표관리 - 목표 */}
                         <td className="py-3 px-2 text-center border-r border-gray-200 text-xs text-black">
-                          {branch.target > 0 ? (modalKPI === 'MMP' ? Math.round(branch.target / 12) : branch.target).toLocaleString() : '-'}
+                          {branch.target > 0
+                            ? modalKPI === 'MMP'
+                              ? (branch.target / 12).toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1})
+                              : branch.target.toLocaleString()
+                            : '-'}
                         </td>
                         {/* 당월 목표관리 - 달성률 */}
                         <td className="py-3 px-2 text-center border-r border-gray-200 text-xs text-black">
