@@ -2538,7 +2538,7 @@ const Agent360Dashboard = () => {
                       <div className="flex items-center justify-end relative group">
                         <div className={`text-sm font-medium ${
                           branchSortBy === 'ape' ? 'text-blue-600' : 'text-gray-900'
-                        }`}>{performanceType === 'MMP' ? `${(branch.ape / 1000000).toFixed(1)}` : `${Math.round(branch.ape / 1000000).toLocaleString()}`}</div>
+                        }`}>{(branch.ape / 1000000).toFixed(1)}</div>
                         <div className="absolute bottom-full right-0 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs py-1 px-2 rounded whitespace-nowrap z-10">
                           {branch.ape.toLocaleString()}원
                         </div>
