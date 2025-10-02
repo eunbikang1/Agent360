@@ -1911,8 +1911,8 @@ const Agent360Dashboard = () => {
                     <div className="absolute top-2 right-2 text-xs  flex items-center gap-1 z-20 text-black">
                       <div className="w-4 h-0.5" style={{backgroundColor: '#facc15'}}></div>
                       <span>일 평균: {
-                        dailyChartMetric === 'APE' ? `${Math.round(average * 1000000).toLocaleString()}원` :
-                        dailyChartMetric === 'MMP' ? `${Math.round(average * 1000).toLocaleString()}원` :
+                        dailyChartMetric === 'APE' ? `${average.toFixed(1)}백만원` :
+                        dailyChartMetric === 'MMP' ? `${(average / 12).toFixed(1)}백만원` :
                         `${average.toFixed(1)}건`
                       }</span>
                     </div>
@@ -2004,7 +2004,7 @@ const Agent360Dashboard = () => {
                     >
                       <div>9월 {hoveredDayData.day}일 (영업 {hoveredDayData.businessDay}일차) - {selectedProduct}</div>
                       {dailyChartMetric === 'APE' || dailyChartMetric === 'MMP' ? (
-                        <div>{performanceType}: {Math.round(hoveredDayData.value * (performanceType === 'APE' ? 1000000 : 1000)).toLocaleString()}원</div>
+                        <div>{performanceType}: {Math.round(hoveredDayData.value * 1000000).toLocaleString()}원</div>
                       ) : dailyChartMetric === '청약' ? (
                         <div>청약: {hoveredDayData.value}건</div>
                       ) : (

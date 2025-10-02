@@ -1799,7 +1799,7 @@ const Branch360Dashboard = () => {
                       : currentData.map(d => d.designCount);
                     const average = values.reduce((sum, val) => sum + val, 0) / values.length;
                     return dailyMetric === performanceType
-                      ? `${Math.round(average).toLocaleString()} 천원`
+                      ? `${(average / 1000).toFixed(1)}백만원`
                       : `${average.toFixed(1)}건`;
                   })()} 
                 </div>
