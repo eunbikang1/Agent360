@@ -44,9 +44,9 @@ const Branch360Dashboard = () => {
   const [performanceType, setPerformanceType] = useState<'APE' | 'MMP'>('APE');
 
   // 테이블 정렬을 위한 state - 가동/미가동 설계사 별도 상태
-  const [activeTableSortBy, setActiveTableSortBy] = useState<string>('');
+  const [activeTableSortBy, setActiveTableSortBy] = useState<string>('currentMMP');
   const [activeTableSortOrder, setActiveTableSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [inactiveTableSortBy, setInactiveTableSortBy] = useState<string>('');
+  const [inactiveTableSortBy, setInactiveTableSortBy] = useState<string>('commissionMonth');
   const [inactiveTableSortOrder, setInactiveTableSortOrder] = useState<'asc' | 'desc'>('desc');
 
   // 테이블 정렬 함수
