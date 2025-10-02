@@ -741,7 +741,11 @@ const Branch360Dashboard = () => {
           designCount: 0,
           isWeekend: true,
           healthRatio: 0,
-          lifeRatio: 0
+          lifeRatio: 0,
+          healthContract: 0,
+          lifeContract: 0,
+          healthDesign: 0,
+          lifeDesign: 0
         });
       } else {
         const dayIndex = businessDays.indexOf(day);
@@ -753,10 +757,19 @@ const Branch360Dashboard = () => {
           apeAmount = apeAmount / 12;
         }
 
-        const contractCount = Math.max(2, Math.min(8, Math.floor(3 + dayIndex * 0.2 + (day % 3))));
-        const designCount = Math.max(3, Math.min(10, Math.floor(contractCount * 1.4)));
+        // 청약/설계 건수도 영업일이 지날수록 증가 (지수 함수 사용)
+        const baseContract = 2 + Math.floor(ratio / totalRatio * businessDays.length * 0.8);
+        const contractCount = Math.max(2, Math.min(15, baseContract));
+        const designCount = Math.max(3, Math.min(20, Math.floor(contractCount * 1.5)));
+
         const healthRatio = 60 + (day % 20);
         const lifeRatio = 100 - healthRatio;
+
+        // 건강/종신정기 건수 분리
+        const healthContract = Math.round(contractCount * healthRatio / 100);
+        const lifeContract = contractCount - healthContract;
+        const healthDesign = Math.round(designCount * healthRatio / 100);
+        const lifeDesign = designCount - healthDesign;
 
         dailyData.push({
           day,
@@ -765,7 +778,11 @@ const Branch360Dashboard = () => {
           designCount,
           isWeekend: false,
           healthRatio,
-          lifeRatio
+          lifeRatio,
+          healthContract,
+          lifeContract,
+          healthDesign,
+          lifeDesign
         });
       }
     }
@@ -2015,17 +2032,25 @@ const Branch360Dashboard = () => {
                   <div className="w-3 h-0.5 bg-yellow-400" style={{width: '12px'}}></div>
                   일 평균: {(() => {
                     const currentData = dailyPerformance.filter(d => !d.isWeekend);
-                    const values = dailyMetric === performanceType
-                      ? currentData.map(d => d.apeAmount)
-                      : dailyMetric === '청약'
-                      ? currentData.map(d => d.contractCount)
-                      : currentData.map(d => d.designCount);
-                    const average = values.reduce((sum, val) => sum + val, 0) / values.length;
-                    return dailyMetric === performanceType
-                      ? performanceType === 'MMP'
-                        ? `${(average / 1000).toFixed(1)}백만원`
-                        : `${Math.round(average / 1000)}백만원`
-                      : `${Math.round(average)}건`;
+                    const workingDays = currentData.length;
+
+                    if (dailyMetric === performanceType) {
+                      // 당월 전체 실적 / 영업일수
+                      const totalPerformance = performanceType === 'MMP'
+                        ? branchPerformanceData.currentMonthAPE / 12
+                        : branchPerformanceData.currentMonthAPE;
+                      const average = totalPerformance / workingDays;
+                      return performanceType === 'MMP'
+                        ? `${(average / 1000).toFixed(1)}천원`
+                        : `${Math.round(average / 1000).toLocaleString()}천원`;
+                    } else {
+                      // 청약/설계는 기존대로 일별 평균
+                      const values = dailyMetric === '청약'
+                        ? currentData.map(d => d.contractCount)
+                        : currentData.map(d => d.designCount);
+                      const average = values.reduce((sum, val) => sum + val, 0) / values.length;
+                      return `${Math.round(average)}건`;
+                    }
                   })()}
                 </div>
                 {/* 평균선 */}
@@ -2124,9 +2149,17 @@ const Branch360Dashboard = () => {
                                 <div className="text-green-400">종신/정기: {Math.round(data.apeAmount * 1000 * data.lifeRatio / 100).toLocaleString()}원</div>
                               </>
                             ) : dailyMetric === '청약' ? (
-                              <div>청약: {data.contractCount}건</div>
+                              <>
+                                <div className="font-semibold">청약: {data.contractCount}건</div>
+                                <div className="text-blue-400">건강: {data.healthContract}건</div>
+                                <div className="text-green-400">종신/정기: {data.lifeContract}건</div>
+                              </>
                             ) : (
-                              <div>설계: {data.designCount}건</div>
+                              <>
+                                <div className="font-semibold">설계: {data.designCount}건</div>
+                                <div className="text-blue-400">건강: {data.healthDesign}건</div>
+                                <div className="text-green-400">종신/정기: {data.lifeDesign}건</div>
+                              </>
                             )}
                             <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
                           </div>
