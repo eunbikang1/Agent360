@@ -2760,8 +2760,7 @@ const Branch360Dashboard = () => {
               {/* 📊 상품 구성 - 트리 구조 */}
               <div className="mb-5">
                 <div className="flex items-center gap-2 mb-4">
-                  <h4 className="text-xs font-semibold text-gray-700">🔍 상품군 필터</h4>
-                  <span className="text-xs text-gray-500">(클릭하여 선택)</span>
+                  <h4 className="text-xs font-medium text-gray-600">상품군을 선택하세요</h4>
                 </div>
 
                 <div className="bg-gray-50 rounded-lg p-3 space-y-2">
