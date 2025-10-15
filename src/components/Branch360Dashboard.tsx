@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { Building, Users, Phone, MapPin, Calendar, TrendingUp, ChevronDown, User, ArrowDown, Download, Briefcase, AlertTriangle, TrendingDown, UserPlus, Search, ChevronRight, ChevronLeft, Check, Filter } from 'lucide-react';
+import { Building, Users, Phone, MapPin, Calendar, TrendingUp, ChevronDown, User, ArrowDown, Download, Briefcase, AlertTriangle, TrendingDown, UserPlus, Search, ChevronRight, ChevronLeft, Check } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import {
   generateBranchPerformance,
@@ -2759,16 +2759,12 @@ const Branch360Dashboard = () => {
 
               {/* 📊 상품 구성 - 트리 구조 */}
               <div className="mb-5">
-                <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                  <div className="bg-gradient-to-r from-indigo-50 to-blue-50 px-4 py-3 border-b border-gray-200">
-                    <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                      <Filter className="w-4 h-4 text-indigo-600" />
-                      상품군 필터
-                    </h4>
-                    <p className="text-xs text-gray-500 mt-1">클릭하여 상품군을 선택하세요</p>
-                  </div>
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-semibold text-gray-700">📊 상품 구성</h4>
+                  <span className="text-xs text-gray-500 px-2 py-1 bg-indigo-50 rounded">클릭하여 필터 적용</span>
+                </div>
 
-                <div className="bg-gray-50 p-3 space-y-2">
+                <div className="bg-gray-50 rounded-lg p-3 space-y-2">
                   {/* 전체 */}
                   <div
                     className={`flex items-center gap-2 py-1.5 px-2 cursor-pointer rounded transition-all relative ${
@@ -2983,7 +2979,6 @@ const Branch360Dashboard = () => {
                           : `${selectedProduct} > ${selectedSubProduct}`}
                     </span>
                   </div>
-                </div>
                 </div>
               </div>
 
