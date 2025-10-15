@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Building, Users, Phone, MapPin, Calendar, TrendingUp, ChevronDown, User, ArrowDown, Download, Briefcase, AlertTriangle, TrendingDown, UserPlus, Search, ChevronRight } from 'lucide-react';
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import {
   generateBranchPerformance,
   generateAgentCount,
@@ -48,6 +49,7 @@ const Branch360Dashboard = () => {
   };
 
   const [selectedProduct, setSelectedProduct] = useState<'전체' | '건강' | '종신/정기'>(searchParams.get('product') as '전체' | '건강' | '종신/정기' || '전체');
+  const [selectedSubProduct, setSelectedSubProduct] = useState<string>('전체'); // 세부 상품군 (골담, 새담 등)
   const [performanceType, setPerformanceType] = useState<'APE' | 'MMP'>((searchParams.get('performanceType') as 'APE' | 'MMP') || 'APE');
 
   // 테이블 정렬을 위한 state - 가동/미가동 설계사 별도 상태
@@ -1441,6 +1443,78 @@ const Branch360Dashboard = () => {
           { rank: 3, name: '골라담간편건강보험Ⅱ(갱신형)', amount: '88', count: '6건' }
         ]
       },
+      '골담': {
+        byAmount: [
+          { rank: 1, name: '골라담간편건강보험Ⅱ(갱신형)', amount: '153', count: '8건' },
+          { rank: 2, name: '골라담간편건강보험Ⅱ(비갱신형)', amount: '142', count: '6건' },
+          { rank: 3, name: '골라담간편건강보험(갱신형)', amount: '98', count: '5건' }
+        ],
+        byCount: [
+          { rank: 1, name: '골라담간편건강보험Ⅱ(갱신형)', amount: '153', count: '8건' },
+          { rank: 2, name: '골라담간편건강보험Ⅱ(비갱신형)', amount: '142', count: '6건' },
+          { rank: 3, name: '골라담간편건강보험(갱신형)', amount: '98', count: '5건' }
+        ]
+      },
+      '새담': {
+        byAmount: [
+          { rank: 1, name: '새로담는암건강보험(갱신형)', amount: '127', count: '7건' },
+          { rank: 2, name: '새로담는건강보험Ⅱ(갱신형)', amount: '115', count: '6건' },
+          { rank: 3, name: '새로담는건강보험(비갱신형)', amount: '89', count: '4건' }
+        ],
+        byCount: [
+          { rank: 1, name: '새로담는암건강보험(갱신형)', amount: '127', count: '7건' },
+          { rank: 2, name: '새로담는건강보험Ⅱ(갱신형)', amount: '115', count: '6건' },
+          { rank: 3, name: '새로담는건강보험(비갱신형)', amount: '89', count: '4건' }
+        ]
+      },
+      '치아': {
+        byAmount: [
+          { rank: 1, name: 'THE건강한치아보험V(갱신형)', amount: '64', count: '5건' },
+          { rank: 2, name: 'THE건강한치아보험V(비갱신형)', amount: '58', count: '4건' },
+          { rank: 3, name: '치아보험플러스(갱신형)', amount: '42', count: '3건' }
+        ],
+        byCount: [
+          { rank: 1, name: 'THE건강한치아보험V(갱신형)', amount: '64', count: '5건' },
+          { rank: 2, name: 'THE건강한치아보험V(비갱신형)', amount: '58', count: '4건' },
+          { rank: 3, name: '치아보험플러스(갱신형)', amount: '42', count: '3건' }
+        ]
+      },
+      '치매': {
+        byAmount: [
+          { rank: 1, name: '치매간병보험(갱신형)', amount: '115', count: '6건' },
+          { rank: 2, name: '치매걱정없는간병보험(갱신형)', amount: '98', count: '5건' },
+          { rank: 3, name: 'THE안심되는치매간병보험', amount: '76', count: '4건' }
+        ],
+        byCount: [
+          { rank: 1, name: '치매간병보험(갱신형)', amount: '115', count: '6건' },
+          { rank: 2, name: '치매걱정없는간병보험(갱신형)', amount: '98', count: '5건' },
+          { rank: 3, name: 'THE안심되는치매간병보험', amount: '76', count: '4건' }
+        ]
+      },
+      '암': {
+        byAmount: [
+          { rank: 1, name: '암치료비걱정없는암보험(갱신형)', amount: '63', count: '4건' },
+          { rank: 2, name: 'THE암보험플러스(갱신형)', amount: '52', count: '3건' },
+          { rank: 3, name: '암보험Ⅱ(비갱신형)', amount: '38', count: '2건' }
+        ],
+        byCount: [
+          { rank: 1, name: '암치료비걱정없는암보험(갱신형)', amount: '63', count: '4건' },
+          { rank: 2, name: 'THE암보험플러스(갱신형)', amount: '52', count: '3건' },
+          { rank: 3, name: '암보험Ⅱ(비갱신형)', amount: '38', count: '2건' }
+        ]
+      },
+      '다이나믹': {
+        byAmount: [
+          { rank: 1, name: '다이나믹건강보험Ⅱ(갱신형)', amount: '115', count: '6건' },
+          { rank: 2, name: '다이나믹건강보험(갱신형)', amount: '98', count: '5건' },
+          { rank: 3, name: '다이나믹건강보험플러스', amount: '72', count: '4건' }
+        ],
+        byCount: [
+          { rank: 1, name: '다이나믹건강보험Ⅱ(갱신형)', amount: '115', count: '6건' },
+          { rank: 2, name: '다이나믹건강보험(갱신형)', amount: '98', count: '5건' },
+          { rank: 3, name: '다이나믹건강보험플러스', amount: '72', count: '4건' }
+        ]
+      },
       '종신/정기': {
         byAmount: [
           { rank: 1, name: 'THE건강해지는종신보험(기본형)', amount: '285', count: '14건' },
@@ -1452,10 +1526,48 @@ const Branch360Dashboard = () => {
           { rank: 2, name: 'THE건강해지는건강정기보험', amount: '142', count: '8건' },
           { rank: 3, name: 'THE채우는종신보험(해약환급금일부지급형)', amount: '102', count: '6건' }
         ]
+      },
+      '저해지': {
+        byAmount: [
+          { rank: 1, name: 'THE채우는종신보험(해약환급금일부지급형)', amount: '154', count: '8건' },
+          { rank: 2, name: '무배당종신보험(저해지형)', amount: '132', count: '6건' },
+          { rank: 3, name: 'THE변하지않는종신보험(저해지)', amount: '98', count: '5건' }
+        ],
+        byCount: [
+          { rank: 1, name: 'THE채우는종신보험(해약환급금일부지급형)', amount: '154', count: '8건' },
+          { rank: 2, name: '무배당종신보험(저해지형)', amount: '132', count: '6건' },
+          { rank: 3, name: 'THE변하지않는종신보험(저해지)', amount: '98', count: '5건' }
+        ]
+      },
+      '무해지': {
+        byAmount: [
+          { rank: 1, name: 'THE건강해지는종신보험(무해지형)', amount: '120', count: '7건' },
+          { rank: 2, name: '무배당종신보험(무해지형)', amount: '105', count: '6건' },
+          { rank: 3, name: 'THE변하지않는종신보험(무해지)', amount: '82', count: '4건' }
+        ],
+        byCount: [
+          { rank: 1, name: 'THE건강해지는종신보험(무해지형)', amount: '120', count: '7건' },
+          { rank: 2, name: '무배당종신보험(무해지형)', amount: '105', count: '6건' },
+          { rank: 3, name: 'THE변하지않는종신보험(무해지)', amount: '82', count: '4건' }
+        ]
+      },
+      '정기': {
+        byAmount: [
+          { rank: 1, name: 'THE건강해지는건강정기보험', amount: '69', count: '5건' },
+          { rank: 2, name: '정기보험플러스(갱신형)', amount: '52', count: '4건' },
+          { rank: 3, name: 'THE정기보험Ⅱ(비갱신형)', amount: '38', count: '3건' }
+        ],
+        byCount: [
+          { rank: 1, name: 'THE건강해지는건강정기보험', amount: '69', count: '5건' },
+          { rank: 2, name: '정기보험플러스(갱신형)', amount: '52', count: '4건' },
+          { rank: 3, name: 'THE정기보험Ⅱ(비갱신형)', amount: '38', count: '3건' }
+        ]
       }
     };
 
-    return (productData as any)[selectedProduct][productSortBy === 'amount' ? 'byAmount' : 'byCount'];
+    // selectedSubProduct가 '전체'가 아니면 세부 상품군 데이터 사용
+    const key = selectedSubProduct !== '전체' ? selectedSubProduct : selectedProduct;
+    return (productData as any)[key][productSortBy === 'amount' ? 'byAmount' : 'byCount'];
   };
   
   const handleShowAllAgents = () => {
@@ -2512,153 +2624,333 @@ const Branch360Dashboard = () => {
               </div>
             </div>
 
-            {/* 계약 특성 */}
-            <div>
-              <div className="bg-white rounded-lg shadow-sm border p-4">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-semibold text-gray-700">계약 특성</h3>
-                  <div className="text-xs text-gray-500">*직전 3개월 신계약 기준</div>
-                </div>
-                <div className="space-y-4">
-                  {/* 평균 월납 보험료 & 평균 납입기간 */}
-                  <div className="grid grid-cols-2 gap-4 divide-x divide-gray-200">
-                    <div className="text-center">
-                      <div className="text-xl font-bold text-green-600 mb-1">63,406원</div>
-                      <div className="text-xs text-gray-500">평균 월납보험료</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-xl font-bold text-purple-600 mb-1">13.3년</div>
-                      <div className="text-xs text-gray-500">평균 납입기간</div>
-                    </div>
-                  </div>
-
-                  {/* 주계약/특약 비율 - 파이차트 */}
-                  <div className="border-t pt-4 flex flex-col items-center">
-                    <div className="relative w-24 h-24 mb-3">
-                      <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 32 32">
-                        <circle
-                          cx="16"
-                          cy="16"
-                          r="12"
-                          fill="none"
-                          stroke="#3b82f6"
-                          strokeWidth="6"
-                          strokeDasharray="46.76 75.36"
-                          strokeDashoffset="0"
-                        />
-                        <circle
-                          cx="16"
-                          cy="16"
-                          r="12"
-                          fill="none"
-                          stroke="#fb923c"
-                          strokeWidth="6"
-                          strokeDasharray="28.60 75.36"
-                          strokeDashoffset="-46.76"
-                        />
-                      </svg>
-                    </div>
-                    <div className="flex items-center gap-4 text-xs">
-                      <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 bg-blue-500 rounded-sm"></div>
-                        <span className="text-gray-600">주계약 62%</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 bg-orange-400 rounded-sm"></div>
-                        <span className="text-gray-600">특약 38%</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 주력 상품 */}
+            {/* 계약 특성 (통합) */}
             <div className="bg-white rounded-lg shadow-sm border p-4">
-              <div className="flex items-center justify-between mb-1">
-                <h3 className="text-sm font-semibold text-gray-700">주력 상품</h3>
-                <p className="text-xs text-gray-500">*직전 3개월 평균 기준</p>
-              </div>
-
-              {/* 상품군 필터 - 토글 버튼 스타일 */}
-              <div className="flex justify-end mb-4 mt-3">
-                <div className="flex bg-gray-100 rounded-lg p-1">
-                  {['전체', '건강', '종신/정기'].map(product => (
-                    <button
-                      key={product}
-                      onClick={() => setSelectedProduct(product as '전체' | '건강' | '종신/정기')}
-                      className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
-                        selectedProduct === product
-                          ? 'bg-white text-gray-900 shadow-sm'
-                          : 'text-gray-600 hover:text-gray-900'
-                      }`}
-                    >
-                      {product}
-                    </button>
-                  ))}
+              {/* 헤더 */}
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold text-gray-700">계약 특성</h3>
+                <div className="text-right">
+                  <p className="text-xs text-gray-500 mb-2">*직전 3개월 신계약 기준</p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-700">상품군</span>
+                    <div className="flex items-center bg-white border border-gray-300 rounded-lg">
+                      <label className="flex items-center px-3 py-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="productCategory"
+                          value="전체"
+                          checked={selectedProduct === '전체'}
+                          onChange={() => {
+                            setSelectedProduct('전체');
+                            setSelectedSubProduct('전체');
+                          }}
+                          className="mr-2 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm">전체</span>
+                      </label>
+                      <div className="w-px h-6 bg-gray-300"></div>
+                      <label className="flex items-center px-3 py-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="productCategory"
+                          value="건강"
+                          checked={selectedProduct === '건강'}
+                          onChange={() => {
+                            setSelectedProduct('건강');
+                            setSelectedSubProduct('전체');
+                          }}
+                          className="mr-2 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm">건강</span>
+                      </label>
+                      <div className="w-px h-6 bg-gray-300"></div>
+                      <label className="flex items-center px-3 py-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="productCategory"
+                          value="종신/정기"
+                          checked={selectedProduct === '종신/정기'}
+                          onChange={() => {
+                            setSelectedProduct('종신/정기');
+                            setSelectedSubProduct('전체');
+                          }}
+                          className="mr-2 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm">종신/정기</span>
+                      </label>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* 포트폴리오 분석 */}
+              {/* 📊 상품 구성 */}
               <div className="mb-4">
-                <div className="space-y-2">
-                  {getPortfolioData().map((item, idx) => {
-                    return (
-                      <div
-                        key={idx}
-                        className="flex items-center gap-3 mb-1 group relative"
-                        onMouseEnter={() => setHoveredProduct({ ...item, idx })}
-                        onMouseLeave={() => setHoveredProduct(null)}
-                      >
-                        <span className="text-xs text-gray-700 w-28 flex-shrink-0">{item.name}</span>
-                        <div className="flex-1 bg-gray-200 rounded-full h-4 relative cursor-pointer">
-                          <div
-                            className="h-4 rounded-full transition-all hover:opacity-80"
-                            style={{ width: `${item.value}%`, backgroundColor: item.color }}
-                          />
-                          {/* 전체 평균선 */}
-                          {selectedProduct === '전체' && (
+
+                {/* 탭 내용 */}
+                <div className="bg-gray-50 rounded-lg p-3">
+                  {selectedProduct === '전체' ? (
+                    <div className="space-y-2">
+                      {[
+                        { name: '건강', value: 65, color: '#3b82f6', amount: 580000, count: 35 },
+                        { name: '종신/정기', value: 35, color: '#10b981', amount: 312000, count: 19 }
+                      ].map((item, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center gap-2 py-1 relative cursor-pointer hover:bg-white rounded px-2 -mx-2 transition-all"
+                          onMouseEnter={() => setHoveredProduct({ ...item, idx: `all-${idx}` })}
+                          onMouseLeave={() => setHoveredProduct(null)}
+                        >
+                          <span className="text-sm font-bold w-20 flex-shrink-0 text-gray-700">{item.name}</span>
+                          <div className="flex-1 bg-gray-200 rounded-full h-4">
                             <div
-                              className="absolute top-0 bottom-0 w-0.5 bg-orange-500 z-10"
-                              style={{
-                                left: `${item.name === '건강' ? '60%' : '40%'}`,
-                                boxShadow: '0 0 4px rgba(255, 165, 0, 0.5)'
-                              }}
-                              title={`전체 평균: ${item.name === '건강' ? '60%' : '40%'}`}
+                              className="h-4 rounded-full transition-all"
+                              style={{ width: `${item.value}%`, backgroundColor: item.color }}
                             />
+                          </div>
+                          <span className="text-sm font-bold w-12 text-right flex-shrink-0 text-gray-700">{item.value}%</span>
+
+                          {/* 툴팁 */}
+                          {hoveredProduct && hoveredProduct.idx === `all-${idx}` && (
+                            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-30 mb-1">
+                              <div className="font-semibold">{item.name}</div>
+                              <div>{performanceType}: {item.amount.toLocaleString()}원</div>
+                              <div>건수: {item.count}건</div>
+                              <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                            </div>
                           )}
                         </div>
-                        <span className="text-xs font-medium text-gray-700 w-8 text-right flex-shrink-0">{item.value}%</span>
+                      ))}
+                    </div>
+                  ) : selectedProduct === '건강' ? (
+                    <div className="space-y-1.5">
+                      {[
+                        { name: '골담', value: 24, color: '#3b82f6', amount: 153000, count: 6 },
+                        { name: '새담', value: 20, color: '#60a5fa', amount: 127000, count: 5 },
+                        { name: '치매', value: 18, color: '#93c5fd', amount: 115000, count: 5 },
+                        { name: '다이나믹', value: 18, color: '#bfdbfe', amount: 115000, count: 5 },
+                        { name: '치아', value: 10, color: '#dbeafe', amount: 64000, count: 3 },
+                        { name: '암', value: 10, color: '#eff6ff', amount: 63000, count: 2 }
+                      ].map((item, idx) => {
+                        const isSelected = selectedSubProduct === item.name;
+                        return (
+                          <div
+                            key={idx}
+                            className={`flex items-center gap-2 py-1.5 px-2 cursor-pointer transition-all rounded relative ${
+                              isSelected ? 'bg-white border-2 border-indigo-300' : 'hover:bg-white'
+                            }`}
+                            onClick={() => setSelectedSubProduct(item.name)}
+                            onMouseEnter={() => setHoveredProduct({ ...item, idx: `health-${idx}` })}
+                            onMouseLeave={() => setHoveredProduct(null)}
+                          >
+                            <span className={`text-xs w-16 flex-shrink-0 ${
+                              isSelected ? 'font-bold text-indigo-700' : 'text-gray-600'
+                            }`}>{item.name}</span>
+                            <div className="flex-1 bg-gray-200 rounded-full h-3">
+                              <div
+                                className="h-3 rounded-full transition-all"
+                                style={{ width: `${item.value}%`, backgroundColor: isSelected ? '#4f46e5' : item.color }}
+                              />
+                            </div>
+                            <span className={`text-xs w-10 text-right flex-shrink-0 ${
+                              isSelected ? 'font-bold text-indigo-700' : 'text-gray-600'
+                            }`}>{item.value}%</span>
 
-                        {/* 툴팁 */}
-                        {hoveredProduct && hoveredProduct.idx === idx && (
-                          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-30 mb-2">
-                            <div>{item.name}</div>
-                            <div>{performanceType}: {item.amount.toLocaleString()}원</div>
-                            <div>건수: {item.count}건</div>
-                            <div>비중: {item.value.toFixed(1)}%</div>
+                            {/* 툴팁 */}
+                            {hoveredProduct && hoveredProduct.idx === `health-${idx}` && (
+                              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-30 mb-1">
+                                <div className="font-semibold">{item.name}</div>
+                                <div>{performanceType}: {item.amount.toLocaleString()}원</div>
+                                <div>건수: {item.count}건</div>
+                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="space-y-1.5">
+                      {[
+                        { name: '저해지', value: 45, color: '#10b981', amount: 154000, count: 6 },
+                        { name: '무해지', value: 35, color: '#34d399', amount: 120000, count: 5 },
+                        { name: '정기', value: 20, color: '#6ee7b7', amount: 69000, count: 3 }
+                      ].map((item, idx) => {
+                        const isSelected = selectedSubProduct === item.name;
+                        return (
+                          <div
+                            key={idx}
+                            className={`flex items-center gap-2 py-1.5 px-2 cursor-pointer transition-all rounded relative ${
+                              isSelected ? 'bg-white border-2 border-indigo-300' : 'hover:bg-white'
+                            }`}
+                            onClick={() => setSelectedSubProduct(item.name)}
+                            onMouseEnter={() => setHoveredProduct({ ...item, idx: `life-${idx}` })}
+                            onMouseLeave={() => setHoveredProduct(null)}
+                          >
+                            <span className={`text-xs w-16 flex-shrink-0 ${
+                              isSelected ? 'font-bold text-indigo-700' : 'text-gray-600'
+                            }`}>{item.name}</span>
+                            <div className="flex-1 bg-gray-200 rounded-full h-3">
+                              <div
+                                className="h-3 rounded-full transition-all"
+                                style={{ width: `${item.value}%`, backgroundColor: isSelected ? '#4f46e5' : item.color }}
+                              />
+                            </div>
+                            <span className={`text-xs w-10 text-right flex-shrink-0 ${
+                              isSelected ? 'font-bold text-indigo-700' : 'text-gray-600'
+                            }`}>{item.value}%</span>
+
+                            {/* 툴팁 */}
+                            {hoveredProduct && hoveredProduct.idx === `life-${idx}` && (
+                              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-30 mb-1">
+                                <div className="font-semibold">{item.name}</div>
+                                <div>{performanceType}: {item.amount.toLocaleString()}원</div>
+                                <div>건수: {item.count}건</div>
+                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
 
-                {/* 범례 - 전체 상품군 선택시에만 표시 */}
-                {selectedProduct === '전체' && (
-                  <div className="mt-3 pt-2 border-t border-gray-100">
-                    <div className="flex items-center justify-center gap-4 text-xs">
-                      <div className="flex items-center">
-                        <div className="w-4 h-0.5 bg-orange-500 mr-2"></div>
-                        <span className="text-gray-600">전체 평균 (건강 60% / 종신정기 40%)</span>
-                      </div>
-                    </div>
+                {/* 현재 선택 표시 */}
+                <div className="mt-3 pt-3 border-t">
+                  <div className="text-xs">
+                    <span className="text-gray-500">현재 선택: </span>
+                    <span className="font-semibold text-indigo-700">
+                      {selectedProduct === '전체' && selectedSubProduct === '전체'
+                        ? '전체'
+                        : selectedSubProduct === '전체'
+                          ? selectedProduct
+                          : `${selectedProduct} > ${selectedSubProduct}`}
+                    </span>
                   </div>
-                )}
+                </div>
               </div>
 
-              {/* Top 3 상품 - 테이블 형태 */}
-              <div className="border-t pt-3">
+              {/* 2. 평균 월납 보험료 & 평균 납입기간 */}
+              <div className="grid grid-cols-2 gap-4 divide-x divide-gray-200 py-4 border-y">
+                <div className="text-center">
+                  <div className="text-xl font-bold text-green-600 mb-1">
+                    {(() => {
+                      // 필터에 따른 평균 월납보험료 계산
+                      let basePremium = 63406;
+                      if (selectedProduct === '건강') {
+                        if (selectedSubProduct === '골담') basePremium = 45000;
+                        else if (selectedSubProduct === '새담') basePremium = 52000;
+                        else if (selectedSubProduct === '치아') basePremium = 38000;
+                        else if (selectedSubProduct === '치매') basePremium = 55000;
+                        else if (selectedSubProduct === '암') basePremium = 48000;
+                        else if (selectedSubProduct === '다이나믹') basePremium = 72000;
+                        else basePremium = 58000; // 건강 전체
+                      } else if (selectedProduct === '종신/정기') {
+                        if (selectedSubProduct === '저해지') basePremium = 95000;
+                        else if (selectedSubProduct === '무해지') basePremium = 82000;
+                        else if (selectedSubProduct === '정기') basePremium = 42000;
+                        else basePremium = 72000; // 종신/정기 전체
+                      }
+                      return basePremium.toLocaleString() + '원';
+                    })()}
+                  </div>
+                  <div className="text-xs text-gray-500">평균 월납보험료</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-xl font-bold text-purple-600 mb-1">
+                    {(() => {
+                      // 필터에 따른 평균 납입기간 계산
+                      let period = 13.3;
+                      if (selectedProduct === '건강') {
+                        if (selectedSubProduct === '골담') period = 10.5;
+                        else if (selectedSubProduct === '새담') period = 11.2;
+                        else if (selectedSubProduct === '치아') period = 9.8;
+                        else if (selectedSubProduct === '치매') period = 12.5;
+                        else if (selectedSubProduct === '암') period = 11.0;
+                        else if (selectedSubProduct === '다이나믹') period = 15.2;
+                        else period = 11.7; // 건강 전체
+                      } else if (selectedProduct === '종신/정기') {
+                        if (selectedSubProduct === '저해지') period = 20.5;
+                        else if (selectedSubProduct === '무해지') period = 18.3;
+                        else if (selectedSubProduct === '정기') period = 10.2;
+                        else period = 16.3; // 종신/정기 전체
+                      }
+                      return period.toFixed(1) + '년';
+                    })()}
+                  </div>
+                  <div className="text-xs text-gray-500">평균 납입기간</div>
+                </div>
+              </div>
+
+              {/* 3. 주계약/특약 비율 - 파이차트 */}
+              <div className="py-4 flex flex-col items-center border-b">
+                {(() => {
+                  // 필터에 따른 주계약/특약 비율 계산
+                  let mainRatio = 62;
+                  let subRatio = 38;
+
+                  if (selectedProduct === '건강') {
+                    if (selectedSubProduct === '골담') { mainRatio = 55; subRatio = 45; }
+                    else if (selectedSubProduct === '새담') { mainRatio = 60; subRatio = 40; }
+                    else if (selectedSubProduct === '치아') { mainRatio = 48; subRatio = 52; }
+                    else if (selectedSubProduct === '치매') { mainRatio = 58; subRatio = 42; }
+                    else if (selectedSubProduct === '암') { mainRatio = 52; subRatio = 48; }
+                    else if (selectedSubProduct === '다이나믹') { mainRatio = 65; subRatio = 35; }
+                    else { mainRatio = 57; subRatio = 43; } // 건강 전체
+                  } else if (selectedProduct === '종신/정기') {
+                    if (selectedSubProduct === '저해지') { mainRatio = 75; subRatio = 25; }
+                    else if (selectedSubProduct === '무해지') { mainRatio = 70; subRatio = 30; }
+                    else if (selectedSubProduct === '정기') { mainRatio = 60; subRatio = 40; }
+                    else { mainRatio = 68; subRatio = 32; } // 종신/정기 전체
+                  }
+
+                  const circumference = 2 * Math.PI * 12;
+                  const mainLength = (mainRatio / 100) * circumference;
+                  const subLength = (subRatio / 100) * circumference;
+
+                  return (
+                    <>
+                      <div className="relative w-24 h-24 mb-3">
+                        <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 32 32">
+                          <circle
+                            cx="16"
+                            cy="16"
+                            r="12"
+                            fill="none"
+                            stroke="#3b82f6"
+                            strokeWidth="6"
+                            strokeDasharray={`${mainLength} ${circumference}`}
+                            strokeDashoffset="0"
+                          />
+                          <circle
+                            cx="16"
+                            cy="16"
+                            r="12"
+                            fill="none"
+                            stroke="#fb923c"
+                            strokeWidth="6"
+                            strokeDasharray={`${subLength} ${circumference}`}
+                            strokeDashoffset={`-${mainLength}`}
+                          />
+                        </svg>
+                      </div>
+                      <div className="flex items-center gap-4 text-xs">
+                        <div className="flex items-center gap-1">
+                          <div className="w-3 h-3 bg-blue-500 rounded-sm"></div>
+                          <span className="text-gray-600">주계약 {mainRatio}%</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <div className="w-3 h-3 bg-orange-400 rounded-sm"></div>
+                          <span className="text-gray-600">특약 {subRatio}%</span>
+                        </div>
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+
+              {/* 4. Top 3 상품 - 테이블 형태 */}
+              <div className="pt-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="text-xs font-medium text-gray-700">Top 3 상품</div>
                   <div className="text-xs text-gray-600">[단위: 천원]</div>
@@ -2698,8 +2990,10 @@ const Branch360Dashboard = () => {
                     {getTopProducts().map((product: any, idx: number) => (
                       <div
                         key={product.rank}
-                        className="grid gap-2 py-2"
+                        className="grid gap-2 py-2 hover:bg-gray-50 rounded transition-colors cursor-pointer relative"
                         style={{gridTemplateColumns: '45px minmax(120px, 1fr) 100px 80px'}}
+                        onMouseEnter={() => setHoveredProduct({ ...product, idx: `top3-${idx}` })}
+                        onMouseLeave={() => setHoveredProduct(null)}
                       >
                         <div className="flex items-center justify-center">
                           <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
@@ -2723,6 +3017,16 @@ const Branch360Dashboard = () => {
                             productSortBy === 'count' ? 'text-blue-600 font-bold' : 'text-gray-900'
                           }`}>{product.count}</div>
                         </div>
+
+                        {/* 툴팁 */}
+                        {hoveredProduct && hoveredProduct.idx === `top3-${idx}` && (
+                          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-800 text-white text-xs rounded px-3 py-2 whitespace-nowrap z-30 mb-1">
+                            <div className="font-semibold mb-1">{product.name}</div>
+                            <div>{performanceType}: {product.amount}천원</div>
+                            <div>건수: {product.count}</div>
+                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
