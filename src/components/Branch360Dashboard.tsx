@@ -86,6 +86,10 @@ const Branch360Dashboard = () => {
           valueA = a.previousMonth.premium;
           valueB = b.previousMonth.premium;
           break;
+        case 'isActive':
+          valueA = a.previousMonth.premium > 0 ? 1 : 0;
+          valueB = b.previousMonth.premium > 0 ? 1 : 0;
+          break;
         default:
           return 0;
       }
@@ -874,7 +878,7 @@ const Branch360Dashboard = () => {
   const [modalPerformanceType, setModalPerformanceType] = useState<'APE' | 'MMP'>('MMP'); // 모달 성과 기준
   const [activeSortBy, setActiveSortBy] = useState<'name' | 'code' | 'tenure' | 'commissionMonth' | 'currentMMP' | 'previousMMP' | 'M0' | 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M0건' | 'M1건' | 'M2건' | 'M3건' | 'M4건' | 'M5건'>('M0'); // 가동 설계사 정렬 기준
   const [activeSortOrder, setActiveSortOrder] = useState<'asc' | 'desc'>('desc'); // 가동 설계사 정렬 순서
-  const [inactiveSortBy, setInactiveSortBy] = useState<'name' | 'code' | 'tenure' | 'commissionMonth' | 'previousMMP' | 'M0' | 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M0건' | 'M1건' | 'M2건' | 'M3건' | 'M4건' | 'M5건'>('commissionMonth'); // 미가동 설계사 정렬 기준
+  const [inactiveSortBy, setInactiveSortBy] = useState<'name' | 'code' | 'tenure' | 'commissionMonth' | 'isActive' | 'previousMMP' | 'M0' | 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M0건' | 'M1건' | 'M2건' | 'M3건' | 'M4건' | 'M5건'>('commissionMonth'); // 미가동 설계사 정렬 기준
   const [inactiveSortOrder, setInactiveSortOrder] = useState<'asc' | 'desc'>('desc'); // 미가동 설계사 정렬 순서
   
   // 에이전트 리스트 데이터 (포함 관계로 정리)
@@ -1137,19 +1141,19 @@ const Branch360Dashboard = () => {
         productMix: { health: 75, life: 25 }, isActive: false
       },
 
-      // 26-27위: 전월 가동→미가동 전환 (당월 무실적)
+      // 26-27위: 전월 미가동 (당월 무실적)
       {
         name: '송재현', agentCode: 'AG050', experience: '6.5년차', commissionMonth:'78개월', insuranceCareer: '6.5년', gender: '남',
         currentMonth: { premium: 0, contracts: 0, rank: null },
-        previousMonth: { premium: 1, contracts: 1, rank: 21 },
-        threeMonthAverage: { premium: 1, contracts: 1 },
+        previousMonth: { premium: 0, contracts: 0, rank: null },
+        threeMonthAverage: { premium: 0, contracts: 0 },
         productMix: { health: 45, life: 55 }, isActive: false
       },
       {
         name: '한수진', agentCode: 'AG051', experience: '3.8년차', commissionMonth:'45개월', insuranceCareer: '3.8년', gender: '여',
         currentMonth: { premium: 0, contracts: 0, rank: null },
-        previousMonth: { premium: 1, contracts: 1, rank: 22 },
-        threeMonthAverage: { premium: 1, contracts: 1 },
+        previousMonth: { premium: 0, contracts: 0, rank: null },
+        threeMonthAverage: { premium: 0, contracts: 0 },
         productMix: { health: 70, life: 30 }, isActive: false
       },
 
@@ -3580,7 +3584,17 @@ const Branch360Dashboard = () => {
                               </button>
                             </th>
                             <th className="px-2 py-2 text-center font-medium text-gray-700 whitespace-nowrap w-16">
-                              활동 여부
+                              <button
+                                onClick={() => handleInactiveTableSort('isActive')}
+                                className="flex items-center gap-1 hover:text-gray-900 transition-colors mx-auto"
+                              >
+                                활동 여부
+                                {inactiveTableSortBy === 'isActive' && (
+                                  <span className="text-gray-500">
+                                    {inactiveTableSortOrder === 'desc' ? '↓' : '↑'}
+                                  </span>
+                                )}
+                              </button>
                             </th>
                             <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap w-20">
                               <button
@@ -4967,7 +4981,19 @@ const Branch360Dashboard = () => {
                       </button>
                     </th>
                     <th rowSpan={2} className="px-2 py-3 text-center font-semibold text-gray-700 border-b border-r-2 border-gray-300 whitespace-nowrap min-w-[60px]">
-                      활동 여부
+                      <button
+                        onClick={() => {
+                          if (inactiveSortBy === 'isActive') {
+                            setInactiveSortOrder(inactiveSortOrder === 'desc' ? 'asc' : 'desc');
+                          } else {
+                            setInactiveSortBy('isActive');
+                            setInactiveSortOrder('desc');
+                          }
+                        }}
+                        className="text-center hover:text-blue-600 transition-colors w-full"
+                      >
+                        활동 여부 {inactiveSortBy === 'isActive' && (inactiveSortOrder === 'desc' ? '↓' : '↑')}
+                      </button>
                     </th>
                     <th colSpan={6} className="px-2 py-2 text-center font-bold text-gray-800 border-b border-l-2 border-gray-300 bg-gray-100">
                       {modalPerformanceType}
@@ -5216,12 +5242,16 @@ const Branch360Dashboard = () => {
                     // 청약건수용 포맷 함수
                     const formatInactiveCount = (value) => value === 0 ? '-' : value;
 
+                    // 각 agent의 monthly 데이터를 미리 생성 (캐싱)
+                    const agentsWithMonthlyData = inactiveAgents.map(agent => ({
+                      ...agent,
+                      monthlyData: generateInactiveMonthlyData(agent)
+                    }));
+
                     // 정렬 함수
                     const getSortedInactiveAgents = () => {
-                      const sorted = [...inactiveAgents].sort((a, b) => {
+                      const sorted = [...agentsWithMonthlyData].sort((a, b) => {
                         let aValue, bValue;
-                        const aMonthly = generateInactiveMonthlyData(a);
-                        const bMonthly = generateInactiveMonthlyData(b);
 
                         switch (inactiveSortBy) {
                           case 'code':
@@ -5240,53 +5270,59 @@ const Branch360Dashboard = () => {
                             aValue = parseInt(a.commissionMonth);
                             bValue = parseInt(b.commissionMonth);
                             break;
+                          case 'isActive':
+                            // Y(활동 중)가 N(미활동)보다 높은 값으로 정렬
+                            // 실제 표시되는 조건과 동일하게 M1 값 기준
+                            aValue = a.monthlyData.M1 > 0 ? 1 : 0;
+                            bValue = b.monthlyData.M1 > 0 ? 1 : 0;
+                            break;
                           case 'M0':
-                            aValue = aMonthly.M0;
-                            bValue = bMonthly.M0;
+                            aValue = a.monthlyData.M0;
+                            bValue = b.monthlyData.M0;
                             break;
                           case 'M1':
-                            aValue = aMonthly.M1;
-                            bValue = bMonthly.M1;
+                            aValue = a.monthlyData.M1;
+                            bValue = b.monthlyData.M1;
                             break;
                           case 'M2':
-                            aValue = aMonthly.M2;
-                            bValue = bMonthly.M2;
+                            aValue = a.monthlyData.M2;
+                            bValue = b.monthlyData.M2;
                             break;
                           case 'M3':
-                            aValue = aMonthly.M3;
-                            bValue = bMonthly.M3;
+                            aValue = a.monthlyData.M3;
+                            bValue = b.monthlyData.M3;
                             break;
                           case 'M4':
-                            aValue = aMonthly.M4;
-                            bValue = bMonthly.M4;
+                            aValue = a.monthlyData.M4;
+                            bValue = b.monthlyData.M4;
                             break;
                           case 'M5':
-                            aValue = aMonthly.M5;
-                            bValue = bMonthly.M5;
+                            aValue = a.monthlyData.M5;
+                            bValue = b.monthlyData.M5;
                             break;
                           case 'M0건':
-                            aValue = aMonthly['M0건'];
-                            bValue = bMonthly['M0건'];
+                            aValue = a.monthlyData['M0건'];
+                            bValue = b.monthlyData['M0건'];
                             break;
                           case 'M1건':
-                            aValue = aMonthly['M1건'];
-                            bValue = bMonthly['M1건'];
+                            aValue = a.monthlyData['M1건'];
+                            bValue = b.monthlyData['M1건'];
                             break;
                           case 'M2건':
-                            aValue = aMonthly['M2건'];
-                            bValue = bMonthly['M2건'];
+                            aValue = a.monthlyData['M2건'];
+                            bValue = b.monthlyData['M2건'];
                             break;
                           case 'M3건':
-                            aValue = aMonthly['M3건'];
-                            bValue = bMonthly['M3건'];
+                            aValue = a.monthlyData['M3건'];
+                            bValue = b.monthlyData['M3건'];
                             break;
                           case 'M4건':
-                            aValue = aMonthly['M4건'];
-                            bValue = bMonthly['M4건'];
+                            aValue = a.monthlyData['M4건'];
+                            bValue = b.monthlyData['M4건'];
                             break;
                           case 'M5건':
-                            aValue = aMonthly['M5건'];
-                            bValue = bMonthly['M5건'];
+                            aValue = a.monthlyData['M5건'];
+                            bValue = b.monthlyData['M5건'];
                             break;
                           default:
                             aValue = parseFloat(a.insuranceCareer);
@@ -5302,7 +5338,7 @@ const Branch360Dashboard = () => {
                     };
 
                     return getSortedInactiveAgents().map((agent, idx) => {
-                      const monthlyData = generateInactiveMonthlyData(agent);
+                      const monthlyData = agent.monthlyData;
                       return (
                         <tr
                           key={idx}
