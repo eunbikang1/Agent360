@@ -909,7 +909,7 @@ const Branch360Dashboard = () => {
   };
 
   const currentAgentStatus = {
-    total: 47, // 총 소속 설계사
+    total: 51, // 총 소속 설계사
     active: baseAgentLists.continuous2Months.length + baseAgentLists.newActive.length, // 당월 가동 설계사 (26명 = 23 + 3)
     newThisMonth: 2, // 당월 신규 위촉
     resignedThisMonth: 1, // 당월 해촉
@@ -920,62 +920,62 @@ const Branch360Dashboard = () => {
     newActive: baseAgentLists.newActive.length // 신규 가동 (3명)
   };
 
-  // 전체 47명 설계사 데이터 생성 (완전 고정 데이터)
+  // 전체 51명 설계사 데이터 생성 (완전 고정 데이터)
   const generateAllAgentsData = () => {
     // 기본 데이터 (비율 유지용)
     const baseData = [
       // 6개월 연속 가동 (8명)
       {
-        name: '이지은', agentCode: 'AG001', experience: '8.5년차', commissionMonth:'102개월', insuranceCareer: '8.5년',
+        name: '이지은', agentCode: 'AG001', experience: '8.5년차', commissionMonth:'102개월', insuranceCareer: '8.5년', gender: '여',
         currentMonth: { premium: 10, contracts: 13, rank: 1 },
         previousMonth: { premium: 26, contracts: 11, rank: 2 },
         threeMonthAverage: { premium: 27, contracts: 12 },
         productMix: { health: 70, life: 30 }, isActive: true, continuousMonths: 6
       },
       {
-        name: '김선호', agentCode: 'AG002', experience: '6.2년차', commissionMonth:'74개월', insuranceCareer: '6.2년',
+        name: '김선호', agentCode: 'AG002', experience: '6.2년차', commissionMonth:'74개월', insuranceCareer: '6.2년', gender: '남',
         currentMonth: { premium: 9, contracts: 12, rank: 2 },
         previousMonth: { premium: 26, contracts: 13, rank: 1 },
         threeMonthAverage: { premium: 26, contracts: 12 },
         productMix: { health: 55, life: 45 }, isActive: true, continuousMonths: 6
       },
       {
-        name: '김준영', agentCode: 'AG003', experience: '12.8년차', commissionMonth:'153개월', insuranceCareer: '12.8년',
+        name: '김준영', agentCode: 'AG003', experience: '12.8년차', commissionMonth:'153개월', insuranceCareer: '12.8년', gender: '남',
         currentMonth: { premium: 8, contracts: 11, rank: 3 },
         previousMonth: { premium: 23, contracts: 10, rank: 3 },
         threeMonthAverage: { premium: 23, contracts: 10 },
         productMix: { health: 65, life: 35 }, isActive: true, continuousMonths: 6
       },
       {
-        name: '이하늘', agentCode: 'AG004', experience: '4.3년차', commissionMonth:'51개월', insuranceCareer: '4.3년',
+        name: '이하늘', agentCode: 'AG004', experience: '4.3년차', commissionMonth:'51개월', insuranceCareer: '4.3년', gender: '여',
         currentMonth: { premium: 7, contracts: 9, rank: 4 },
         previousMonth: { premium: 21, contracts: 8, rank: 4 },
         threeMonthAverage: { premium: 21, contracts: 8 },
         productMix: { health: 40, life: 60 }, isActive: true, continuousMonths: 6
       },
       {
-        name: '박상호', agentCode: 'AG005', experience: '7.6년차', commissionMonth:'91개월', insuranceCareer: '7.6년',
+        name: '박상호', agentCode: 'AG005', experience: '7.6년차', commissionMonth:'91개월', insuranceCareer: '7.6년', gender: '남',
         currentMonth: { premium: 7, contracts: 10, rank: 5 },
         previousMonth: { premium: 19, contracts: 9, rank: 5 },
         threeMonthAverage: { premium: 19, contracts: 9 },
         productMix: { health: 80, life: 20 }, isActive: true, continuousMonths: 6
       },
       {
-        name: '정미선', agentCode: 'AG006', experience: '5.4년차', commissionMonth:'65개월', insuranceCareer: '5.4년',
+        name: '정미선', agentCode: 'AG006', experience: '5.4년차', commissionMonth:'65개월', insuranceCareer: '5.4년', gender: '여',
         currentMonth: { premium: 3, contracts: 8, rank: 6 },
         previousMonth: { premium: 6, contracts: 7, rank: 6 },
         threeMonthAverage: { premium: 6, contracts: 7 },
         productMix: { health: 55, life: 45 }, isActive: true, continuousMonths: 6
       },
       {
-        name: '조영수', agentCode: 'AG007', experience: '3.7년차', commissionMonth:'44개월', insuranceCareer: '3.7년',
+        name: '조영수', agentCode: 'AG007', experience: '3.7년차', commissionMonth:'44개월', insuranceCareer: '3.7년', gender: '남',
         currentMonth: { premium: 3, contracts: 7, rank: 7 },
         previousMonth: { premium: 6, contracts: 6, rank: 7 },
         threeMonthAverage: { premium: 6, contracts: 6 },
         productMix: { health: 75, life: 25 }, isActive: true, continuousMonths: 6
       },
       {
-        name: '차서영', agentCode: 'AG008', experience: '10.2년차', commissionMonth:'122개월', insuranceCareer: '10.2년',
+        name: '차서영', agentCode: 'AG008', experience: '10.2년차', commissionMonth:'122개월', insuranceCareer: '10.2년', gender: '여',
         currentMonth: { premium: 3, contracts: 6, rank: 8 },
         previousMonth: { premium: 5, contracts: 5, rank: 8 },
         threeMonthAverage: { premium: 6, contracts: 5 },
@@ -984,49 +984,49 @@ const Branch360Dashboard = () => {
 
       // 3개월 연속 가동 추가 (7명)
       {
-        name: '손민준', agentCode: 'AG009', experience: '2.9년차', commissionMonth:'35개월', insuranceCareer: '2.9년',
+        name: '손민준', agentCode: 'AG009', experience: '2.9년차', commissionMonth:'35개월', insuranceCareer: '2.9년', gender: '남',
         currentMonth: { premium: 3, contracts: 5, rank: 9 },
         previousMonth: { premium: 5, contracts: 4, rank: 9 },
         threeMonthAverage: { premium: 5, contracts: 4 },
         productMix: { health: 45, life: 55 }, isActive: true, continuousMonths: 3
       },
       {
-        name: '박지수', agentCode: 'AG010', experience: '6.8년차', commissionMonth:'81개월', insuranceCareer: '6.8년',
+        name: '박지수', agentCode: 'AG010', experience: '6.8년차', commissionMonth:'81개월', insuranceCareer: '6.8년', gender: '여',
         currentMonth: { premium: 3, contracts: 4, rank: 10 },
         previousMonth: { premium: 5, contracts: 3, rank: 10 },
         threeMonthAverage: { premium: 5, contracts: 3 },
         productMix: { health: 85, life: 15 }, isActive: true, continuousMonths: 3
       },
       {
-        name: '정동현', agentCode: 'AG011', experience: '4.5년차', commissionMonth:'54개월', insuranceCareer: '4.5년',
+        name: '정동현', agentCode: 'AG011', experience: '4.5년차', commissionMonth:'54개월', insuranceCareer: '4.5년', gender: '남',
         currentMonth: { premium: 3, contracts: 3, rank: 11 },
         previousMonth: { premium: 5, contracts: 2, rank: 11 },
         threeMonthAverage: { premium: 5, contracts: 2 },
         productMix: { health: 50, life: 50 }, isActive: true, continuousMonths: 3
       },
       {
-        name: '차민정', agentCode: 'AG012', experience: '1.8년차', commissionMonth:'21개월', insuranceCareer: '1.8년',
+        name: '차민정', agentCode: 'AG012', experience: '1.8년차', commissionMonth:'21개월', insuranceCareer: '1.8년', gender: '여',
         currentMonth: { premium: 3, contracts: 2, rank: 12 },
         previousMonth: { premium: 5, contracts: 2, rank: 12 },
         threeMonthAverage: { premium: 5, contracts: 2 },
         productMix: { health: 70, life: 30 }, isActive: true, continuousMonths: 3
       },
       {
-        name: '박지영', agentCode: 'AG013', experience: '3.2년차', commissionMonth:'38개월', insuranceCareer: '3.2년',
+        name: '박지영', agentCode: 'AG013', experience: '3.2년차', commissionMonth:'38개월', insuranceCareer: '3.2년', gender: '여',
         currentMonth: { premium: 3, contracts: 1, rank: 13 },
         previousMonth: { premium: 5, contracts: 1, rank: 13 },
         threeMonthAverage: { premium: 5, contracts: 1 },
         productMix: { health: 80, life: 20 }, isActive: true, continuousMonths: 3
       },
       {
-        name: '정예린', agentCode: 'AG014', experience: '5.7년차', commissionMonth:'68개월', insuranceCareer: '5.7년',
+        name: '정예린', agentCode: 'AG014', experience: '5.7년차', commissionMonth:'68개월', insuranceCareer: '5.7년', gender: '여',
         currentMonth: { premium: 3, contracts: 1, rank: 14 },
         previousMonth: { premium: 5, contracts: 1, rank: 14 },
         threeMonthAverage: { premium: 5, contracts: 1 },
         productMix: { health: 40, life: 60 }, isActive: true, continuousMonths: 3
       },
       {
-        name: '조은경', agentCode: 'AG015', experience: '2.5년차', commissionMonth:'30개월', insuranceCareer: '2.5년',
+        name: '조은경', agentCode: 'AG015', experience: '2.5년차', commissionMonth:'30개월', insuranceCareer: '2.5년', gender: '여',
         currentMonth: { premium: 3, contracts: 1, rank: 15 },
         previousMonth: { premium: 5, contracts: 1, rank: 15 },
         threeMonthAverage: { premium: 5, contracts: 1 },
@@ -1035,56 +1035,56 @@ const Branch360Dashboard = () => {
 
       // 2개월 연속 가동 추가 (8명)
       {
-        name: '손지원', agentCode: 'AG016', experience: '4.1년차', commissionMonth:'49개월', insuranceCareer: '4.1년',
+        name: '손지원', agentCode: 'AG016', experience: '4.1년차', commissionMonth:'49개월', insuranceCareer: '4.1년', gender: '여',
         currentMonth: { premium: 3, contracts: 1, rank: 16 },
         previousMonth: { premium: 5, contracts: 1, rank: 16 },
         threeMonthAverage: { premium: 5, contracts: 1 },
         productMix: { health: 60, life: 40 }, isActive: true, continuousMonths: 2
       },
       {
-        name: '김동현', agentCode: 'AG017', experience: '7.3년차', commissionMonth:'87개월', insuranceCareer: '7.3년',
+        name: '김동현', agentCode: 'AG017', experience: '7.3년차', commissionMonth:'87개월', insuranceCareer: '7.3년', gender: '남',
         currentMonth: { premium: 3, contracts: 1, rank: 17 },
         previousMonth: { premium: 5, contracts: 1, rank: 17 },
         threeMonthAverage: { premium: 5, contracts: 1 },
         productMix: { health: 50, life: 50 }, isActive: true, continuousMonths: 2
       },
       {
-        name: '이민지', agentCode: 'AG018', experience: '1.9년차', commissionMonth:'23개월', insuranceCareer: '1.9년',
+        name: '이민지', agentCode: 'AG018', experience: '1.9년차', commissionMonth:'23개월', insuranceCareer: '1.9년', gender: '여',
         currentMonth: { premium: 3, contracts: 1, rank: 18 },
         previousMonth: { premium: 2, contracts: 1, rank: 18 },
         threeMonthAverage: { premium: 2, contracts: 1 },
         productMix: { health: 85, life: 15 }, isActive: true, continuousMonths: 2
       },
       {
-        name: '박형준', agentCode: 'AG019', experience: '5.2년차', commissionMonth:'62개월', insuranceCareer: '5.2년',
+        name: '박형준', agentCode: 'AG019', experience: '5.2년차', commissionMonth:'62개월', insuranceCareer: '5.2년', gender: '남',
         currentMonth: { premium: 3, contracts: 1, rank: 19 },
         previousMonth: { premium: 2, contracts: 1, rank: 19 },
         threeMonthAverage: { premium: 2, contracts: 1 },
         productMix: { health: 65, life: 35 }, isActive: true, continuousMonths: 2
       },
       {
-        name: '김나영', agentCode: 'AG020', experience: '3.6년차', commissionMonth:'43개월', insuranceCareer: '3.6년',
+        name: '김나영', agentCode: 'AG020', experience: '3.6년차', commissionMonth:'43개월', insuranceCareer: '3.6년', gender: '여',
         currentMonth: { premium: 3, contracts: 1, rank: 20 },
         previousMonth: { premium: 2, contracts: 1, rank: 20 },
         threeMonthAverage: { premium: 2, contracts: 1 },
         productMix: { health: 70, life: 30 }, isActive: true, continuousMonths: 2
       },
       {
-        name: '이성민', agentCode: 'AG021', experience: '2.1년차', commissionMonth:'25개월', insuranceCareer: '2.1년',
+        name: '이성민', agentCode: 'AG021', experience: '2.1년차', commissionMonth:'25개월', insuranceCareer: '2.1년', gender: '남',
         currentMonth: { premium: 3, contracts: 1, rank: 21 },
         previousMonth: { premium: 2, contracts: 1, rank: 21 },
         threeMonthAverage: { premium: 2, contracts: 1 },
         productMix: { health: 50, life: 50 }, isActive: true, continuousMonths: 2
       },
       {
-        name: '김배태', agentCode: 'AG022', experience: '4.1년차', commissionMonth:'2개월', insuranceCareer: '4.1년',
+        name: '김배태', agentCode: 'AG022', experience: '4.1년차', commissionMonth:'2개월', insuranceCareer: '4.1년', gender: '남',
         currentMonth: { premium: 3, contracts: 2, rank: 22 },
         previousMonth: { premium: 2, contracts: 1, rank: 22 },
         threeMonthAverage: { premium: 2, contracts: 1 },
         productMix: { health: 65, life: 35 }, isActive: true, continuousMonths: 2
       },
       {
-        name: '박예진', agentCode: 'AG023', experience: '1.3년차', commissionMonth:'2개월', insuranceCareer: '1.3년',
+        name: '박예진', agentCode: 'AG023', experience: '1.3년차', commissionMonth:'2개월', insuranceCareer: '1.3년', gender: '여',
         currentMonth: { premium: 3, contracts: 1, rank: 23 },
         previousMonth: { premium: 2, contracts: 1, rank: 23 },
         threeMonthAverage: { premium: 2, contracts: 1 },
@@ -1093,42 +1093,42 @@ const Branch360Dashboard = () => {
 
       // 신규 가동 (3명) - M1~M5 모두 0
       {
-        name: '최지후', agentCode: 'AG024', experience: '2.3년차', commissionMonth:'1개월', insuranceCareer: '2.3년',
+        name: '최지후', agentCode: 'AG024', experience: '2.3년차', commissionMonth:'1개월', insuranceCareer: '2.3년', gender: '남',
         currentMonth: { premium: 2, contracts: 1, rank: 24 },
         previousMonth: { premium: 0, contracts: 0, rank: null },
         threeMonthAverage: { premium: 1, contracts: 0 },
         productMix: { health: 60, life: 40 }, isActive: true, continuousMonths: 1
       },
       {
-        name: '김대우', agentCode: 'AG025', experience: '3.1년차', commissionMonth:'1개월', insuranceCareer: '3.1년',
+        name: '김대우', agentCode: 'AG025', experience: '3.1년차', commissionMonth:'1개월', insuranceCareer: '3.1년', gender: '남',
         currentMonth: { premium: 2, contracts: 1, rank: 25 },
         previousMonth: { premium: 0, contracts: 0, rank: null },
         threeMonthAverage: { premium: 1, contracts: 0 },
         productMix: { health: 50, life: 50 }, isActive: true, continuousMonths: 1
       },
       {
-        name: '이예진', agentCode: 'AG026', experience: '1.5년차', commissionMonth:'1개월', insuranceCareer: '1.5년',
+        name: '이예진', agentCode: 'AG026', experience: '1.5년차', commissionMonth:'1개월', insuranceCareer: '1.5년', gender: '여',
         currentMonth: { premium: 2, contracts: 1, rank: 26 },
         previousMonth: { premium: 0, contracts: 0, rank: null },
         threeMonthAverage: { premium: 1, contracts: 0 },
         productMix: { health: 80, life: 20 }, isActive: true, continuousMonths: 1
       },
       {
-        name: '조민석', agentCode: 'AG025', experience: '5.2년차', commissionMonth:'62개월', insuranceCareer: '5.2년',
+        name: '조민석', agentCode: 'AG025', experience: '5.2년차', commissionMonth:'62개월', insuranceCareer: '5.2년', gender: '남',
         currentMonth: { premium: 0, contracts: 0, rank: null },
         previousMonth: { premium: 0, contracts: 0, rank: null },
         threeMonthAverage: { premium: 0, contracts: 0 },
         productMix: { health: 65, life: 35 }, isActive: false
       },
       {
-        name: '최지후', agentCode: 'AG026', experience: '1.5년차', commissionMonth:'18개월', insuranceCareer: '1.5년',
+        name: '최지후', agentCode: 'AG026', experience: '1.5년차', commissionMonth:'18개월', insuranceCareer: '1.5년', gender: '남',
         currentMonth: { premium: 0, contracts: 0, rank: null },
         previousMonth: { premium: 0, contracts: 0, rank: null },
         threeMonthAverage: { premium: 0, contracts: 0 },
         productMix: { health: 40, life: 60 }, isActive: false
       },
       {
-        name: '김대우', agentCode: 'AG027', experience: '4.7년차', commissionMonth:'56개월', insuranceCareer: '4.7년',
+        name: '김대우', agentCode: 'AG027', experience: '4.7년차', commissionMonth:'56개월', insuranceCareer: '4.7년', gender: '남',
         currentMonth: { premium: 0, contracts: 0, rank: null },
         previousMonth: { premium: 0, contracts: 0, rank: null },
         threeMonthAverage: { premium: 0, contracts: 0 },
@@ -1137,14 +1137,14 @@ const Branch360Dashboard = () => {
 
       // 26-27위: 전월 가동→미가동 전환 (당월 무실적)
       {
-        name: '박형준', agentCode: 'AG021', experience: '6.5년차', commissionMonth:'78개월', insuranceCareer: '6.5년',
+        name: '박형준', agentCode: 'AG021', experience: '6.5년차', commissionMonth:'78개월', insuranceCareer: '6.5년', gender: '남',
         currentMonth: { premium: 0, contracts: 0, rank: null },
         previousMonth: { premium: 1, contracts: 1, rank: 21 },
         threeMonthAverage: { premium: 1, contracts: 1 },
         productMix: { health: 45, life: 55 }, isActive: false
       },
       {
-        name: '김나영', agentCode: 'AG022', experience: '3.8년차', commissionMonth:'45개월', insuranceCareer: '3.8년',
+        name: '김나영', agentCode: 'AG022', experience: '3.8년차', commissionMonth:'45개월', insuranceCareer: '3.8년', gender: '여',
         currentMonth: { premium: 0, contracts: 0, rank: null },
         previousMonth: { premium: 1, contracts: 1, rank: 22 },
         threeMonthAverage: { premium: 1, contracts: 1 },
@@ -1153,28 +1153,28 @@ const Branch360Dashboard = () => {
 
       // 28-31위: 전월 가동→미가동 전환 (당월 무실적)
       {
-        name: '이예진', agentCode: 'AG028', experience: '7.9년차', commissionMonth:'94개월', insuranceCareer: '7.9년',
+        name: '이예진', agentCode: 'AG028', experience: '7.9년차', commissionMonth:'94개월', insuranceCareer: '7.9년', gender: '여',
         currentMonth: { premium: 0, contracts: 0, rank: null },
         previousMonth: { premium: 30, contracts: 1, rank: 28 },
         threeMonthAverage: { premium: 10, contracts: 0 },
         productMix: { health: 60, life: 40 }, isActive: false
       },
       {
-        name: '박시원', agentCode: 'AG029', experience: '3.4년차', commissionMonth:'41개월', insuranceCareer: '3.4년',
+        name: '박시원', agentCode: 'AG029', experience: '3.4년차', commissionMonth:'41개월', insuranceCareer: '3.4년', gender: '여',
         currentMonth: { premium: 0, contracts: 0, rank: null },
         previousMonth: { premium: 20, contracts: 1, rank: 29 },
         threeMonthAverage: { premium: 7, contracts: 0 },
         productMix: { health: 50, life: 50 }, isActive: false
       },
       {
-        name: '정민준', agentCode: 'AG030', experience: '9.2년차', commissionMonth:'110개월', insuranceCareer: '9.2년',
+        name: '정민준', agentCode: 'AG030', experience: '9.2년차', commissionMonth:'110개월', insuranceCareer: '9.2년', gender: '남',
         currentMonth: { premium: 0, contracts: 0, rank: null },
         previousMonth: { premium: 15, contracts: 1, rank: 30 },
         threeMonthAverage: { premium: 5, contracts: 0 },
         productMix: { health: 85, life: 15 }, isActive: false
       },
       {
-        name: '조상원', agentCode: 'AG031', experience: '5.9년차', commissionMonth:'70개월', insuranceCareer: '5.9년',
+        name: '조상원', agentCode: 'AG031', experience: '5.9년차', commissionMonth:'70개월', insuranceCareer: '5.9년', gender: '남',
         currentMonth: { premium: 0, contracts: 0, rank: null },
         previousMonth: { premium: 10, contracts: 1, rank: 31 },
         threeMonthAverage: { premium: 3, contracts: 0 },
@@ -1183,28 +1183,28 @@ const Branch360Dashboard = () => {
 
       // 32-35위: 전월 가동→미가동 전환
       {
-        name: '윤서연', agentCode: 'AG032', experience: '11.3년차', commissionMonth:'135개월', insuranceCareer: '11.3년',
+        name: '윤서연', agentCode: 'AG032', experience: '11.3년차', commissionMonth:'135개월', insuranceCareer: '11.3년', gender: '여',
         currentMonth: { premium: 0, contracts: 0, rank: null },
         previousMonth: { premium: 45, contracts: 2, rank: 15 },
         threeMonthAverage: { premium: 22, contracts: 1 },
         productMix: { health: 70, life: 30 }, isActive: false
       },
       {
-        name: '장민호', agentCode: 'AG033', experience: '4.4년차', commissionMonth:'52개월', insuranceCareer: '4.4년',
+        name: '장민호', agentCode: 'AG033', experience: '4.4년차', commissionMonth:'52개월', insuranceCareer: '4.4년', gender: '남',
         currentMonth: { premium: 0, contracts: 0, rank: null },
         previousMonth: { premium: 38, contracts: 2, rank: 18 },
         threeMonthAverage: { premium: 19, contracts: 1 },
         productMix: { health: 55, life: 45 }, isActive: false
       },
       {
-        name: '강예슬', agentCode: 'AG034', experience: '6.7년차', commissionMonth:'80개월', insuranceCareer: '6.7년',
+        name: '강예슬', agentCode: 'AG034', experience: '6.7년차', commissionMonth:'80개월', insuranceCareer: '6.7년', gender: '여',
         currentMonth: { premium: 0, contracts: 0, rank: null },
         previousMonth: { premium: 32, contracts: 1, rank: 20 },
         threeMonthAverage: { premium: 16, contracts: 0 },
         productMix: { health: 80, life: 20 }, isActive: false
       },
       {
-        name: '오준혁', agentCode: 'AG035', experience: '2.1년차', commissionMonth:'25개월', insuranceCareer: '2.1년',
+        name: '오준혁', agentCode: 'AG035', experience: '2.1년차', commissionMonth:'25개월', insuranceCareer: '2.1년', gender: '남',
         currentMonth: { premium: 0, contracts: 0, rank: null },
         previousMonth: { premium: 28, contracts: 1, rank: 22 },
         threeMonthAverage: { premium: 14, contracts: 0 },
@@ -1212,18 +1212,18 @@ const Branch360Dashboard = () => {
       },
 
       // 36-47위: 미가동 설계사
-      { name: '김스우', agentCode: 'AG036', experience: '7.4년차', commissionMonth:'88개월', insuranceCareer: '7.4년', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 85, contracts: 3, rank: 25 }, threeMonthAverage: { premium: 28, contracts: 1 }, productMix: { health: 75, life: 25 }, isActive: false },
-      { name: '이지인', agentCode: 'AG037', experience: '3.6년차', commissionMonth:'43개월', insuranceCareer: '3.6년', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 72, contracts: 2, rank: 28 }, threeMonthAverage: { premium: 24, contracts: 1 }, productMix: { health: 60, life: 40 }, isActive: false },
-      { name: '박성민', agentCode: 'AG038', experience: '5.1년차', commissionMonth:'61개월', insuranceCareer: '5.1년', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 91, contracts: 4, rank: 22 }, threeMonthAverage: { premium: 30, contracts: 1 }, productMix: { health: 50, life: 50 }, isActive: false },
-      { name: '정선영', agentCode: 'AG039', experience: '8.7년차', commissionMonth:'104개월', insuranceCareer: '8.7년', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 68, contracts: 2, rank: 31 }, threeMonthAverage: { premium: 23, contracts: 1 }, productMix: { health: 85, life: 15 }, isActive: false },
-      { name: '조지우', agentCode: 'AG040', experience: '2.8년차', commissionMonth:'33개월', insuranceCareer: '2.8년', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 45, life: 55 }, isActive: false },
-      { name: '차예린', agentCode: 'AG041', experience: '6.3년차', commissionMonth:'75개월', insuranceCareer: '6.3년', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 70, life: 30 }, isActive: false },
-      { name: '손이상', agentCode: 'AG042', experience: '1.7년차', commissionMonth:'20개월', insuranceCareer: '1.7년', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 55, life: 45 }, isActive: false },
-      { name: '김은영', agentCode: 'AG043', experience: '4.9년차', commissionMonth:'58개월', insuranceCareer: '4.9년', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 80, life: 20 }, isActive: false },
-      { name: '이승찬', agentCode: 'AG044', experience: '10.5년차', commissionMonth:'126개월', insuranceCareer: '10.5년', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 40, life: 60 }, isActive: false },
-      { name: '박서우', agentCode: 'AG045', experience: '3.1년차', commissionMonth:'37개월', insuranceCareer: '3.1년', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 75, life: 25 }, isActive: false },
-      { name: '정민규', agentCode: 'AG046', experience: '7.8년차', commissionMonth:'93개월', insuranceCareer: '7.8년', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 60, life: 40 }, isActive: false },
-      { name: '조예림', agentCode: 'AG047', experience: '5.6년차', commissionMonth:'67개월', insuranceCareer: '5.6년', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 50, life: 50 }, isActive: false }
+      { name: '김스우', agentCode: 'AG036', experience: '7.4년차', commissionMonth:'88개월', insuranceCareer: '7.4년', gender: '여', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 85, contracts: 3, rank: 25 }, threeMonthAverage: { premium: 28, contracts: 1 }, productMix: { health: 75, life: 25 }, isActive: false },
+      { name: '이지인', agentCode: 'AG037', experience: '3.6년차', commissionMonth:'43개월', insuranceCareer: '3.6년', gender: '여', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 72, contracts: 2, rank: 28 }, threeMonthAverage: { premium: 24, contracts: 1 }, productMix: { health: 60, life: 40 }, isActive: false },
+      { name: '박성민', agentCode: 'AG038', experience: '5.1년차', commissionMonth:'61개월', insuranceCareer: '5.1년', gender: '남', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 91, contracts: 4, rank: 22 }, threeMonthAverage: { premium: 30, contracts: 1 }, productMix: { health: 50, life: 50 }, isActive: false },
+      { name: '정선영', agentCode: 'AG039', experience: '8.7년차', commissionMonth:'104개월', insuranceCareer: '8.7년', gender: '여', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 68, contracts: 2, rank: 31 }, threeMonthAverage: { premium: 23, contracts: 1 }, productMix: { health: 85, life: 15 }, isActive: false },
+      { name: '조지우', agentCode: 'AG040', experience: '2.8년차', commissionMonth:'33개월', insuranceCareer: '2.8년', gender: '남', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 45, life: 55 }, isActive: false },
+      { name: '차예린', agentCode: 'AG041', experience: '6.3년차', commissionMonth:'75개월', insuranceCareer: '6.3년', gender: '여', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 70, life: 30 }, isActive: false },
+      { name: '손이상', agentCode: 'AG042', experience: '1.7년차', commissionMonth:'20개월', insuranceCareer: '1.7년', gender: '남', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 55, life: 45 }, isActive: false },
+      { name: '김은영', agentCode: 'AG043', experience: '4.9년차', commissionMonth:'58개월', insuranceCareer: '4.9년', gender: '여', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 80, life: 20 }, isActive: false },
+      { name: '이승찬', agentCode: 'AG044', experience: '10.5년차', commissionMonth:'126개월', insuranceCareer: '10.5년', gender: '남', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 40, life: 60 }, isActive: false },
+      { name: '박서우', agentCode: 'AG045', experience: '3.1년차', commissionMonth:'37개월', insuranceCareer: '3.1년', gender: '남', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 75, life: 25 }, isActive: false },
+      { name: '정민규', agentCode: 'AG046', experience: '7.8년차', commissionMonth:'93개월', insuranceCareer: '7.8년', gender: '남', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 60, life: 40 }, isActive: false },
+      { name: '조예림', agentCode: 'AG047', experience: '5.6년차', commissionMonth:'67개월', insuranceCareer: '5.6년', gender: '여', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 50, life: 50 }, isActive: false }
     ];
 
     // 가동 설계사들의 기본 실적 합계 계산 (백만원 단위)
@@ -1409,6 +1409,7 @@ const Branch360Dashboard = () => {
   
   const handleCategoryClick = (category: string) => {
     setSelectedAgentCategory(category);
+    setModalPerformanceType(performanceType);
     setAgentListModal(true);
   };
 
@@ -1458,6 +1459,7 @@ const Branch360Dashboard = () => {
   };
   
   const handleShowAllAgents = () => {
+    setModalPerformanceType(performanceType);
     setShowAllAgentsModal(true);
   };
 
@@ -2848,10 +2850,10 @@ const Branch360Dashboard = () => {
               설계사 현황
             </h2>
 
-            {/* 전체 위촉 설계사 */}
+            {/* 전체 재적 설계사 */}
             <div className="bg-white rounded-lg shadow-sm border p-4">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-semibold text-gray-700">위촉 설계사</h3>
+                <h3 className="text-sm font-semibold text-gray-700">재적 설계사</h3>
                 <button
                   onClick={() => handleShowAllAgents()}
                   className="text-xs text-gray-500 hover:text-gray-700 font-medium"
@@ -2876,40 +2878,94 @@ const Branch360Dashboard = () => {
               </div>
               
               <div className="border-t pt-4 space-y-3">
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center">
-                    <User className="w-4 h-4 text-gray-500 mr-2" />
-                    <span className="text-sm text-gray-600">평균 연령</span>
+                <div className="p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center">
+                      <User className="w-4 h-4 text-gray-500 mr-2" />
+                      <span className="text-sm text-gray-600">평균 연령</span>
+                    </div>
+                    <span className="text-sm font-medium">{branchProfile.designerAvgAge}세</span>
                   </div>
-                  <span className="text-sm font-medium">{branchProfile.designerAvgAge}세</span>
+                  <div className="border-t border-gray-200 pt-3">
+                    {(() => {
+                      const allData = generateAllAgentsData();
+                      const maleCount = allData.filter(a => a.gender === '남').length;
+                      const femaleCount = allData.filter(a => a.gender === '여').length;
+                      const total = allData.length;
+                      const malePercent = Math.round((maleCount / total) * 100);
+                      const femalePercent = 100 - malePercent;
+
+                      return (
+                        <div className="space-y-2">
+                          <div className="flex w-full h-2 rounded-full overflow-hidden">
+                            <div
+                              className="bg-blue-500 transition-all"
+                              style={{ width: `${malePercent}%` }}
+                            />
+                            <div
+                              className="bg-pink-400 transition-all"
+                              style={{ width: `${femalePercent}%` }}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between text-xs text-gray-600">
+                            <span>남 {maleCount}명 ({malePercent}%)</span>
+                            <span>여 {femaleCount}명 ({femalePercent}%)</span>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
                 </div>
-                
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center">
-                    <Briefcase className="w-4 h-4 text-gray-500 mr-2" />
-                    <span className="text-sm text-gray-600">평균 보험 경력</span>
+
+                <div className="p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Briefcase className="w-4 h-4 text-gray-500 mr-2" />
+                      <span className="text-sm text-gray-600">평균 보험 경력</span>
+                    </div>
+                    <span className="text-sm font-medium">{branchProfile.designerAvgCareer}년</span>
                   </div>
-                  <span className="text-sm font-medium">{branchProfile.designerAvgCareer}년</span>
+                  <div className="text-xs text-gray-400 mt-2">*생명보험협회 등록 기준</div>
                 </div>
               </div>
             </div>
 
-            {/* 우수 설계사 현황 */}
+            {/* 가동 설계사 현황 */}
             <div className="bg-white rounded-lg shadow-sm border p-4">
-              <h3 className="text-sm font-semibold text-gray-700 mb-4">당월 가동 설계사</h3>
-              
+              <h3 className="text-sm font-semibold text-gray-700 mb-4">가동 설계사</h3>
+
               {/* 간략 현황 */}
-              <div className="text-center mb-4 pb-4 border-b border-gray-200">
-                <div className="text-2xl font-bold text-indigo-600">{(() => {
-                  const allData = getSortedAgents(true);
-                  const activeCount = allData.filter(agent => agent.currentMonth.premium > 0).length;
-                  return activeCount;
-                })()}<span className="text-sm text-gray-500">명</span></div>
-                <div className="text-xs text-gray-600">전체 대비 {Math.round(((() => {
-                  const allData = getSortedAgents(true);
-                  const activeCount = allData.filter(agent => agent.currentMonth.premium > 0).length;
-                  return activeCount;
-                })() / currentAgentStatus.total) * 100)}% 가동률</div>
+              <div className="flex items-center gap-4 mb-4 pb-4 border-b border-gray-200">
+                {/* 활동 */}
+                <div className="flex-1 text-center p-4 bg-gray-100 rounded-lg">
+                  <div className="text-xs text-gray-600 mb-1">당월 활동</div>
+                  <div className="text-2xl font-bold text-gray-700">38<span className="text-sm text-gray-500 ml-1">명</span></div>
+                </div>
+
+                {/* 화살표 */}
+                <div className="pt-5">
+                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </div>
+
+                {/* 가동 */}
+                <div className="flex-1 text-center p-4 bg-indigo-50 rounded-lg border-2 border-indigo-200">
+                  <div className="text-xs text-gray-600 mb-1">당월 가동</div>
+                  <div className="text-2xl font-bold text-indigo-600">{currentAgentStatus.active}<span className="text-sm text-gray-500 ml-1">명</span></div>
+                </div>
+
+                {/* 비율 */}
+                <div className="flex flex-col gap-2">
+                  <div className="text-xs whitespace-nowrap">
+                    <span className="text-gray-500">전체 대비 </span>
+                    <span className="font-semibold text-gray-700">{Math.round((currentAgentStatus.active / currentAgentStatus.total) * 100)}%</span>
+                  </div>
+                  <div className="text-xs whitespace-nowrap">
+                    <span className="text-gray-500">활동 대비 </span>
+                    <span className="font-semibold text-indigo-600">{Math.round((currentAgentStatus.active / 38) * 100)}%</span>
+                  </div>
+                </div>
               </div>
 
               {/* 카테고리 선택 */}
@@ -3105,6 +3161,7 @@ const Branch360Dashboard = () => {
               <div className="mt-4 pt-3 border-t border-gray-200">
                 <button
                   onClick={() => {
+                    setModalPerformanceType(performanceType);
                     setShowActiveAgentsModal(true);
                   }}
                   className="w-full text-center text-xs text-blue-600 hover:text-blue-800 font-medium py-2 transition-colors"
@@ -3114,9 +3171,9 @@ const Branch360Dashboard = () => {
               </div>
             </div>
 
-            {/* 당월 미가동 설계사 */}
+            {/* 미가동 설계사 */}
             <div className="bg-white rounded-lg shadow-sm border p-4">
-              <h3 className="text-sm font-semibold text-gray-700 mb-4">당월 미가동 설계사</h3>
+              <h3 className="text-sm font-semibold text-gray-700 mb-4">미가동 설계사</h3>
 
               {/* 간략 현황 */}
               <div className="text-center mb-4 pb-4 border-b border-gray-200">
@@ -3129,7 +3186,7 @@ const Branch360Dashboard = () => {
                   const allData = getSortedAgents(true);
                   const inactiveCount = allData.filter(agent => agent.currentMonth.premium === 0).length;
                   return inactiveCount;
-                })() / currentAgentStatus.total) * 100)}% 미가동률</div>
+                })() / currentAgentStatus.total) * 100)}%</div>
               </div>
 
               {/* 미가동 설계사 리스트 */}
@@ -3192,6 +3249,9 @@ const Branch360Dashboard = () => {
                                 )}
                               </button>
                             </th>
+                            <th className="px-2 py-2 text-center font-medium text-gray-700 whitespace-nowrap w-16">
+                              활동 여부
+                            </th>
                             <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap w-20">
                               <button
                                 onClick={() => handleInactiveTableSort('currentMMP')}
@@ -3226,6 +3286,11 @@ const Branch360Dashboard = () => {
                               <td className="px-2 py-2 text-gray-600 font-mono text-xs">{agent.agentCode}</td>
                               <td className="px-2 py-2 font-medium text-gray-800">{agent.name}</td>
                               <td className="px-2 py-2 text-right text-gray-600 text-xs">{agent.commissionMonth.replace('개월', '')}</td>
+                              <td className="px-2 py-2 text-center">
+                                <span className={agent.previousMonth.premium > 0 ? 'text-green-600 font-medium' : 'text-gray-400'}>
+                                  {agent.previousMonth.premium > 0 ? 'Y' : 'N'}
+                                </span>
+                              </td>
                               <td className="px-2 py-2 text-right text-gray-400">-</td>
                               <td className="px-2 py-2 text-right text-gray-600 whitespace-nowrap">
                                 {agent.previousMonth.premium === 0 ? '-' : (performanceType === 'MMP' ? Math.round(agent.previousMonth.premium * 10 / 12) : agent.previousMonth.premium * 10)}
@@ -3233,7 +3298,7 @@ const Branch360Dashboard = () => {
                             </tr>
                           )) : (
                             <tr>
-                              <td colSpan={5} className="px-4 py-6 text-center text-gray-500 text-sm">미가동 설계사가 없습니다</td>
+                              <td colSpan={6} className="px-4 py-6 text-center text-gray-500 text-sm">미가동 설계사가 없습니다</td>
                             </tr>
                           )}
                         </tbody>
@@ -3247,6 +3312,7 @@ const Branch360Dashboard = () => {
               <div className="mt-4 pt-3 border-t border-gray-200">
                 <button
                   onClick={() => {
+                    setModalPerformanceType(performanceType);
                     setShowInactiveAgentsModal(true);
                   }}
                   className="w-full text-center text-xs text-red-600 hover:text-red-800 font-medium py-2 transition-colors"
@@ -3762,7 +3828,7 @@ const Branch360Dashboard = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowAllAgentsModal(false)}>
           <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">위촉 설계사</h3>
+              <h3 className="text-lg font-semibold text-gray-900">재적 설계사</h3>
               <button
                 onClick={() => setShowAllAgentsModal(false)}
                 className="text-gray-500 hover:text-gray-700 text-xl"
@@ -4555,7 +4621,7 @@ const Branch360Dashboard = () => {
                         보험경력 {inactiveSortBy === 'tenure' && (inactiveSortOrder === 'desc' ? '↓' : '↑')}
                       </button>
                     </th>
-                    <th rowSpan={2} className="px-2 py-3 text-center font-semibold text-gray-700 border-b border-r-2 border-gray-300 whitespace-nowrap min-w-[60px]">
+                    <th rowSpan={2} className="px-2 py-3 text-center font-semibold text-gray-700 border-b whitespace-nowrap min-w-[60px]">
                       <button
                         onClick={() => {
                           if (inactiveSortBy === 'commissionMonth') {
@@ -4569,6 +4635,9 @@ const Branch360Dashboard = () => {
                       >
                         위촉차월 {inactiveSortBy === 'commissionMonth' && (inactiveSortOrder === 'desc' ? '↓' : '↑')}
                       </button>
+                    </th>
+                    <th rowSpan={2} className="px-2 py-3 text-center font-semibold text-gray-700 border-b border-r-2 border-gray-300 whitespace-nowrap min-w-[60px]">
+                      활동 여부
                     </th>
                     <th colSpan={6} className="px-2 py-2 text-center font-bold text-gray-800 border-b border-l-2 border-gray-300 bg-gray-100">
                       {modalPerformanceType}
@@ -4913,7 +4982,12 @@ const Branch360Dashboard = () => {
                           <td className="px-2 py-3 font-mono text-gray-600">{agent.agentCode}</td>
                           <td className="px-2 py-3 font-medium text-gray-900">{agent.name}</td>
                           <td className="px-2 py-3 text-gray-600">{agent.insuranceCareer}</td>
-                          <td className="px-2 py-3 text-center text-gray-600 border-r-2 border-gray-200">{agent.commissionMonth}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{agent.commissionMonth}</td>
+                          <td className="px-2 py-3 text-center border-r-2 border-gray-200">
+                            <span className={monthlyData.M1 > 0 ? 'text-green-600 font-medium' : 'text-gray-400'}>
+                              {monthlyData.M1 > 0 ? 'Y' : 'N'}
+                            </span>
+                          </td>
                           <td className="px-2 py-3 text-center text-red-600 font-medium">{formatInactiveValue(monthlyData.M0)}</td>
                           <td className="px-2 py-3 text-center text-gray-600">{formatInactiveValue(monthlyData.M1)}</td>
                           <td className="px-2 py-3 text-center text-gray-600">{formatInactiveValue(monthlyData.M2)}</td>
