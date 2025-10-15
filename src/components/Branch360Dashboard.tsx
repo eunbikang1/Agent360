@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { Building, Users, Phone, MapPin, Calendar, TrendingUp, ChevronDown, User, ArrowDown, Download, Briefcase, AlertTriangle, TrendingDown, UserPlus, Search, ChevronRight } from 'lucide-react';
+import { Building, Users, Phone, MapPin, Calendar, TrendingUp, ChevronDown, User, ArrowDown, Download, Briefcase, AlertTriangle, TrendingDown, UserPlus, Search, ChevronRight, ChevronLeft, Check } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import {
   generateBranchPerformance,
@@ -1673,6 +1673,15 @@ const Branch360Dashboard = () => {
         <div className="px-6 py-4 border-b border-gray-100">
           <div className="flex items-center justify-between">
             <div>
+              {/* 뒤로가기 버튼 */}
+              <button
+                onClick={() => navigate('/')}
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors mb-2"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                돌아가기
+              </button>
+
               <h1 className="text-xl font-bold text-gray-900 mb-1">지점 360° 상세 뷰</h1>
               <div className="flex items-center text-sm text-gray-600">
                 <span className="font-medium">{selectedAgency} &gt; {selectedBranch}</span>
@@ -2629,133 +2638,114 @@ const Branch360Dashboard = () => {
               {/* 헤더 */}
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-semibold text-gray-700">계약 특성</h3>
-                <div className="text-right">
-                  <p className="text-xs text-gray-500 mb-2">*직전 3개월 신계약 기준</p>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-gray-700">상품군</span>
-                    <div className="flex items-center bg-white border border-gray-300 rounded-lg">
-                      <label className="flex items-center px-3 py-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="productCategory"
-                          value="전체"
-                          checked={selectedProduct === '전체'}
-                          onChange={() => {
-                            setSelectedProduct('전체');
-                            setSelectedSubProduct('전체');
-                          }}
-                          className="mr-2 text-blue-600 focus:ring-blue-500"
-                        />
-                        <span className="text-sm">전체</span>
-                      </label>
-                      <div className="w-px h-6 bg-gray-300"></div>
-                      <label className="flex items-center px-3 py-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="productCategory"
-                          value="건강"
-                          checked={selectedProduct === '건강'}
-                          onChange={() => {
-                            setSelectedProduct('건강');
-                            setSelectedSubProduct('전체');
-                          }}
-                          className="mr-2 text-blue-600 focus:ring-blue-500"
-                        />
-                        <span className="text-sm">건강</span>
-                      </label>
-                      <div className="w-px h-6 bg-gray-300"></div>
-                      <label className="flex items-center px-3 py-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="productCategory"
-                          value="종신/정기"
-                          checked={selectedProduct === '종신/정기'}
-                          onChange={() => {
-                            setSelectedProduct('종신/정기');
-                            setSelectedSubProduct('전체');
-                          }}
-                          className="mr-2 text-blue-600 focus:ring-blue-500"
-                        />
-                        <span className="text-sm">종신/정기</span>
-                      </label>
-                    </div>
-                  </div>
-                </div>
+                <p className="text-xs text-gray-500">*직전 3개월 신계약 기준</p>
               </div>
 
-              {/* 📊 상품 구성 */}
+              {/* 📊 상품 구성 - 트리 구조 */}
               <div className="mb-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <h4 className="text-xs font-semibold text-gray-700">🔍 상품군 필터</h4>
+                  <span className="text-xs text-gray-500">(클릭하여 선택)</span>
+                </div>
 
-                {/* 탭 내용 */}
-                <div className="bg-gray-50 rounded-lg p-3">
-                  {selectedProduct === '전체' ? (
-                    <div className="space-y-2">
-                      {[
-                        { name: '건강', value: 65, color: '#3b82f6', amount: 580000, count: 35 },
-                        { name: '종신/정기', value: 35, color: '#10b981', amount: 312000, count: 19 }
-                      ].map((item, idx) => (
+                <div className="bg-gray-50 rounded-lg p-3 space-y-2">
+                  {/* 전체 */}
+                  <div
+                    className={`flex items-center gap-2 py-1.5 px-2 cursor-pointer rounded transition-all relative ${
+                      selectedProduct === '전체' && selectedSubProduct === '전체' ? 'bg-indigo-50 border-2 border-indigo-300' : 'hover:bg-white border-2 border-transparent'
+                    }`}
+                    onClick={() => {
+                      setSelectedProduct('전체');
+                      setSelectedSubProduct('전체');
+                    }}
+                  >
+                    {selectedProduct === '전체' && selectedSubProduct === '전체' && (
+                      <Check className="w-4 h-4 text-indigo-600 flex-shrink-0" />
+                    )}
+                    <span className={`text-sm font-bold ${
+                      selectedProduct === '전체' && selectedSubProduct === '전체' ? 'text-indigo-700' : 'text-gray-700'
+                    }`}>전체</span>
+                  </div>
+
+                  {/* 건강 */}
+                  <div>
+                    <div
+                      className={`flex items-center gap-2 py-1.5 px-2 cursor-pointer rounded transition-all relative ${
+                        selectedProduct === '건강' && selectedSubProduct === '전체' ? 'bg-indigo-50 border-2 border-indigo-300' : 'hover:bg-white border-2 border-transparent'
+                      }`}
+                      onClick={() => {
+                        setSelectedProduct('건강');
+                        setSelectedSubProduct('전체');
+                      }}
+                      onMouseEnter={() => setHoveredProduct({ name: '건강', value: 65, amount: 580000, count: 35, idx: 'health-parent' })}
+                      onMouseLeave={() => setHoveredProduct(null)}
+                    >
+                      {selectedProduct === '건강' && selectedSubProduct === '전체' && (
+                        <Check className="w-4 h-4 text-indigo-600 flex-shrink-0" />
+                      )}
+                      <span className={`text-sm font-bold w-20 flex-shrink-0 ${
+                        selectedProduct === '건강' && selectedSubProduct === '전체' ? 'text-indigo-700' : 'text-gray-700'
+                      }`}>건강</span>
+                      <div className="flex-1 bg-gray-200 rounded-full h-3.5">
                         <div
-                          key={idx}
-                          className="flex items-center gap-2 py-1 relative cursor-pointer hover:bg-white rounded px-2 -mx-2 transition-all"
-                          onMouseEnter={() => setHoveredProduct({ ...item, idx: `all-${idx}` })}
-                          onMouseLeave={() => setHoveredProduct(null)}
-                        >
-                          <span className="text-sm font-bold w-20 flex-shrink-0 text-gray-700">{item.name}</span>
-                          <div className="flex-1 bg-gray-200 rounded-full h-4">
-                            <div
-                              className="h-4 rounded-full transition-all"
-                              style={{ width: `${item.value}%`, backgroundColor: item.color }}
-                            />
-                          </div>
-                          <span className="text-sm font-bold w-12 text-right flex-shrink-0 text-gray-700">{item.value}%</span>
+                          className="h-3.5 rounded-full transition-all"
+                          style={{ width: '65%', backgroundColor: selectedProduct === '건강' && selectedSubProduct === '전체' ? '#4f46e5' : '#3b82f6' }}
+                        />
+                      </div>
+                      <span className={`text-sm font-bold w-12 text-right flex-shrink-0 ${
+                        selectedProduct === '건강' && selectedSubProduct === '전체' ? 'text-indigo-700' : 'text-gray-700'
+                      }`}>65%</span>
 
-                          {/* 툴팁 */}
-                          {hoveredProduct && hoveredProduct.idx === `all-${idx}` && (
-                            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-30 mb-1">
-                              <div className="font-semibold">{item.name}</div>
-                              <div>{performanceType}: {item.amount.toLocaleString()}원</div>
-                              <div>건수: {item.count}건</div>
-                              <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
-                            </div>
-                          )}
+                      {hoveredProduct && hoveredProduct.idx === 'health-parent' && (
+                        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-30 mb-1">
+                          <div className="font-semibold">건강</div>
+                          <div>{performanceType}: {(580000).toLocaleString()}원</div>
+                          <div>건수: 35건</div>
+                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
                         </div>
-                      ))}
+                      )}
                     </div>
-                  ) : selectedProduct === '건강' ? (
-                    <div className="space-y-1.5">
+
+                    {/* 건강 세부 상품 */}
+                    <div className="ml-6 mt-1 space-y-1">
                       {[
-                        { name: '골담', value: 24, color: '#3b82f6', amount: 153000, count: 6 },
-                        { name: '새담', value: 20, color: '#60a5fa', amount: 127000, count: 5 },
-                        { name: '치매', value: 18, color: '#93c5fd', amount: 115000, count: 5 },
-                        { name: '다이나믹', value: 18, color: '#bfdbfe', amount: 115000, count: 5 },
-                        { name: '치아', value: 10, color: '#dbeafe', amount: 64000, count: 3 },
-                        { name: '암', value: 10, color: '#eff6ff', amount: 63000, count: 2 }
+                        { name: '골담', value: 24, absoluteValue: 16, color: '#3b82f6', amount: 153000, count: 6 },
+                        { name: '새담', value: 20, absoluteValue: 13, color: '#60a5fa', amount: 127000, count: 5 },
+                        { name: '치매', value: 18, absoluteValue: 12, color: '#93c5fd', amount: 115000, count: 5 },
+                        { name: '다이나믹', value: 18, absoluteValue: 12, color: '#bfdbfe', amount: 115000, count: 5 },
+                        { name: '치아', value: 10, absoluteValue: 6.5, color: '#dbeafe', amount: 64000, count: 3 },
+                        { name: '암', value: 10, absoluteValue: 6.5, color: '#eff6ff', amount: 63000, count: 2 }
                       ].map((item, idx) => {
-                        const isSelected = selectedSubProduct === item.name;
+                        const isSelected = selectedProduct === '건강' && selectedSubProduct === item.name;
                         return (
                           <div
                             key={idx}
-                            className={`flex items-center gap-2 py-1.5 px-2 cursor-pointer transition-all rounded relative ${
-                              isSelected ? 'bg-white border-2 border-indigo-300' : 'hover:bg-white'
+                            className={`flex items-center gap-2 py-1 px-2 cursor-pointer rounded transition-all relative ${
+                              isSelected ? 'bg-indigo-50 border-2 border-indigo-300' : 'hover:bg-white border-2 border-transparent'
                             }`}
-                            onClick={() => setSelectedSubProduct(item.name)}
+                            onClick={() => {
+                              setSelectedProduct('건강');
+                              setSelectedSubProduct(item.name);
+                            }}
                             onMouseEnter={() => setHoveredProduct({ ...item, idx: `health-${idx}` })}
                             onMouseLeave={() => setHoveredProduct(null)}
                           >
+                            {isSelected && (
+                              <Check className="w-3 h-3 text-indigo-600 flex-shrink-0 ml-2" />
+                            )}
                             <span className={`text-xs w-16 flex-shrink-0 ${
                               isSelected ? 'font-bold text-indigo-700' : 'text-gray-600'
-                            }`}>{item.name}</span>
-                            <div className="flex-1 bg-gray-200 rounded-full h-3">
+                            }`}>└ {item.name}</span>
+                            <div className="flex-1 bg-gray-200 rounded-full h-2.5">
                               <div
-                                className="h-3 rounded-full transition-all"
-                                style={{ width: `${item.value}%`, backgroundColor: isSelected ? '#4f46e5' : item.color }}
+                                className="h-2.5 rounded-full transition-all"
+                                style={{ width: `${item.absoluteValue}%`, backgroundColor: isSelected ? '#4f46e5' : item.color }}
                               />
                             </div>
                             <span className={`text-xs w-10 text-right flex-shrink-0 ${
                               isSelected ? 'font-bold text-indigo-700' : 'text-gray-600'
-                            }`}>{item.value}%</span>
+                            }`}>{item.absoluteValue}%</span>
 
-                            {/* 툴팁 */}
                             {hoveredProduct && hoveredProduct.idx === `health-${idx}` && (
                               <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-30 mb-1">
                                 <div className="font-semibold">{item.name}</div>
@@ -2768,38 +2758,84 @@ const Branch360Dashboard = () => {
                         );
                       })}
                     </div>
-                  ) : (
-                    <div className="space-y-1.5">
+                  </div>
+
+                  {/* 종신/정기 */}
+                  <div>
+                    <div
+                      className={`flex items-center gap-2 py-1.5 px-2 cursor-pointer rounded transition-all relative ${
+                        selectedProduct === '종신/정기' && selectedSubProduct === '전체' ? 'bg-indigo-50 border-2 border-indigo-300' : 'hover:bg-white border-2 border-transparent'
+                      }`}
+                      onClick={() => {
+                        setSelectedProduct('종신/정기');
+                        setSelectedSubProduct('전체');
+                      }}
+                      onMouseEnter={() => setHoveredProduct({ name: '종신/정기', value: 35, amount: 312000, count: 19, idx: 'life-parent' })}
+                      onMouseLeave={() => setHoveredProduct(null)}
+                    >
+                      {selectedProduct === '종신/정기' && selectedSubProduct === '전체' && (
+                        <Check className="w-4 h-4 text-indigo-600 flex-shrink-0" />
+                      )}
+                      <span className={`text-sm font-bold w-20 flex-shrink-0 ${
+                        selectedProduct === '종신/정기' && selectedSubProduct === '전체' ? 'text-indigo-700' : 'text-gray-700'
+                      }`}>종신/정기</span>
+                      <div className="flex-1 bg-gray-200 rounded-full h-3.5">
+                        <div
+                          className="h-3.5 rounded-full transition-all"
+                          style={{ width: '35%', backgroundColor: selectedProduct === '종신/정기' && selectedSubProduct === '전체' ? '#4f46e5' : '#10b981' }}
+                        />
+                      </div>
+                      <span className={`text-sm font-bold w-12 text-right flex-shrink-0 ${
+                        selectedProduct === '종신/정기' && selectedSubProduct === '전체' ? 'text-indigo-700' : 'text-gray-700'
+                      }`}>35%</span>
+
+                      {hoveredProduct && hoveredProduct.idx === 'life-parent' && (
+                        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-30 mb-1">
+                          <div className="font-semibold">종신/정기</div>
+                          <div>{performanceType}: {(312000).toLocaleString()}원</div>
+                          <div>건수: 19건</div>
+                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* 종신/정기 세부 상품 */}
+                    <div className="ml-6 mt-1 space-y-1">
                       {[
-                        { name: '저해지', value: 45, color: '#10b981', amount: 154000, count: 6 },
-                        { name: '무해지', value: 35, color: '#34d399', amount: 120000, count: 5 },
-                        { name: '정기', value: 20, color: '#6ee7b7', amount: 69000, count: 3 }
+                        { name: '저해지', value: 45, absoluteValue: 16, color: '#10b981', amount: 154000, count: 6 },
+                        { name: '무해지', value: 35, absoluteValue: 12, color: '#34d399', amount: 120000, count: 5 },
+                        { name: '정기', value: 20, absoluteValue: 7, color: '#6ee7b7', amount: 69000, count: 3 }
                       ].map((item, idx) => {
-                        const isSelected = selectedSubProduct === item.name;
+                        const isSelected = selectedProduct === '종신/정기' && selectedSubProduct === item.name;
                         return (
                           <div
                             key={idx}
-                            className={`flex items-center gap-2 py-1.5 px-2 cursor-pointer transition-all rounded relative ${
-                              isSelected ? 'bg-white border-2 border-indigo-300' : 'hover:bg-white'
+                            className={`flex items-center gap-2 py-1 px-2 cursor-pointer rounded transition-all relative ${
+                              isSelected ? 'bg-indigo-50 border-2 border-indigo-300' : 'hover:bg-white border-2 border-transparent'
                             }`}
-                            onClick={() => setSelectedSubProduct(item.name)}
+                            onClick={() => {
+                              setSelectedProduct('종신/정기');
+                              setSelectedSubProduct(item.name);
+                            }}
                             onMouseEnter={() => setHoveredProduct({ ...item, idx: `life-${idx}` })}
                             onMouseLeave={() => setHoveredProduct(null)}
                           >
+                            {isSelected && (
+                              <Check className="w-3 h-3 text-indigo-600 flex-shrink-0 ml-2" />
+                            )}
                             <span className={`text-xs w-16 flex-shrink-0 ${
                               isSelected ? 'font-bold text-indigo-700' : 'text-gray-600'
-                            }`}>{item.name}</span>
-                            <div className="flex-1 bg-gray-200 rounded-full h-3">
+                            }`}>└ {item.name}</span>
+                            <div className="flex-1 bg-gray-200 rounded-full h-2.5">
                               <div
-                                className="h-3 rounded-full transition-all"
-                                style={{ width: `${item.value}%`, backgroundColor: isSelected ? '#4f46e5' : item.color }}
+                                className="h-2.5 rounded-full transition-all"
+                                style={{ width: `${item.absoluteValue}%`, backgroundColor: isSelected ? '#4f46e5' : item.color }}
                               />
                             </div>
                             <span className={`text-xs w-10 text-right flex-shrink-0 ${
                               isSelected ? 'font-bold text-indigo-700' : 'text-gray-600'
-                            }`}>{item.value}%</span>
+                            }`}>{item.absoluteValue}%</span>
 
-                            {/* 툴팁 */}
                             {hoveredProduct && hoveredProduct.idx === `life-${idx}` && (
                               <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-30 mb-1">
                                 <div className="font-semibold">{item.name}</div>
@@ -2812,7 +2848,7 @@ const Branch360Dashboard = () => {
                         );
                       })}
                     </div>
-                  )}
+                  </div>
                 </div>
 
                 {/* 현재 선택 표시 */}
