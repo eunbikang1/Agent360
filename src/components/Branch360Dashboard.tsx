@@ -2757,10 +2757,10 @@ const Branch360Dashboard = () => {
                 <p className="text-xs text-gray-500">*직전 3개월 신계약 기준</p>
               </div>
 
-              {/* 📊 상품군별 현황 - 트리 구조 */}
+              {/* 상품군별 현황 - 트리 구조 */}
               <div className="mb-5">
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-semibold text-gray-700">📊 상품군별 현황</h4>
+                  <h4 className="text-sm font-semibold text-gray-700">상품군별 현황</h4>
                   <span className="text-xs text-gray-500 px-2 py-1 bg-indigo-50 rounded">클릭하여 필터 적용</span>
                 </div>
 
