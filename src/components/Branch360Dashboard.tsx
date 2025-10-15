@@ -3513,12 +3513,12 @@ const Branch360Dashboard = () => {
               <div className="text-center mb-4 pb-4 border-b border-gray-200">
                 <div className="text-2xl font-bold text-red-600">{(() => {
                   const allData = getSortedAgents(true);
-                  const inactiveCount = allData.filter(agent => agent.currentMonth.premium === 0).length;
+                  const inactiveCount = allData.filter(agent => !agent.isActive).length;
                   return inactiveCount;
                 })()}<span className="text-sm text-gray-500">명</span></div>
                 <div className="text-xs text-gray-600">전체 대비 {Math.round(((() => {
                   const allData = getSortedAgents(true);
-                  const inactiveCount = allData.filter(agent => agent.currentMonth.premium === 0).length;
+                  const inactiveCount = allData.filter(agent => !agent.isActive).length;
                   return inactiveCount;
                 })() / currentAgentStatus.total) * 100)}%</div>
               </div>
@@ -3527,7 +3527,7 @@ const Branch360Dashboard = () => {
               {(() => {
                 const allData = getSortedAgents(true);
                 const inactiveAgents = sortTableData(
-                  allData.filter(agent => agent.currentMonth.premium === 0),
+                  allData.filter(agent => !agent.isActive),
                   inactiveTableSortBy,
                   inactiveTableSortOrder
                 );
@@ -5189,7 +5189,7 @@ const Branch360Dashboard = () => {
                 <tbody>
                   {(() => {
                     // 미가동 설계사 필터링
-                    const inactiveAgents = allAgentsData.filter(agent => agent.currentMonth.premium === 0);
+                    const inactiveAgents = allAgentsData.filter(agent => !agent.isActive);
 
                     // M0-M5 데이터 생성 함수 (미가동 설계사용 - 전월 또는 과거 데이터 기반)
                     const generateInactiveMonthlyData = (agent) => {
@@ -5375,7 +5375,7 @@ const Branch360Dashboard = () => {
             </div>
 
             <div className="mt-4 pt-4 border-t text-center">
-              <span className="text-sm text-gray-500">총 {allAgentsData.filter(agent => agent.currentMonth.premium === 0).length}명 미가동 설계사</span>
+              <span className="text-sm text-gray-500">총 {allAgentsData.filter(agent => !agent.isActive).length}명 미가동 설계사</span>
             </div>
           </div>
         </div>
