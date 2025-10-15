@@ -900,7 +900,7 @@ const Branch360Dashboard = () => {
       '손지원', '김동현', '이민지', '박형준', '김나영', '이성민', '김배태', '박예진'
     ],
     newActive: [
-      '김배태', '박예진', '최지후' // 전월 미가동→가동 전환
+      '최지후', '김대우', '이예진' // 신규 가동
     ],
     newCommissioned: [
       '정민준', '조상원' // 당월 신규 위촉 (새로 입사한 설계사)
@@ -912,7 +912,7 @@ const Branch360Dashboard = () => {
 
   const currentAgentStatus = {
     total: 51, // 총 소속 설계사
-    active: baseAgentLists.continuous2Months.length + baseAgentLists.newActive.length, // 당월 가동 설계사 (26명 = 23 + 3)
+    active: 26, // 당월 가동 설계사 (26명)
     newThisMonth: 2, // 당월 신규 위촉
     resignedThisMonth: 1, // 당월 해촉
     netChange: 1, // 순증감
@@ -1116,21 +1116,21 @@ const Branch360Dashboard = () => {
         productMix: { health: 80, life: 20 }, isActive: true, continuousMonths: 1
       },
       {
-        name: '조민석', agentCode: 'AG025', experience: '5.2년차', commissionMonth:'62개월', insuranceCareer: '5.2년', gender: '남',
+        name: '강민수', agentCode: 'AG027', experience: '5.2년차', commissionMonth:'62개월', insuranceCareer: '5.2년', gender: '남',
         currentMonth: { premium: 0, contracts: 0, rank: null },
         previousMonth: { premium: 0, contracts: 0, rank: null },
         threeMonthAverage: { premium: 0, contracts: 0 },
         productMix: { health: 65, life: 35 }, isActive: false
       },
       {
-        name: '최지후', agentCode: 'AG026', experience: '1.5년차', commissionMonth:'18개월', insuranceCareer: '1.5년', gender: '남',
+        name: '윤정호', agentCode: 'AG028', experience: '1.5년차', commissionMonth:'18개월', insuranceCareer: '1.5년', gender: '남',
         currentMonth: { premium: 0, contracts: 0, rank: null },
         previousMonth: { premium: 0, contracts: 0, rank: null },
         threeMonthAverage: { premium: 0, contracts: 0 },
         productMix: { health: 40, life: 60 }, isActive: false
       },
       {
-        name: '김대우', agentCode: 'AG027', experience: '4.7년차', commissionMonth:'56개월', insuranceCareer: '4.7년', gender: '남',
+        name: '서준혁', agentCode: 'AG029', experience: '4.7년차', commissionMonth:'56개월', insuranceCareer: '4.7년', gender: '남',
         currentMonth: { premium: 0, contracts: 0, rank: null },
         previousMonth: { premium: 0, contracts: 0, rank: null },
         threeMonthAverage: { premium: 0, contracts: 0 },
@@ -1139,14 +1139,14 @@ const Branch360Dashboard = () => {
 
       // 26-27위: 전월 가동→미가동 전환 (당월 무실적)
       {
-        name: '박형준', agentCode: 'AG021', experience: '6.5년차', commissionMonth:'78개월', insuranceCareer: '6.5년', gender: '남',
+        name: '송재현', agentCode: 'AG050', experience: '6.5년차', commissionMonth:'78개월', insuranceCareer: '6.5년', gender: '남',
         currentMonth: { premium: 0, contracts: 0, rank: null },
         previousMonth: { premium: 1, contracts: 1, rank: 21 },
         threeMonthAverage: { premium: 1, contracts: 1 },
         productMix: { health: 45, life: 55 }, isActive: false
       },
       {
-        name: '김나영', agentCode: 'AG022', experience: '3.8년차', commissionMonth:'45개월', insuranceCareer: '3.8년', gender: '여',
+        name: '한수진', agentCode: 'AG051', experience: '3.8년차', commissionMonth:'45개월', insuranceCareer: '3.8년', gender: '여',
         currentMonth: { premium: 0, contracts: 0, rank: null },
         previousMonth: { premium: 1, contracts: 1, rank: 22 },
         threeMonthAverage: { premium: 1, contracts: 1 },
@@ -1155,14 +1155,14 @@ const Branch360Dashboard = () => {
 
       // 28-31위: 전월 가동→미가동 전환 (당월 무실적)
       {
-        name: '이예진', agentCode: 'AG028', experience: '7.9년차', commissionMonth:'94개월', insuranceCareer: '7.9년', gender: '여',
+        name: '이수현', agentCode: 'AG052', experience: '7.9년차', commissionMonth:'94개월', insuranceCareer: '7.9년', gender: '여',
         currentMonth: { premium: 0, contracts: 0, rank: null },
         previousMonth: { premium: 30, contracts: 1, rank: 28 },
         threeMonthAverage: { premium: 10, contracts: 0 },
         productMix: { health: 60, life: 40 }, isActive: false
       },
       {
-        name: '박시원', agentCode: 'AG029', experience: '3.4년차', commissionMonth:'41개월', insuranceCareer: '3.4년', gender: '여',
+        name: '박시원', agentCode: 'AG053', experience: '3.4년차', commissionMonth:'41개월', insuranceCareer: '3.4년', gender: '여',
         currentMonth: { premium: 0, contracts: 0, rank: null },
         previousMonth: { premium: 20, contracts: 1, rank: 29 },
         threeMonthAverage: { premium: 7, contracts: 0 },
@@ -1236,8 +1236,10 @@ const Branch360Dashboard = () => {
     // 지점 APE를 백만원 단위로 변환
     const branchAPEInMillions = branchPerformanceData.currentMonthAPE / 1000000;
 
-    // 스케일 팩터 계산
-    const scaleFactor = activeAgentsBasePremiumSum > 0 ? branchAPEInMillions / activeAgentsBasePremiumSum : 1;
+    // 스케일 팩터 계산 (최소값 1 보장)
+    const scaleFactor = activeAgentsBasePremiumSum > 0 && branchAPEInMillions > 0
+      ? branchAPEInMillions / activeAgentsBasePremiumSum
+      : 1;
 
     // 모든 설계사의 실적에 스케일 팩터 적용
     const scaledData = baseData.map(agent => ({
@@ -2187,7 +2189,7 @@ const Branch360Dashboard = () => {
                       : currentData.map(d => d.designCount);
                     const average = values.reduce((sum, val) => sum + val, 0) / values.length;
                     const maxValue = Math.max(...values);
-                    const avgY = 100 - ((average / maxValue) * 90) - 5;
+                    const avgY = 100 - ((average / maxValue) * 70) - 10;
 
                     return (
                       <g>
@@ -2223,7 +2225,7 @@ const Branch360Dashboard = () => {
                 )}
                 
                 {/* 막대 그래프 */}
-                <div className="flex items-end justify-between h-full relative" style={{paddingTop: '20px'}}>
+                <div className="flex items-end justify-center gap-1 h-full relative" style={{paddingTop: '50px', paddingBottom: '10px'}}>
                   {dailyPerformance.filter(d => !d.isWeekend).map((data, i) => {
                     const currentValue = dailyMetric === performanceType ? data.apeAmount :
                                        dailyMetric === '청약' ? data.contractCount : data.designCount;
@@ -2234,10 +2236,10 @@ const Branch360Dashboard = () => {
                       : Math.max(...dailyPerformance.filter(d => !d.isWeekend).map(d => d.designCount));
 
                     // 막대 높이 계산 (평일만 표시됨)
-                    const barHeight = currentValue === 0 ? 2 : (currentValue / maxValue) * 160;
+                    const barHeight = currentValue === 0 ? 2 : (currentValue / maxValue) * 110;
                     const healthHeight = (barHeight * data.healthRatio) / 100;
                     const lifeHeight = (barHeight * data.lifeRatio) / 100;
-                    
+
                     return (
                       <div key={data.day} className="flex flex-col items-center relative" style={{width: '20px'}}>
                         {/* 막대 그래프 - 건강(파란색) + 종신(초록색) */}
@@ -2259,7 +2261,7 @@ const Branch360Dashboard = () => {
                         </div>
 
                         {/* 영업일자 */}
-                        <div className="text-xs text-gray-600 mt-2" style={{fontSize: '10px'}}>{i + 1}</div>
+                        <div className="text-xs text-gray-600 mt-3" style={{fontSize: '10px'}}>{i + 1}</div>
 
                         {/* 툴팁 */}
                         {hoveredDayData && hoveredDayData.idx === i && (
@@ -2383,7 +2385,7 @@ const Branch360Dashboard = () => {
                       ? dataExcludingCurrent.reduce((sum, val) => sum + val, 0) / dataExcludingCurrent.length
                       : 0;
                     const maxValue = Math.max(...allData.slice(0, currentMonth));
-                    const avgY = 100 - ((average / maxValue) * 90) - 5;
+                    const avgY = 100 - ((average / maxValue) * 70) - 10;
 
                     return (
                       <g>
@@ -2419,29 +2421,29 @@ const Branch360Dashboard = () => {
                 )}
                 
                 {/* 막대 그래프 */}
-                <div className="flex items-end justify-center gap-1 h-full relative" style={{paddingTop: '20px'}}>
+                <div className="flex items-end justify-center gap-2 h-full relative" style={{paddingTop: '50px', paddingBottom: '10px'}}>
                   {(() => {
                     // 고정된 데이터 사용 (연도와 지표별로)
                     const selectedPeriodYear = selectedPeriod.split('-')[0];
                     const monthCount = getCurrentMonth();
                     const currentMonthData = [];
-                    
+
                     // 연도별 고정 데이터
                     const yearData = {
                       '2023': [1200, 1150, 1300, 1100, 1250, 1180, 1350, 1200, 1100, 1050, 950, 800],
                       '2024': [900, 1000, 1100, 950, 1150, 1050, 1200, 1100, 1000, 850, 750, 650],
                       '2025': [850, 920, 875, 1050, 980, 1120, 1030, 1180, 1000]
                     };
-                    
+
                     const contractData = {
                       '2023': [180, 175, 190, 165, 185, 170, 195, 180, 165, 155, 145, 130],
                       '2024': [160, 170, 180, 155, 175, 165, 185, 170, 155, 145, 135, 125],
                       '2025': [155, 168, 152, 179, 164, 186, 171, 195, 178]
                     };
-                    
+
                     const apeValues = yearData[selectedPeriodYear as keyof typeof yearData];
                     const contractValues = contractData[selectedPeriodYear as keyof typeof contractData];
-                    
+
                     for (let i = 0; i < monthCount; i++) {
                       currentMonthData.push({
                         month: `${i+1}월`,
@@ -2454,25 +2456,25 @@ const Branch360Dashboard = () => {
                         lifeContracts: Math.floor(contractValues[i] * 0.35)
                       });
                     }
-                    
+
                     const maxValue = selectedMetric === performanceType
                       ? Math.max(...currentMonthData.map(d => d.ape))
                       : Math.max(...currentMonthData.map(d => d.contracts));
-                    
+
                     return currentMonthData.map((data, idx) => {
                       const value = selectedMetric === performanceType ? data.ape : data.contracts;
-                      const barHeight = Math.min((value / maxValue) * 160, 160);
+                      const barHeight = Math.min((value / maxValue) * 110, 110);
                       const healthHeight = (barHeight * 65) / 100;
                       const lifeHeight = barHeight - healthHeight;
-                      
-                      
+
+
                       return (
                         <div key={idx} className="flex flex-col items-center relative" style={{
-                          height: '160px', 
+                          height: '140px',
                           width: monthCount <= 9 ? '35px' : '25px'
                         }}>
                           {/* 차트 영역 */}
-                          <div className="relative flex justify-center" style={{height: '120px', width: '100%'}}>
+                          <div className="relative flex justify-center" style={{height: '110px', width: '100%'}}>
                             {/* 막대 */}
                             <div
                               className="w-6 rounded-t hover:opacity-80 transition-opacity cursor-pointer absolute bottom-0 overflow-hidden"
@@ -2480,7 +2482,7 @@ const Branch360Dashboard = () => {
                               onMouseEnter={() => setHoveredMonthData({...data, idx, value})}
                             >
                               {/* 종신/정기 부분 (상단) */}
-                              <div 
+                              <div
                                 className="w-full bg-green-500"
                                 style={{height: `${lifeHeight}px`}}
                               />
@@ -2490,11 +2492,11 @@ const Branch360Dashboard = () => {
                                 style={{height: `${healthHeight}px`}}
                               />
                             </div>
-                            
+
                           </div>
-                          
+
                           {/* 월 라벨 - 숫자만 표시 */}
-                          <div className="text-xs text-gray-500 mt-2">
+                          <div className="text-xs text-gray-500 mt-3">
                             {idx + 1}
                           </div>
                           
@@ -2537,6 +2539,116 @@ const Branch360Dashboard = () => {
               </div>
             </div>
 
+            {/* 관리 활동 내역 */}
+            <div className="mb-4">
+              <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                </svg>
+                관리 활동 내역
+              </h2>
+            </div>
+
+            {/* 최근 관리 활동 */}
+            <div className="bg-white rounded-lg shadow-sm border p-4">
+              <h3 className="text-sm font-semibold text-gray-700 mb-4">최근 활동</h3>
+
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                {/* 교육 카드 */}
+                <div className={`border rounded-lg overflow-hidden transition-all ${
+                  selectedActivityType === '교육'
+                    ? 'border-blue-400 shadow-md'
+                    : 'border-blue-200 hover:border-blue-300'
+                }`}>
+                  <div
+                    className="flex items-center justify-between py-3 px-4 bg-blue-50 hover:bg-blue-100 transition-colors cursor-pointer"
+                    onClick={() => setSelectedActivityType('교육')}
+                  >
+                    <div className="flex items-center">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
+                      <span className="text-sm font-medium text-blue-700">교육</span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="text-sm font-bold text-blue-600 mr-2">9/8 (5일전)</span>
+                      <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* 방문 카드 */}
+                <div className={`border rounded-lg overflow-hidden transition-all ${
+                  selectedActivityType === '방문'
+                    ? 'border-green-400 shadow-md'
+                    : 'border-green-200 hover:border-green-300'
+                }`}>
+                  <div
+                    className="flex items-center justify-between py-3 px-4 bg-green-50 hover:bg-green-100 transition-colors cursor-pointer"
+                    onClick={() => setSelectedActivityType('방문')}
+                  >
+                    <div className="flex items-center">
+                      <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
+                      <span className="text-sm font-medium text-green-700">방문</span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="text-sm font-bold text-green-600 mr-2">6/25 (93일전)</span>
+                      <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              {/* 활동 목록 */}
+              <div className="mt-4">
+                {/* 선택된 활동 소제목 */}
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-xs text-gray-500">
+                    {selectedActivityType === '교육' ? '교육 상세 내역' :
+                     selectedActivityType === '방문' ? '방문 상세 내역' : '최근 활동 내역'}
+                  </span>
+                  <span className="text-xs text-gray-400">* 최대 30개까지 표시</span>
+                </div>
+
+                <div className="bg-white border border-gray-200 rounded-lg h-32 overflow-y-auto">
+                  {/* 헤더 */}
+                  <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-t-lg text-xs font-medium text-gray-700 border-b border-gray-200 sticky top-0">
+                    <div className="min-w-[35px] shrink-0">날짜</div>
+                    <div className="flex-1">활동 내용</div>
+                    <div className="min-w-[70px] shrink-0">담당</div>
+                  </div>
+
+                  {/* 활동 목록 - 선택에 따라 변경 */}
+                  <div className="divide-y divide-gray-100">
+                    {(() => {
+                      let activityList;
+                      if (selectedActivityType === '교육') {
+                        activityList = educationActivityList;
+                      } else if (selectedActivityType === '방문') {
+                        activityList = visitActivityList;
+                      } else {
+                        activityList = recentActivityList;
+                      }
+
+                      return activityList.map((activity, index) => (
+                        <div key={index} className="flex items-center gap-3 p-2 hover:bg-gray-50 transition-colors text-xs">
+                          <div className="min-w-[35px] shrink-0 text-gray-600 font-medium">
+                            {activity.date.split('-')[1]}/{activity.date.split('-')[2]}
+                          </div>
+                          <div className="flex-1 text-gray-800 truncate">{activity.content}</div>
+                          <div className="min-w-[70px] shrink-0 text-gray-600">{activity.manager}</div>
+                        </div>
+                      ));
+                    })()}
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
 
           {/* 가운데: 지점 특성 */}
@@ -2550,25 +2662,25 @@ const Branch360Dashboard = () => {
                 지점 특성 정보
               </h2>
 
-              <div className="bg-white rounded-lg shadow-sm border p-4 space-y-3">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">기본 정보</h3>
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div className="bg-white rounded-lg shadow-sm border p-6 space-y-4">
+                <h3 className="text-sm font-semibold text-gray-700 mb-4">기본 정보</h3>
+                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-center">
                     <MapPin className="w-4 h-4 text-gray-500 mr-2" />
                     <span className="text-sm text-gray-600">주소</span>
                   </div>
                   <span className="text-sm font-medium text-gray-900">{branchProfile.address}</span>
                 </div>
-                
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+
+                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-center">
                     <Phone className="w-4 h-4 text-gray-500 mr-2" />
                     <span className="text-sm text-gray-600">연락처</span>
                   </div>
                   <span className="text-sm font-medium text-gray-900">{branchProfile.phone}</span>
                 </div>
-                
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+
+                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-center">
                     <Calendar className="w-4 h-4 text-gray-500 mr-2" />
                     <span className="text-sm text-gray-600">개설일자</span>
@@ -2580,15 +2692,15 @@ const Branch360Dashboard = () => {
 
             {/* 고객 특성 */}
             <div>
-              <div className="bg-white rounded-lg shadow-sm border p-4">
-                <div className="flex items-center justify-between mb-4">
+              <div className="bg-white rounded-lg shadow-sm border p-6">
+                <div className="flex items-center justify-between mb-5">
                   <h3 className="text-sm font-semibold text-gray-700">고객 특성</h3>
                   <div className="text-xs text-gray-500">*직전 3개월 신계약 기준</div>
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-5">
                   {/* 연령대 */}
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600 mb-1">{metricsData['average'].customerAge}</div>
+                    <div className="text-3xl font-bold text-blue-600 mb-2">{metricsData['average'].customerAge}</div>
                     <div className="text-xs text-gray-500">평균 36.5세</div>
                   </div>
 
@@ -2634,16 +2746,16 @@ const Branch360Dashboard = () => {
             </div>
 
             {/* 계약 특성 (통합) */}
-            <div className="bg-white rounded-lg shadow-sm border p-4">
+            <div className="bg-white rounded-lg shadow-sm border p-6">
               {/* 헤더 */}
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-semibold text-gray-700">계약 특성</h3>
                 <p className="text-xs text-gray-500">*직전 3개월 신계약 기준</p>
               </div>
 
               {/* 📊 상품 구성 - 트리 구조 */}
-              <div className="mb-4">
-                <div className="flex items-center gap-2 mb-3">
+              <div className="mb-5">
+                <div className="flex items-center gap-2 mb-4">
                   <h4 className="text-xs font-semibold text-gray-700">🔍 상품군 필터</h4>
                   <span className="text-xs text-gray-500">(클릭하여 선택)</span>
                 </div>
@@ -2986,7 +3098,7 @@ const Branch360Dashboard = () => {
               </div>
 
               {/* 4. Top 3 상품 - 테이블 형태 */}
-              <div className="pt-4">
+              <div className="pt-5">
                 <div className="flex items-center justify-between mb-3">
                   <div className="text-xs font-medium text-gray-700">Top 3 상품</div>
                   <div className="text-xs text-gray-600">[단위: 천원]</div>
@@ -3026,10 +3138,8 @@ const Branch360Dashboard = () => {
                     {getTopProducts().map((product: any, idx: number) => (
                       <div
                         key={product.rank}
-                        className="grid gap-2 py-2 hover:bg-gray-50 rounded transition-colors cursor-pointer relative"
+                        className="grid gap-2 py-2 relative"
                         style={{gridTemplateColumns: '45px minmax(120px, 1fr) 100px 80px'}}
-                        onMouseEnter={() => setHoveredProduct({ ...product, idx: `top3-${idx}` })}
-                        onMouseLeave={() => setHoveredProduct(null)}
                       >
                         <div className="flex items-center justify-center">
                           <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
@@ -3053,128 +3163,8 @@ const Branch360Dashboard = () => {
                             productSortBy === 'count' ? 'text-blue-600 font-bold' : 'text-gray-900'
                           }`}>{product.count}</div>
                         </div>
-
-                        {/* 툴팁 */}
-                        {hoveredProduct && hoveredProduct.idx === `top3-${idx}` && (
-                          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-800 text-white text-xs rounded px-3 py-2 whitespace-nowrap z-30 mb-1">
-                            <div className="font-semibold mb-1">{product.name}</div>
-                            <div>{performanceType}: {product.amount}천원</div>
-                            <div>건수: {product.count}</div>
-                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
-                          </div>
-                        )}
                       </div>
                     ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 관리 활동 내역 */}
-            <div className="mb-4">
-              <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
-                </svg>
-                관리 활동 내역
-              </h2>
-            </div>
-
-            {/* 최근 관리 활동 */}
-            <div className="bg-white rounded-lg shadow-sm border p-4">
-              <h3 className="text-sm font-semibold text-gray-700 mb-4">최근 활동</h3>
-
-              <div className="grid grid-cols-2 gap-3 mb-4">
-                {/* 교육 카드 */}
-                <div className={`border rounded-lg overflow-hidden transition-all ${
-                  selectedActivityType === '교육'
-                    ? 'border-blue-400 shadow-md'
-                    : 'border-blue-200 hover:border-blue-300'
-                }`}>
-                  <div
-                    className="flex items-center justify-between py-3 px-4 bg-blue-50 hover:bg-blue-100 transition-colors cursor-pointer"
-                    onClick={() => setSelectedActivityType('교육')}
-                  >
-                    <div className="flex items-center">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
-                      <span className="text-sm font-medium text-blue-700">교육</span>
-                    </div>
-                    <div className="flex items-center">
-                      <span className="text-sm font-bold text-blue-600 mr-2">9/8 (5일전)</span>
-                      <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </div>
-                  </div>
-
-                </div>
-
-                {/* 방문 카드 */}
-                <div className={`border rounded-lg overflow-hidden transition-all ${
-                  selectedActivityType === '방문'
-                    ? 'border-green-400 shadow-md'
-                    : 'border-green-200 hover:border-green-300'
-                }`}>
-                  <div
-                    className="flex items-center justify-between py-3 px-4 bg-green-50 hover:bg-green-100 transition-colors cursor-pointer"
-                    onClick={() => setSelectedActivityType('방문')}
-                  >
-                    <div className="flex items-center">
-                      <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
-                      <span className="text-sm font-medium text-green-700">방문</span>
-                    </div>
-                    <div className="flex items-center">
-                      <span className="text-sm font-bold text-green-600 mr-2">6/25 (93일전)</span>
-                      <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </div>
-                  </div>
-
-                </div>
-              </div>
-
-              {/* 활동 목록 */}
-              <div className="mt-4">
-                {/* 선택된 활동 소제목 */}
-                <div className="mb-2 flex items-center justify-between">
-                  <span className="text-xs text-gray-500">
-                    {selectedActivityType === '교육' ? '교육 상세 내역' :
-                     selectedActivityType === '방문' ? '방문 상세 내역' : '최근 활동 내역'}
-                  </span>
-                  <span className="text-xs text-gray-400">* 최대 30개까지 표시</span>
-                </div>
-
-                <div className="bg-white border border-gray-200 rounded-lg h-32 overflow-y-auto">
-                  {/* 헤더 */}
-                  <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-t-lg text-xs font-medium text-gray-700 border-b border-gray-200 sticky top-0">
-                    <div className="min-w-[35px] shrink-0">날짜</div>
-                    <div className="flex-1">활동 내용</div>
-                    <div className="min-w-[70px] shrink-0">담당</div>
-                  </div>
-
-                  {/* 활동 목록 - 선택에 따라 변경 */}
-                  <div className="divide-y divide-gray-100">
-                    {(() => {
-                      let activityList;
-                      if (selectedActivityType === '교육') {
-                        activityList = educationActivityList;
-                      } else if (selectedActivityType === '방문') {
-                        activityList = visitActivityList;
-                      } else {
-                        activityList = recentActivityList;
-                      }
-
-                      return activityList.map((activity, index) => (
-                        <div key={index} className="flex items-center gap-3 p-2 hover:bg-gray-50 transition-colors text-xs">
-                          <div className="min-w-[35px] shrink-0 text-gray-600 font-medium">
-                            {activity.date.split('-')[1]}/{activity.date.split('-')[2]}
-                          </div>
-                          <div className="flex-1 text-gray-800 truncate">{activity.content}</div>
-                          <div className="min-w-[70px] shrink-0 text-gray-600">{activity.manager}</div>
-                        </div>
-                      ));
-                    })()}
                   </div>
                 </div>
               </div>
@@ -3191,8 +3181,8 @@ const Branch360Dashboard = () => {
             </h2>
 
             {/* 전체 재적 설계사 */}
-            <div className="bg-white rounded-lg shadow-sm border p-4">
-              <div className="flex items-center justify-between mb-4">
+            <div className="bg-white rounded-lg shadow-sm border p-6">
+              <div className="flex items-center justify-between mb-5">
                 <h3 className="text-sm font-semibold text-gray-700">재적 설계사</h3>
                 <button
                   onClick={() => handleShowAllAgents()}
@@ -3201,24 +3191,24 @@ const Branch360Dashboard = () => {
                   전체보기 {'>'}
                 </button>
               </div>
-              
-              <div className="text-center mb-4">
-                <div className="text-3xl font-bold text-blue-600">{currentAgentStatus.total}<span className="text-base text-gray-500">명</span></div>
+
+              <div className="text-center mb-5">
+                <div className="text-4xl font-bold text-blue-600">{currentAgentStatus.total}<span className="text-lg text-gray-500">명</span></div>
               </div>
-              
-              <div className="grid grid-cols-2 gap-3 text-sm mb-4">
-                <div className="text-center p-3 bg-green-50 rounded-lg">
+
+              <div className="grid grid-cols-2 gap-4 text-sm mb-5">
+                <div className="text-center p-4 bg-green-50 rounded-lg">
                   <div className="text-lg font-bold text-green-600">+{currentAgentStatus.newThisMonth}</div>
                   <div className="text-xs text-gray-600">당월 신규</div>
                 </div>
-                <div className="text-center p-3 bg-red-50 rounded-lg">
+                <div className="text-center p-4 bg-red-50 rounded-lg">
                   <div className="text-lg font-bold text-red-600">-{currentAgentStatus.resignedThisMonth}</div>
                   <div className="text-xs text-gray-600">당월 해촉</div>
                 </div>
               </div>
-              
-              <div className="border-t pt-4 space-y-3">
-                <div className="p-3 bg-gray-50 rounded-lg">
+
+              <div className="border-t pt-5 space-y-4">
+                <div className="p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center">
                       <User className="w-4 h-4 text-gray-500 mr-2" />
@@ -3257,7 +3247,7 @@ const Branch360Dashboard = () => {
                   </div>
                 </div>
 
-                <div className="p-3 bg-gray-50 rounded-lg">
+                <div className="p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <Briefcase className="w-4 h-4 text-gray-500 mr-2" />
@@ -3271,27 +3261,27 @@ const Branch360Dashboard = () => {
             </div>
 
             {/* 가동 설계사 현황 */}
-            <div className="bg-white rounded-lg shadow-sm border p-4">
-              <h3 className="text-sm font-semibold text-gray-700 mb-4">가동 설계사</h3>
+            <div className="bg-white rounded-lg shadow-sm border p-6">
+              <h3 className="text-sm font-semibold text-gray-700 mb-5">가동 설계사</h3>
 
               {/* 간략 현황 */}
-              <div className="flex items-center gap-4 mb-4 pb-4 border-b border-gray-200">
+              <div className="flex items-center gap-4 mb-5 pb-5 border-b border-gray-200">
                 {/* 활동 */}
-                <div className="flex-1 text-center p-4 bg-gray-100 rounded-lg">
-                  <div className="text-xs text-gray-600 mb-1">당월 활동</div>
+                <div className="flex-1 text-center p-5 bg-gray-100 rounded-lg">
+                  <div className="text-xs text-gray-600 mb-2">당월 활동</div>
                   <div className="text-2xl font-bold text-gray-700">38<span className="text-sm text-gray-500 ml-1">명</span></div>
                 </div>
 
                 {/* 화살표 */}
-                <div className="pt-5">
+                <div className="pt-6">
                   <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
                 </div>
 
                 {/* 가동 */}
-                <div className="flex-1 text-center p-4 bg-indigo-50 rounded-lg border-2 border-indigo-200">
-                  <div className="text-xs text-gray-600 mb-1">당월 가동</div>
+                <div className="flex-1 text-center p-5 bg-indigo-50 rounded-lg border-2 border-indigo-200">
+                  <div className="text-xs text-gray-600 mb-2">당월 가동</div>
                   <div className="text-2xl font-bold text-indigo-600">{currentAgentStatus.active}<span className="text-sm text-gray-500 ml-1">명</span></div>
                 </div>
 
@@ -3381,17 +3371,17 @@ const Branch360Dashboard = () => {
 
                 if (selectedContinuousTab === 'all') {
                   // 전체: 가동 설계사 전체
-                  filteredActiveAgents = allData.filter(agent => agent.currentMonth.premium > 0);
+                  filteredActiveAgents = allData.filter(agent => agent.isActive);
                 } else {
                   const categoryNames = getAgentList(selectedContinuousTab);
-                  filteredActiveAgents = allData.filter(agent => categoryNames.includes(agent.name) && agent.currentMonth.premium > 0);
+                  filteredActiveAgents = allData.filter(agent => categoryNames.includes(agent.name) && agent.isActive);
                 }
 
                 // 가동 설계사 정렬
                 const activeAgents = sortTableData(filteredActiveAgents, activeTableSortBy, activeTableSortOrder);
 
                 // 미가동 설계사 (전체에서 가동이 아닌 설계사)
-                const inactiveAgents = allData.filter(agent => agent.currentMonth.premium === 0);
+                const inactiveAgents = allData.filter(agent => !agent.isActive);
 
                 return (
                   <div className="bg-white rounded-lg border border-gray-200">

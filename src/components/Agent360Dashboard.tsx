@@ -2327,7 +2327,7 @@ const Agent360Dashboard = () => {
               {/* 테이블 형태 */}
               <div className="overflow-hidden">
                 {/* 헤더 */}
-                <div className="grid gap-3 pb-3 border-b border-gray-200 mb-2" style={{gridTemplateColumns: '50px 1fr 100px 100px 110px'}}>
+                <div className="grid gap-3 pb-3 border-b border-gray-200 mb-2" style={{gridTemplateColumns: '35px 1fr 75px 75px 85px'}}>
                   <div className="text-xs font-semibold text-gray-700 text-center">순위</div>
                   <div className="text-xs font-semibold text-gray-700">지점명</div>
                   <button
@@ -2392,7 +2392,7 @@ const Agent360Dashboard = () => {
                     <div
                       key={idx}
                       className="grid gap-3 py-2.5 px-2 hover:bg-blue-50 rounded cursor-pointer transition-all"
-                      style={{gridTemplateColumns: '50px 1fr 100px 100px 110px'}}
+                      style={{gridTemplateColumns: '35px 1fr 75px 75px 85px'}}
                       onClick={() => handleBranchClick(branch.agency, branch.branch)}
                     >
                       <div className="flex items-center justify-center">
