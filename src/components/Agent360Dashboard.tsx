@@ -69,13 +69,13 @@ const Agent360Dashboard = () => {
     },
     // 모바일 청약률
     mobileContract: {
-      current: 76.5, // 현재 모바일 청약률 (%) - 251/328
-      count: 251, // 모바일 청약 건수
-      total: 328, // 전체 청약 건수
+      current: 45.8, // 현재 모바일 청약률 (%) - 103/225
+      count: 103, // 모바일 청약 건수
+      total: 225, // 전체 청약 건수
       hqAvg: 42.6, // 영업본부 평균 (%)
       nationalAvg: 38.9, // 전국 평균 (%)
-      vsLastMonth: -12, // 전월 동기 대비 증감 (건) - 모바일 건수 감소
-      vsLastMonthPercent: 3.2 // 전월 동기 대비 증감 (%p) - 비율은 상승
+      vsLastMonth: -3, // 전월 동기 대비 증감 (건) - 모바일 건수 감소
+      vsLastMonthPercent: -1.4 // 전월 동기 대비 증감 (%p) - 비율 감소
     }
   };
 
@@ -217,10 +217,6 @@ const Agent360Dashboard = () => {
       ]
     }
   };
-
-
-  // 월별 데이터만 사용 (헤더와 연동 가능하도록)
-  const kpiData = monthlyTrend[2025][selectedKPI as keyof typeof monthlyTrend[2025]] || [];
 
   // 방문 추천 지점 (간단하고 직관적)
   // 메인 대시보드용 알림 시스템 (Branch360Dashboard와 동일한 로직)
@@ -424,6 +420,10 @@ const Agent360Dashboard = () => {
 
   // 현재 날짜 기준으로 실시간 데이터인지 판단
   const isCurrentMonth = appliedMonth === '2025-09';
+
+  // 월별 데이터만 사용 (헤더와 연동 가능하도록)
+  const yearFromPeriod = parseInt(appliedMonth.split('-')[0]) as 2023 | 2024 | 2025;
+  const kpiData = monthlyTrend[yearFromPeriod]?.[selectedKPI as keyof typeof monthlyTrend[2023]] || [];
 
   // 조회 버튼 클릭 핸들러
   const handleSearchClick = () => {
@@ -1424,86 +1424,6 @@ const Agent360Dashboard = () => {
                 </div>
               </div>
             </div>
-
-            {/* 당월 방문/교육 현황 */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold text-gray-900 flex items-center">
-                  <Users className="w-5 h-5 text-blue-500 mr-2" />
-                  당월 방문/교육 현황
-                </h2>
-              </div>
-
-              {/* 방문/교육 토글 및 카운트 */}
-              <div className="bg-white rounded-lg shadow-sm border p-4">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex gap-1">
-                    {(['방문', '교육'] as const).map(type => (
-                      <button
-                        key={type}
-                        onClick={() => {
-                          setVisitEducationType(type);
-                          setShowVisitEducationList(false);
-                        }}
-                        className={`px-4 py-2 rounded-lg text-sm  transition-all ${
-                          visitEducationType === type
-                            ? 'bg-blue-50 text-blue-600 border border-blue-200'
-                            : 'text-black hover:bg-gray-50'
-                        }`}
-                      >
-                        {type}
-                      </button>
-                    ))}
-                  </div>
-
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-blue-600">
-                      {visitEducationData[visitEducationType].count}건
-                    </div>
-                    <div className="text-xs text-black">이번 달 총 {visitEducationType}</div>
-                  </div>
-                </div>
-
-                {/* 세부 리스트 - 항상 펼쳐진 상태 */}
-                <div className="border-t pt-3 mt-3">
-                  <div className="text-xs text-black mb-3">
-                    {visitEducationType} 상세 내역
-                  </div>
-
-                  <div className="max-h-48 overflow-y-auto">
-                    {/* 컬럼 헤더 */}
-                    <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg mb-2 text-xs  text-gray-700 border-b border-gray-200">
-                      <div className="min-w-[35px] shrink-0">날짜</div>
-                      <div className="min-w-[120px] shrink-0">대리점</div>
-                      <div className="min-w-[120px] shrink-0">지점</div>
-                      <div className="flex-1 min-w-0">활동 내용</div>
-                    </div>
-
-                    <div className="space-y-1">
-                      {visitEducationData[visitEducationType].data.map((item, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 text-xs border-l-2 border-transparent hover:border-blue-200 transition-all"
-                        >
-                          <div className="text-black min-w-[35px] shrink-0 font-mono">
-                            {item.date}
-                          </div>
-                          <div className="min-w-[120px] shrink-0 truncate text-gray-900">
-                            {item.agency}
-                          </div>
-                          <div className="min-w-[120px] shrink-0 truncate text-gray-700">
-                            {item.branch}
-                          </div>
-                          <div className="text-black flex-1 min-w-0 truncate">
-                            {item.detail}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* ② 관리 지점 실적 현황 */}
@@ -1926,6 +1846,86 @@ const Agent360Dashboard = () => {
                         </div>
                       </div>
                     ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 당월 방문/교육 현황 */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-bold text-gray-900 flex items-center">
+                  <Users className="w-5 h-5 text-blue-500 mr-2" />
+                  당월 방문/교육 현황
+                </h2>
+              </div>
+
+              {/* 방문/교육 토글 및 카운트 */}
+              <div className="bg-white rounded-lg shadow-sm border p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex gap-1">
+                    {(['방문', '교육'] as const).map(type => (
+                      <button
+                        key={type}
+                        onClick={() => {
+                          setVisitEducationType(type);
+                          setShowVisitEducationList(false);
+                        }}
+                        className={`px-4 py-2 rounded-lg text-sm  transition-all ${
+                          visitEducationType === type
+                            ? 'bg-blue-50 text-blue-600 border border-blue-200'
+                            : 'text-black hover:bg-gray-50'
+                        }`}
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-blue-600">
+                      {visitEducationData[visitEducationType].count}건
+                    </div>
+                    <div className="text-xs text-black">이번 달 총 {visitEducationType}</div>
+                  </div>
+                </div>
+
+                {/* 세부 리스트 - 항상 펼쳐진 상태 */}
+                <div className="border-t pt-3 mt-3">
+                  <div className="text-xs text-black mb-3">
+                    {visitEducationType} 상세 내역
+                  </div>
+
+                  <div className="max-h-48 overflow-y-auto">
+                    {/* 컬럼 헤더 */}
+                    <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg mb-2 text-xs  text-gray-700 border-b border-gray-200">
+                      <div className="min-w-[35px] shrink-0">날짜</div>
+                      <div className="min-w-[120px] shrink-0">대리점</div>
+                      <div className="min-w-[120px] shrink-0">지점</div>
+                      <div className="flex-1 min-w-0">활동 내용</div>
+                    </div>
+
+                    <div className="space-y-1">
+                      {visitEducationData[visitEducationType].data.map((item, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 text-xs border-l-2 border-transparent hover:border-blue-200 transition-all"
+                        >
+                          <div className="text-black min-w-[35px] shrink-0 font-mono">
+                            {item.date}
+                          </div>
+                          <div className="min-w-[120px] shrink-0 truncate text-gray-900">
+                            {item.agency}
+                          </div>
+                          <div className="min-w-[120px] shrink-0 truncate text-gray-700">
+                            {item.branch}
+                          </div>
+                          <div className="text-black flex-1 min-w-0 truncate">
+                            {item.detail}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
