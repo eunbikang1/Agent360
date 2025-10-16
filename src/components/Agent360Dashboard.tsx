@@ -57,15 +57,15 @@ const Agent360Dashboard = () => {
     },
     // 설계사 가동률
     designerActivity: {
-      current: 67.8, // 현재 가동률 (%) - 251/370
-      active: 251, // 실제 가동 설계사 수
-      total: 3787, // 전체 담당 설계사 수
-      hqAvg: 7.2, // 영업본부 평균 (%)
-      nationalAvg: 8.1, // 전국 평균 (%)
-      vsLastMonth: -15, // 전월 동기 대비 증감 (명) - 가동 설계사 감소
-      vsLastMonthPercent: -0.4, // 전월 동기 대비 증감 (%p) - 가동률 감소
-      plan: 370, // 가동 계획
-      planAchievement: 67.8 // 가동 계획 대비 달성률 (%) - 251/370
+      current: 14.2, // 현재 가동률 (%) - 284/2000
+      active: 284, // 실제 가동 설계사 수
+      total: 2000, // 전체 재적 설계사 수
+      hqAvg: 15.8, // 영업본부 평균 (%)
+      nationalAvg: 16.5, // 전국 평균 (%)
+      vsLastMonth: -12, // 전월 동기 대비 증감 (명) - 가동 설계사 감소
+      vsLastMonthPercent: -0.6, // 전월 동기 대비 증감 (%p) - 가동률 감소
+      plan: 2000, // 재적 설계사 (total과 동일)
+      planAchievement: 14.2 // 가동률 (%) - 284/2000
     },
     // 모바일 청약률
     mobileContract: {
@@ -109,18 +109,18 @@ const Agent360Dashboard = () => {
         { month: '12월', value: 98.2, hqAvg: 102.3, actual: 491, target: 500 }
       ],
       activity_plan: [
-        { month: '1월', value: 74.5, hqAvg: 77.2, active: 372, target: 500 },
-        { month: '2월', value: 78.2, hqAvg: 75.8, active: 391, target: 500 },
-        { month: '3월', value: 76.7, hqAvg: 79.2, active: 384, target: 500 },
-        { month: '4월', value: 79.2, hqAvg: 76.5, active: 396, target: 500 },
-        { month: '5월', value: 75.8, hqAvg: 78.3, active: 379, target: 500 },
-        { month: '6월', value: 82.6, hqAvg: 78.2, active: 413, target: 500 },
-        { month: '7월', value: 77.3, hqAvg: 80.1, active: 387, target: 500 },
-        { month: '8월', value: 80.2, hqAvg: 77.5, active: 401, target: 500 },
-        { month: '9월', value: 73.8, hqAvg: 76.3, active: 369, target: 500 },
-        { month: '10월', value: 76.5, hqAvg: 79.8, active: 383, target: 500 },
-        { month: '11월', value: 79.2, hqAvg: 76.5, active: 396, target: 500 },
-        { month: '12월', value: 81.3, hqAvg: 78.3, active: 407, target: 500 }
+        { month: '1월', value: 14.5, hqAvg: 15.2, active: 290, total: 2000 },
+        { month: '2월', value: 16.2, hqAvg: 14.8, active: 324, total: 2000 },
+        { month: '3월', value: 15.7, hqAvg: 16.2, active: 314, total: 2000 },
+        { month: '4월', value: 17.2, hqAvg: 15.5, active: 344, total: 2000 },
+        { month: '5월', value: 14.8, hqAvg: 16.3, active: 296, total: 2000 },
+        { month: '6월', value: 18.6, hqAvg: 16.2, active: 372, total: 2000 },
+        { month: '7월', value: 15.3, hqAvg: 17.1, active: 306, total: 2000 },
+        { month: '8월', value: 17.2, hqAvg: 15.5, active: 344, total: 2000 },
+        { month: '9월', value: 13.8, hqAvg: 15.3, active: 276, total: 2000 },
+        { month: '10월', value: 15.5, hqAvg: 16.8, active: 310, total: 2000 },
+        { month: '11월', value: 16.2, hqAvg: 14.5, active: 324, total: 2000 },
+        { month: '12월', value: 18.3, hqAvg: 16.3, active: 366, total: 2000 }
       ],
       mobile_contract: [
         { month: '1월', value: 38.5, hqAvg: 36.2, count: 85, total: 221 },
@@ -153,18 +153,18 @@ const Agent360Dashboard = () => {
         { month: '12월', value: 99.2, hqAvg: 101.3, actual: 496, target: 500 }
       ],
       activity_plan: [
-        { month: '1월', value: 76.5, hqAvg: 79.2, active: 383, target: 500 },
-        { month: '2월', value: 79.2, hqAvg: 76.8, active: 396, target: 500 },
-        { month: '3월', value: 73.7, hqAvg: 76.2, active: 369, target: 500 },
-        { month: '4월', value: 78.2, hqAvg: 80.5, active: 391, target: 500 },
-        { month: '5월', value: 81.8, hqAvg: 78.3, active: 409, target: 500 },
-        { month: '6월', value: 74.6, hqAvg: 77.2, active: 373, target: 500 },
-        { month: '7월', value: 77.3, hqAvg: 79.1, active: 387, target: 500 },
-        { month: '8월', value: 80.2, hqAvg: 78.5, active: 401, target: 500 },
-        { month: '9월', value: 75.8, hqAvg: 78.3, active: 379, target: 500 },
-        { month: '10월', value: 78.5, hqAvg: 76.8, active: 393, target: 500 },
-        { month: '11월', value: 72.2, hqAvg: 75.5, active: 361, target: 500 },
-        { month: '12월', value: 79.3, hqAvg: 77.5, active: 397, target: 500 }
+        { month: '1월', value: 15.5, hqAvg: 16.2, active: 310, total: 2000 },
+        { month: '2월', value: 17.2, hqAvg: 14.8, active: 344, total: 2000 },
+        { month: '3월', value: 13.7, hqAvg: 15.2, active: 274, total: 2000 },
+        { month: '4월', value: 16.2, hqAvg: 17.5, active: 324, total: 2000 },
+        { month: '5월', value: 18.8, hqAvg: 16.3, active: 376, total: 2000 },
+        { month: '6월', value: 14.6, hqAvg: 15.2, active: 292, total: 2000 },
+        { month: '7월', value: 15.3, hqAvg: 16.1, active: 306, total: 2000 },
+        { month: '8월', value: 17.2, hqAvg: 16.5, active: 344, total: 2000 },
+        { month: '9월', value: 14.8, hqAvg: 16.3, active: 296, total: 2000 },
+        { month: '10월', value: 16.5, hqAvg: 14.8, active: 330, total: 2000 },
+        { month: '11월', value: 12.2, hqAvg: 14.5, active: 244, total: 2000 },
+        { month: '12월', value: 17.3, hqAvg: 15.5, active: 346, total: 2000 }
       ],
       mobile_contract: [
         { month: '1월', value: 40.5, hqAvg: 38.2, count: 89, total: 220 },
@@ -194,15 +194,15 @@ const Agent360Dashboard = () => {
         { month: '9월', value: 62.0, hqAvg: 59.4, actual: 310, target: 500 }
       ],
       activity_plan: [
-        { month: '1월', value: 76.5, hqAvg: 79.2, active: 383, target: 500 },
-        { month: '2월', value: 72.2, hqAvg: 75.8, active: 361, target: 500 },
-        { month: '3월', value: 79.7, hqAvg: 77.2, active: 399, target: 500 },
-        { month: '4월', value: 73.2, hqAvg: 76.5, active: 366, target: 500 },
-        { month: '5월', value: 77.8, hqAvg: 80.3, active: 389, target: 500 },
-        { month: '6월', value: 74.6, hqAvg: 77.2, active: 373, target: 500 },
-        { month: '7월', value: 81.3, hqAvg: 78.1, active: 407, target: 500 },
-        { month: '8월', value: 79.2, hqAvg: 81.5, active: 396, target: 500 },
-        { month: '9월', value: 75.2, hqAvg: 77.8, active: 456, target: 607 }
+        { month: '1월', value: 15.5, hqAvg: 16.2, active: 310, total: 2000 },
+        { month: '2월', value: 12.2, hqAvg: 14.8, active: 244, total: 2000 },
+        { month: '3월', value: 17.7, hqAvg: 15.2, active: 354, total: 2000 },
+        { month: '4월', value: 13.2, hqAvg: 15.5, active: 264, total: 2000 },
+        { month: '5월', value: 16.8, hqAvg: 17.3, active: 336, total: 2000 },
+        { month: '6월', value: 14.6, hqAvg: 15.2, active: 292, total: 2000 },
+        { month: '7월', value: 18.3, hqAvg: 16.1, active: 366, total: 2000 },
+        { month: '8월', value: 17.2, hqAvg: 18.5, active: 344, total: 2000 },
+        { month: '9월', value: 14.2, hqAvg: 15.8, active: 284, total: 2000 }
       ],
       mobile_contract: [
         { month: '1월', value: 42.5, hqAvg: 40.2, count: 93, total: 219 },
@@ -1277,11 +1277,11 @@ const Agent360Dashboard = () => {
                 <h4 className="text-sm font-semibold text-gray-700 mb-3">설계사 가동률</h4>
                 <div className="text-center mb-3">
                   <div className="text-2xl font-bold text-blue-600">{myKPI.designerActivity.current.toFixed(1)}%</div>
-                  <div className="text-xs text-black">({myKPI.designerActivity.active}/{myKPI.designerActivity.plan}명)</div>
+                  <div className="text-xs text-black">(가동 {myKPI.designerActivity.active}/재적 {myKPI.designerActivity.total}명)</div>
                 </div>
                 <div className="text-center">
                   <span className="text-xs text-black">전월 동기 대비 </span>
-                  <span className="text-sm  text-red-600">▼ 3명</span>
+                  <span className="text-sm  text-red-600">▼ {Math.abs(myKPI.designerActivity.vsLastMonth)}명</span>
                 </div>
               </div>
 
@@ -1387,9 +1387,9 @@ const Agent360Dashboard = () => {
                             ) : selectedKPI === 'activity_plan' ? (
                               <div>
                                 <div>{data.month}</div>
-                                <div>가동 Plan: {data.target}명</div>
-                                <div>Actual: {data.active}명</div>
-                                <div>{data.value.toFixed(1)}% 달성</div>
+                                <div>재적 설계사: {data.total}명</div>
+                                <div>가동 설계사: {data.active}명</div>
+                                <div>{data.value.toFixed(1)}%</div>
                                 <div className="text-yellow-300">전체평균 {data.hqAvg}%</div>
                               </div>
                             ) : (
@@ -1420,6 +1420,86 @@ const Agent360Dashboard = () => {
                   <div className="flex items-center">
                     <div className="w-6 h-0.5 bg-yellow-500 border-t-2 border-yellow-500 border-dashed mr-1"></div>
                     <span>전체평균</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 당월 방문/교육 현황 */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-bold text-gray-900 flex items-center">
+                  <Users className="w-5 h-5 text-blue-500 mr-2" />
+                  당월 방문/교육 현황
+                </h2>
+              </div>
+
+              {/* 방문/교육 토글 및 카운트 */}
+              <div className="bg-white rounded-lg shadow-sm border p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex gap-1">
+                    {(['방문', '교육'] as const).map(type => (
+                      <button
+                        key={type}
+                        onClick={() => {
+                          setVisitEducationType(type);
+                          setShowVisitEducationList(false);
+                        }}
+                        className={`px-4 py-2 rounded-lg text-sm  transition-all ${
+                          visitEducationType === type
+                            ? 'bg-blue-50 text-blue-600 border border-blue-200'
+                            : 'text-black hover:bg-gray-50'
+                        }`}
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-blue-600">
+                      {visitEducationData[visitEducationType].count}건
+                    </div>
+                    <div className="text-xs text-black">이번 달 총 {visitEducationType}</div>
+                  </div>
+                </div>
+
+                {/* 세부 리스트 - 항상 펼쳐진 상태 */}
+                <div className="border-t pt-3 mt-3">
+                  <div className="text-xs text-black mb-3">
+                    {visitEducationType} 상세 내역
+                  </div>
+
+                  <div className="max-h-48 overflow-y-auto">
+                    {/* 컬럼 헤더 */}
+                    <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg mb-2 text-xs  text-gray-700 border-b border-gray-200">
+                      <div className="min-w-[35px] shrink-0">날짜</div>
+                      <div className="min-w-[120px] shrink-0">대리점</div>
+                      <div className="min-w-[120px] shrink-0">지점</div>
+                      <div className="flex-1 min-w-0">활동 내용</div>
+                    </div>
+
+                    <div className="space-y-1">
+                      {visitEducationData[visitEducationType].data.map((item, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 text-xs border-l-2 border-transparent hover:border-blue-200 transition-all"
+                        >
+                          <div className="text-black min-w-[35px] shrink-0 font-mono">
+                            {item.date}
+                          </div>
+                          <div className="min-w-[120px] shrink-0 truncate text-gray-900">
+                            {item.agency}
+                          </div>
+                          <div className="min-w-[120px] shrink-0 truncate text-gray-700">
+                            {item.branch}
+                          </div>
+                          <div className="text-black flex-1 min-w-0 truncate">
+                            {item.detail}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1846,85 +1926,6 @@ const Agent360Dashboard = () => {
                         </div>
                       </div>
                     ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-            {/* 당월 방문/교육 현황 */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold text-gray-900 flex items-center">
-                  <Users className="w-5 h-5 text-blue-500 mr-2" />
-                  당월 방문/교육 현황
-                </h2>
-              </div>
-
-              {/* 방문/교육 토글 및 카운트 */}
-              <div className="bg-white rounded-lg shadow-sm border p-4">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex gap-1">
-                    {(['방문', '교육'] as const).map(type => (
-                      <button
-                        key={type}
-                        onClick={() => {
-                          setVisitEducationType(type);
-                          setShowVisitEducationList(false);
-                        }}
-                        className={`px-4 py-2 rounded-lg text-sm  transition-all ${
-                          visitEducationType === type
-                            ? 'bg-blue-50 text-blue-600 border border-blue-200'
-                            : 'text-black hover:bg-gray-50'
-                        }`}
-                      >
-                        {type}
-                      </button>
-                    ))}
-                  </div>
-
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-blue-600">
-                      {visitEducationData[visitEducationType].count}건
-                    </div>
-                    <div className="text-xs text-black">이번 달 총 {visitEducationType}</div>
-                  </div>
-                </div>
-
-                {/* 세부 리스트 - 항상 펼쳐진 상태 */}
-                <div className="border-t pt-3 mt-3">
-                  <div className="text-xs text-black mb-3">
-                    {visitEducationType} 상세 내역
-                  </div>
-
-                  <div className="max-h-48 overflow-y-auto">
-                    {/* 컬럼 헤더 */}
-                    <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg mb-2 text-xs  text-gray-700 border-b border-gray-200">
-                      <div className="min-w-[35px] shrink-0">날짜</div>
-                      <div className="min-w-[120px] shrink-0">대리점</div>
-                      <div className="min-w-[120px] shrink-0">지점</div>
-                      <div className="flex-1 min-w-0">활동 내용</div>
-                    </div>
-
-                    <div className="space-y-1">
-                      {visitEducationData[visitEducationType].data.map((item, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 text-xs border-l-2 border-transparent hover:border-blue-200 transition-all"
-                        >
-                          <div className="text-black min-w-[35px] shrink-0 font-mono">
-                            {item.date}
-                          </div>
-                          <div className="min-w-[120px] shrink-0 truncate text-gray-900">
-                            {item.agency}
-                          </div>
-                          <div className="min-w-[120px] shrink-0 truncate text-gray-700">
-                            {item.branch}
-                          </div>
-                          <div className="text-black flex-1 min-w-0 truncate">
-                            {item.detail}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
                   </div>
                 </div>
               </div>

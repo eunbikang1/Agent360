@@ -2832,7 +2832,7 @@ const Branch360Dashboard = () => {
                         setSelectedProduct('건강');
                         setSelectedSubProduct('전체');
                       }}
-                      onMouseEnter={() => setHoveredProduct({ name: '건강', value: 65, amount: 580000, count: 35, idx: 'health-parent' })}
+                      onMouseEnter={() => setHoveredProduct({ name: '건강', value: 65, amount: 580000, count: 340, idx: 'health-parent' })}
                       onMouseLeave={() => setHoveredProduct(null)}
                     >
                       {selectedProduct === '건강' && selectedSubProduct === '전체' && (
@@ -2845,14 +2845,14 @@ const Branch360Dashboard = () => {
                         <div
                           className="h-3.5 rounded-full transition-all"
                           style={{
-                            width: productRatioCriteria === 'amount' ? '65%' : '64.8%',
+                            width: productRatioCriteria === 'amount' ? '65%' : '74%',
                             backgroundColor: selectedProduct === '건강' && selectedSubProduct === '전체' ? '#4f46e5' : '#3b82f6'
                           }}
                         />
                       </div>
                       <span className={`text-sm font-bold w-12 text-right flex-shrink-0 ${
                         selectedProduct === '건강' && selectedSubProduct === '전체' ? 'text-indigo-700' : 'text-gray-700'
-                      }`}>{productRatioCriteria === 'amount' ? '65%' : '64.8%'}</span>
+                      }`}>{productRatioCriteria === 'amount' ? '65%' : '74%'}</span>
 
                       {hoveredProduct && hoveredProduct.idx === 'health-parent' && (
                         <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-30 mb-1">
@@ -2867,14 +2867,14 @@ const Branch360Dashboard = () => {
                     {/* 건강 세부 상품 */}
                     <div className="ml-6 mt-1 space-y-1">
                       {[
-                        { name: '골담', value: 24, absoluteValue: 16, color: '#3b82f6', amount: 153000, count: 6 },
-                        { name: '새담', value: 20, absoluteValue: 13, color: '#60a5fa', amount: 127000, count: 5 },
-                        { name: '치매', value: 18, absoluteValue: 12, color: '#93c5fd', amount: 115000, count: 5 },
-                        { name: '다이나믹', value: 18, absoluteValue: 12, color: '#bfdbfe', amount: 115000, count: 5 },
-                        { name: '치아', value: 10, absoluteValue: 6.5, color: '#dbeafe', amount: 64000, count: 3 },
-                        { name: '암', value: 10, absoluteValue: 6.5, color: '#eff6ff', amount: 63000, count: 2 }
+                        { name: '치아', value: 17.2, absoluteValue: 11.2, countRatio: 43.7, color: '#dbeafe', amount: 100000, count: 200 },
+                        { name: '새담', value: 27.6, absoluteValue: 17.9, countRatio: 22.9, color: '#60a5fa', amount: 160000, count: 105 },
+                        { name: '골담', value: 25.9, absoluteValue: 16.8, countRatio: 5.2, color: '#3b82f6', amount: 150000, count: 24 },
+                        { name: '치매', value: 17.2, absoluteValue: 11.2, countRatio: 2.2, color: '#93c5fd', amount: 100000, count: 10 },
+                        { name: '암', value: 12.1, absoluteValue: 7.8, countRatio: 0.2, color: '#eff6ff', amount: 70000, count: 1 }
                       ].map((item, idx) => {
                         const isSelected = selectedProduct === '건강' && selectedSubProduct === item.name;
+                        const displayValue = productRatioCriteria === 'amount' ? item.absoluteValue : item.countRatio;
                         return (
                           <div
                             key={idx}
@@ -2897,12 +2897,12 @@ const Branch360Dashboard = () => {
                             <div className="flex-1 bg-gray-200 rounded-full h-2.5">
                               <div
                                 className="h-2.5 rounded-full transition-all"
-                                style={{ width: `${item.absoluteValue}%`, backgroundColor: isSelected ? '#4f46e5' : item.color }}
+                                style={{ width: `${displayValue}%`, backgroundColor: isSelected ? '#4f46e5' : item.color }}
                               />
                             </div>
                             <span className={`text-xs w-10 text-right flex-shrink-0 ${
                               isSelected ? 'font-bold text-indigo-700' : 'text-gray-600'
-                            }`}>{item.absoluteValue}%</span>
+                            }`}>{displayValue.toFixed(1)}%</span>
 
                             {hoveredProduct && hoveredProduct.idx === `health-${idx}` && (
                               <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-30 mb-1">
@@ -2928,7 +2928,7 @@ const Branch360Dashboard = () => {
                         setSelectedProduct('종신/정기');
                         setSelectedSubProduct('전체');
                       }}
-                      onMouseEnter={() => setHoveredProduct({ name: '종신/정기', value: 35, amount: 312000, count: 19, idx: 'life-parent' })}
+                      onMouseEnter={() => setHoveredProduct({ name: '종신/정기', value: 35, amount: 312000, count: 118, idx: 'life-parent' })}
                       onMouseLeave={() => setHoveredProduct(null)}
                     >
                       {selectedProduct === '종신/정기' && selectedSubProduct === '전체' && (
@@ -2941,14 +2941,14 @@ const Branch360Dashboard = () => {
                         <div
                           className="h-3.5 rounded-full transition-all"
                           style={{
-                            width: productRatioCriteria === 'amount' ? '35%' : '35.2%',
+                            width: productRatioCriteria === 'amount' ? '35%' : '26%',
                             backgroundColor: selectedProduct === '종신/정기' && selectedSubProduct === '전체' ? '#4f46e5' : '#10b981'
                           }}
                         />
                       </div>
                       <span className={`text-sm font-bold w-12 text-right flex-shrink-0 ${
                         selectedProduct === '종신/정기' && selectedSubProduct === '전체' ? 'text-indigo-700' : 'text-gray-700'
-                      }`}>{productRatioCriteria === 'amount' ? '35%' : '35.2%'}</span>
+                      }`}>{productRatioCriteria === 'amount' ? '35%' : '26%'}</span>
 
                       {hoveredProduct && hoveredProduct.idx === 'life-parent' && (
                         <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-30 mb-1">
@@ -2963,11 +2963,12 @@ const Branch360Dashboard = () => {
                     {/* 종신/정기 세부 상품 */}
                     <div className="ml-6 mt-1 space-y-1">
                       {[
-                        { name: '저해지', value: 45, absoluteValue: 16, color: '#10b981', amount: 154000, count: 6 },
-                        { name: '무해지', value: 35, absoluteValue: 12, color: '#34d399', amount: 120000, count: 5 },
-                        { name: '정기', value: 20, absoluteValue: 7, color: '#6ee7b7', amount: 69000, count: 3 }
+                        { name: '저해지', value: 80.1, absoluteValue: 28.0, countRatio: 24.9, color: '#10b981', amount: 250000, count: 114 },
+                        { name: '무해지', value: 12.8, absoluteValue: 4.5, countRatio: 0.7, color: '#34d399', amount: 40000, count: 3 },
+                        { name: '정기', value: 7.1, absoluteValue: 2.5, countRatio: 0.2, color: '#6ee7b7', amount: 22000, count: 1 }
                       ].map((item, idx) => {
                         const isSelected = selectedProduct === '종신/정기' && selectedSubProduct === item.name;
+                        const displayValue = productRatioCriteria === 'amount' ? item.absoluteValue : item.countRatio;
                         return (
                           <div
                             key={idx}
@@ -2990,12 +2991,12 @@ const Branch360Dashboard = () => {
                             <div className="flex-1 bg-gray-200 rounded-full h-2.5">
                               <div
                                 className="h-2.5 rounded-full transition-all"
-                                style={{ width: `${item.absoluteValue}%`, backgroundColor: isSelected ? '#4f46e5' : item.color }}
+                                style={{ width: `${displayValue}%`, backgroundColor: isSelected ? '#4f46e5' : item.color }}
                               />
                             </div>
                             <span className={`text-xs w-10 text-right flex-shrink-0 ${
                               isSelected ? 'font-bold text-indigo-700' : 'text-gray-600'
-                            }`}>{item.absoluteValue}%</span>
+                            }`}>{displayValue.toFixed(1)}%</span>
 
                             {hoveredProduct && hoveredProduct.idx === `life-${idx}` && (
                               <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-30 mb-1">
