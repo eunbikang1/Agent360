@@ -3292,7 +3292,7 @@ const Branch360Dashboard = () => {
                 {/* 비율 */}
                 <div className="flex flex-col gap-2">
                   <div className="text-xs whitespace-nowrap">
-                    <span className="text-gray-500">전체 대비 </span>
+                    <span className="text-gray-500">재적 대비 </span>
                     <span className="font-semibold text-gray-700">{Math.round((currentAgentStatus.active / currentAgentStatus.total) * 100)}%</span>
                   </div>
                   <div className="text-xs whitespace-nowrap">
@@ -3516,7 +3516,7 @@ const Branch360Dashboard = () => {
                   const inactiveCount = allData.filter(agent => !agent.isActive).length;
                   return inactiveCount;
                 })()}<span className="text-sm text-gray-500">명</span></div>
-                <div className="text-xs text-gray-600">전체 대비 {Math.round(((() => {
+                <div className="text-xs text-gray-600">재적 대비 {Math.round(((() => {
                   const allData = getSortedAgents(true);
                   const inactiveCount = allData.filter(agent => !agent.isActive).length;
                   return inactiveCount;
