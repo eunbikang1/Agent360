@@ -805,6 +805,7 @@ const Branch360Dashboard = () => {
   const [hoveredDayData, setHoveredDayData] = useState<any>(null);
   const [selectedMetric, setSelectedMetric] = useState<string>(performanceType);
   const [productSortBy, setProductSortBy] = useState<'amount' | 'count'>('amount');
+  const [productRatioCriteria, setProductRatioCriteria] = useState<'amount' | 'count'>('amount'); // 상품군 비중 기준
   const [dailyMetric, setDailyMetric] = useState<'APE' | 'MMP' | '청약' | '설계'>(performanceType); // 일별 차트 지표
   const [hoveredAverage, setHoveredAverage] = useState<{type: 'daily' | 'monthly', value: number} | null>(null); // 평균선 호버
   const [showExpectedProgressTooltip, setShowExpectedProgressTooltip] = useState(false); // 기대진도 툴팁
@@ -2759,9 +2760,47 @@ const Branch360Dashboard = () => {
 
               {/* 상품군 비중 - 트리 구조 */}
               <div className="mb-5">
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center justify-between mb-2">
                   <div className="text-xs font-medium text-gray-700">상품군 비중</div>
-                  <span className="text-xs text-gray-500 px-2 py-1 bg-indigo-50 rounded">클릭하여 필터 적용</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-600">기준:</span>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => setProductRatioCriteria('amount')}
+                        className="flex items-center gap-1.5 text-xs hover:text-gray-900 transition-colors"
+                      >
+                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                          productRatioCriteria === 'amount'
+                            ? 'border-indigo-600'
+                            : 'border-gray-300'
+                        }`}>
+                          {productRatioCriteria === 'amount' && (
+                            <div className="w-2 h-2 rounded-full bg-indigo-600"></div>
+                          )}
+                        </div>
+                        <span className={productRatioCriteria === 'amount' ? 'text-gray-900 font-semibold' : 'text-gray-600'}>
+                          실적
+                        </span>
+                      </button>
+                      <button
+                        onClick={() => setProductRatioCriteria('count')}
+                        className="flex items-center gap-1.5 text-xs hover:text-gray-900 transition-colors"
+                      >
+                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                          productRatioCriteria === 'count'
+                            ? 'border-indigo-600'
+                            : 'border-gray-300'
+                        }`}>
+                          {productRatioCriteria === 'count' && (
+                            <div className="w-2 h-2 rounded-full bg-indigo-600"></div>
+                          )}
+                        </div>
+                        <span className={productRatioCriteria === 'count' ? 'text-gray-900 font-semibold' : 'text-gray-600'}>
+                          건수
+                        </span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="bg-gray-50 rounded-lg p-3 space-y-2">
@@ -2805,12 +2844,15 @@ const Branch360Dashboard = () => {
                       <div className="flex-1 bg-gray-200 rounded-full h-3.5">
                         <div
                           className="h-3.5 rounded-full transition-all"
-                          style={{ width: '65%', backgroundColor: selectedProduct === '건강' && selectedSubProduct === '전체' ? '#4f46e5' : '#3b82f6' }}
+                          style={{
+                            width: productRatioCriteria === 'amount' ? '65%' : '64.8%',
+                            backgroundColor: selectedProduct === '건강' && selectedSubProduct === '전체' ? '#4f46e5' : '#3b82f6'
+                          }}
                         />
                       </div>
                       <span className={`text-sm font-bold w-12 text-right flex-shrink-0 ${
                         selectedProduct === '건강' && selectedSubProduct === '전체' ? 'text-indigo-700' : 'text-gray-700'
-                      }`}>65%</span>
+                      }`}>{productRatioCriteria === 'amount' ? '65%' : '64.8%'}</span>
 
                       {hoveredProduct && hoveredProduct.idx === 'health-parent' && (
                         <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-30 mb-1">
@@ -2898,12 +2940,15 @@ const Branch360Dashboard = () => {
                       <div className="flex-1 bg-gray-200 rounded-full h-3.5">
                         <div
                           className="h-3.5 rounded-full transition-all"
-                          style={{ width: '35%', backgroundColor: selectedProduct === '종신/정기' && selectedSubProduct === '전체' ? '#4f46e5' : '#10b981' }}
+                          style={{
+                            width: productRatioCriteria === 'amount' ? '35%' : '35.2%',
+                            backgroundColor: selectedProduct === '종신/정기' && selectedSubProduct === '전체' ? '#4f46e5' : '#10b981'
+                          }}
                         />
                       </div>
                       <span className={`text-sm font-bold w-12 text-right flex-shrink-0 ${
                         selectedProduct === '종신/정기' && selectedSubProduct === '전체' ? 'text-indigo-700' : 'text-gray-700'
-                      }`}>35%</span>
+                      }`}>{productRatioCriteria === 'amount' ? '35%' : '35.2%'}</span>
 
                       {hoveredProduct && hoveredProduct.idx === 'life-parent' && (
                         <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-30 mb-1">
@@ -2968,207 +3013,186 @@ const Branch360Dashboard = () => {
                 </div>
 
                 {/* 현재 선택 표시 */}
-                <div className="mt-3 pt-3 border-t">
-                  <div className="text-xs">
-                    <span className="text-gray-500">현재 선택: </span>
-                    <span className="font-semibold text-indigo-700">
-                      {selectedProduct === '전체' && selectedSubProduct === '전체'
+                <div className="mt-3 pt-3">
+                  <div className="text-xs text-gray-600">
+                    <span className="font-medium text-indigo-600">
+                      [{selectedProduct === '전체' && selectedSubProduct === '전체'
                         ? '전체'
                         : selectedSubProduct === '전체'
                           ? selectedProduct
-                          : `${selectedProduct} > ${selectedSubProduct}`}
+                          : `${selectedProduct} > ${selectedSubProduct}`}]
                     </span>
+                    <span className="ml-1.5">기준으로 아래 지표 확인 ↓</span>
                   </div>
                 </div>
               </div>
 
-              {/* 2. 평균 월납 보험료 & 평균 납입기간 */}
-              <div className="grid grid-cols-2 gap-4 divide-x divide-gray-200 py-4 border-y">
-                <div className="text-center">
-                  <div className="text-xl font-bold text-green-600 mb-1">
-                    {(() => {
-                      // 필터에 따른 평균 월납보험료 계산
-                      let basePremium = 63406;
-                      if (selectedProduct === '건강') {
-                        if (selectedSubProduct === '골담') basePremium = 45000;
-                        else if (selectedSubProduct === '새담') basePremium = 52000;
-                        else if (selectedSubProduct === '치아') basePremium = 38000;
-                        else if (selectedSubProduct === '치매') basePremium = 55000;
-                        else if (selectedSubProduct === '암') basePremium = 48000;
-                        else if (selectedSubProduct === '다이나믹') basePremium = 72000;
-                        else basePremium = 58000; // 건강 전체
-                      } else if (selectedProduct === '종신/정기') {
-                        if (selectedSubProduct === '저해지') basePremium = 95000;
-                        else if (selectedSubProduct === '무해지') basePremium = 82000;
-                        else if (selectedSubProduct === '정기') basePremium = 42000;
-                        else basePremium = 72000; // 종신/정기 전체
-                      }
-                      return basePremium.toLocaleString() + '원';
-                    })()}
+              {/* 필터 적용 결과 영역 */}
+              <div className="bg-blue-50/30 rounded-lg p-4 border border-blue-100">
+                {/* 2. 평균 월납 보험료 */}
+                <div className="py-4 border-b border-blue-100">
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-green-600 mb-1">
+                      {(() => {
+                        // 필터에 따른 평균 월납보험료 계산
+                        let basePremium = 63406;
+                        if (selectedProduct === '건강') {
+                          if (selectedSubProduct === '골담') basePremium = 45000;
+                          else if (selectedSubProduct === '새담') basePremium = 52000;
+                          else if (selectedSubProduct === '치아') basePremium = 38000;
+                          else if (selectedSubProduct === '치매') basePremium = 55000;
+                          else if (selectedSubProduct === '암') basePremium = 48000;
+                          else if (selectedSubProduct === '다이나믹') basePremium = 72000;
+                          else basePremium = 58000; // 건강 전체
+                        } else if (selectedProduct === '종신/정기') {
+                          if (selectedSubProduct === '저해지') basePremium = 95000;
+                          else if (selectedSubProduct === '무해지') basePremium = 82000;
+                          else if (selectedSubProduct === '정기') basePremium = 42000;
+                          else basePremium = 72000; // 종신/정기 전체
+                        }
+                        return basePremium.toLocaleString() + '원';
+                      })()}
+                    </div>
+                    <div className="text-xs text-gray-500">평균 월납보험료</div>
                   </div>
-                  <div className="text-xs text-gray-500">평균 월납보험료</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-xl font-bold text-purple-600 mb-1">
-                    {(() => {
-                      // 필터에 따른 평균 납입기간 계산
-                      let period = 13.3;
-                      if (selectedProduct === '건강') {
-                        if (selectedSubProduct === '골담') period = 10.5;
-                        else if (selectedSubProduct === '새담') period = 11.2;
-                        else if (selectedSubProduct === '치아') period = 9.8;
-                        else if (selectedSubProduct === '치매') period = 12.5;
-                        else if (selectedSubProduct === '암') period = 11.0;
-                        else if (selectedSubProduct === '다이나믹') period = 15.2;
-                        else period = 11.7; // 건강 전체
-                      } else if (selectedProduct === '종신/정기') {
-                        if (selectedSubProduct === '저해지') period = 20.5;
-                        else if (selectedSubProduct === '무해지') period = 18.3;
-                        else if (selectedSubProduct === '정기') period = 10.2;
-                        else period = 16.3; // 종신/정기 전체
-                      }
-                      return period.toFixed(1) + '년';
-                    })()}
-                  </div>
-                  <div className="text-xs text-gray-500">평균 납입기간</div>
-                </div>
-              </div>
 
-              {/* 3. 주계약/특약 비율 - 파이차트 */}
-              <div className="py-4 flex flex-col items-center border-b">
-                {(() => {
-                  // 필터에 따른 주계약/특약 비율 계산
-                  let mainRatio = 62;
-                  let subRatio = 38;
+                {/* 3. 주계약/특약 비율 - 파이차트 */}
+                <div className="py-4 flex flex-col items-center border-b border-blue-100">
+                  {(() => {
+                    // 필터에 따른 주계약/특약 비율 계산
+                    let mainRatio = 62;
+                    let subRatio = 38;
 
-                  if (selectedProduct === '건강') {
-                    if (selectedSubProduct === '골담') { mainRatio = 55; subRatio = 45; }
-                    else if (selectedSubProduct === '새담') { mainRatio = 60; subRatio = 40; }
-                    else if (selectedSubProduct === '치아') { mainRatio = 48; subRatio = 52; }
-                    else if (selectedSubProduct === '치매') { mainRatio = 58; subRatio = 42; }
-                    else if (selectedSubProduct === '암') { mainRatio = 52; subRatio = 48; }
-                    else if (selectedSubProduct === '다이나믹') { mainRatio = 65; subRatio = 35; }
-                    else { mainRatio = 57; subRatio = 43; } // 건강 전체
-                  } else if (selectedProduct === '종신/정기') {
-                    if (selectedSubProduct === '저해지') { mainRatio = 75; subRatio = 25; }
-                    else if (selectedSubProduct === '무해지') { mainRatio = 70; subRatio = 30; }
-                    else if (selectedSubProduct === '정기') { mainRatio = 60; subRatio = 40; }
-                    else { mainRatio = 68; subRatio = 32; } // 종신/정기 전체
-                  }
+                    if (selectedProduct === '건강') {
+                      if (selectedSubProduct === '골담') { mainRatio = 55; subRatio = 45; }
+                      else if (selectedSubProduct === '새담') { mainRatio = 60; subRatio = 40; }
+                      else if (selectedSubProduct === '치아') { mainRatio = 48; subRatio = 52; }
+                      else if (selectedSubProduct === '치매') { mainRatio = 58; subRatio = 42; }
+                      else if (selectedSubProduct === '암') { mainRatio = 52; subRatio = 48; }
+                      else if (selectedSubProduct === '다이나믹') { mainRatio = 65; subRatio = 35; }
+                      else { mainRatio = 57; subRatio = 43; } // 건강 전체
+                    } else if (selectedProduct === '종신/정기') {
+                      if (selectedSubProduct === '저해지') { mainRatio = 75; subRatio = 25; }
+                      else if (selectedSubProduct === '무해지') { mainRatio = 70; subRatio = 30; }
+                      else if (selectedSubProduct === '정기') { mainRatio = 60; subRatio = 40; }
+                      else { mainRatio = 68; subRatio = 32; } // 종신/정기 전체
+                    }
 
-                  const circumference = 2 * Math.PI * 12;
-                  const mainLength = (mainRatio / 100) * circumference;
-                  const subLength = (subRatio / 100) * circumference;
+                    const circumference = 2 * Math.PI * 12;
+                    const mainLength = (mainRatio / 100) * circumference;
+                    const subLength = (subRatio / 100) * circumference;
 
-                  return (
-                    <>
-                      <div className="relative w-24 h-24 mb-3">
-                        <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 32 32">
-                          <circle
-                            cx="16"
-                            cy="16"
-                            r="12"
-                            fill="none"
-                            stroke="#3b82f6"
-                            strokeWidth="6"
-                            strokeDasharray={`${mainLength} ${circumference}`}
-                            strokeDashoffset="0"
-                          />
-                          <circle
-                            cx="16"
-                            cy="16"
-                            r="12"
-                            fill="none"
-                            stroke="#fb923c"
-                            strokeWidth="6"
-                            strokeDasharray={`${subLength} ${circumference}`}
-                            strokeDashoffset={`-${mainLength}`}
-                          />
-                        </svg>
-                      </div>
-                      <div className="flex items-center gap-4 text-xs">
-                        <div className="flex items-center gap-1">
-                          <div className="w-3 h-3 bg-blue-500 rounded-sm"></div>
-                          <span className="text-gray-600">주계약 {mainRatio}%</span>
+                    return (
+                      <>
+                        <div className="relative w-24 h-24 mb-3">
+                          <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 32 32">
+                            <circle
+                              cx="16"
+                              cy="16"
+                              r="12"
+                              fill="none"
+                              stroke="#3b82f6"
+                              strokeWidth="6"
+                              strokeDasharray={`${mainLength} ${circumference}`}
+                              strokeDashoffset="0"
+                            />
+                            <circle
+                              cx="16"
+                              cy="16"
+                              r="12"
+                              fill="none"
+                              stroke="#fb923c"
+                              strokeWidth="6"
+                              strokeDasharray={`${subLength} ${circumference}`}
+                              strokeDashoffset={`-${mainLength}`}
+                            />
+                          </svg>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <div className="w-3 h-3 bg-orange-400 rounded-sm"></div>
-                          <span className="text-gray-600">특약 {subRatio}%</span>
+                        <div className="flex items-center gap-4 text-xs">
+                          <div className="flex items-center gap-1">
+                            <div className="w-3 h-3 bg-blue-500 rounded-sm"></div>
+                            <span className="text-gray-600">주계약 {mainRatio}%</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <div className="w-3 h-3 bg-orange-400 rounded-sm"></div>
+                            <span className="text-gray-600">특약 {subRatio}%</span>
+                          </div>
                         </div>
-                      </div>
-                    </>
-                  );
-                })()}
-              </div>
-
-              {/* 4. Top 3 상품 - 테이블 형태 */}
-              <div className="pt-5">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="text-xs font-medium text-gray-700">Top 3 상품</div>
-                  <div className="text-xs text-gray-600">[단위: 천원]</div>
+                      </>
+                    );
+                  })()}
                 </div>
 
-                <div className="overflow-hidden">
-                  {/* 헤더 */}
-                  <div className="grid gap-2 pb-2 border-b border-gray-200 mb-3" style={{gridTemplateColumns: '45px minmax(120px, 1fr) 100px 80px'}}>
-                    <div className="text-xs font-medium text-gray-500 text-center">순위</div>
-                    <div className="text-xs font-medium text-gray-500">상품명</div>
-                    <button
-                      onClick={() => setProductSortBy(productSortBy === 'amount' ? 'count' : 'amount')}
-                      className={`text-xs font-medium hover:text-blue-600 transition-colors text-right flex items-center justify-end gap-1 ${
-                        productSortBy === 'amount' ? 'text-blue-600 font-bold' : 'text-gray-900'
-                      }`}
-                    >
-                      {performanceType}
-                      {productSortBy === 'amount' && (
-                        <ArrowDown className="w-3 h-3" />
-                      )}
-                    </button>
-                    <button
-                      onClick={() => setProductSortBy(productSortBy === 'count' ? 'amount' : 'count')}
-                      className={`text-xs font-medium hover:text-blue-600 transition-colors text-right flex items-center justify-end gap-1 ${
-                        productSortBy === 'count' ? 'text-blue-600 font-bold' : 'text-gray-900'
-                      }`}
-                    >
-                      건수
-                      {productSortBy === 'count' && (
-                        <ArrowDown className="w-3 h-3" />
-                      )}
-                    </button>
+                {/* 4. Top 3 상품 - 테이블 형태 */}
+                <div className="pt-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="text-xs font-medium text-gray-700">Top 3 상품</div>
+                    <div className="text-xs text-gray-600">[단위: 천원]</div>
                   </div>
 
-                  {/* 데이터 행 */}
-                  <div className="space-y-1">
-                    {getTopProducts().map((product: any, idx: number) => (
-                      <div
-                        key={product.rank}
-                        className="grid gap-2 py-2 relative"
-                        style={{gridTemplateColumns: '45px minmax(120px, 1fr) 100px 80px'}}
+                  <div className="overflow-hidden">
+                    {/* 헤더 */}
+                    <div className="grid gap-2 pb-2 border-b border-gray-200 mb-3" style={{gridTemplateColumns: '45px minmax(120px, 1fr) 100px 80px'}}>
+                      <div className="text-xs font-medium text-gray-500 text-center">순위</div>
+                      <div className="text-xs font-medium text-gray-500">상품명</div>
+                      <button
+                        onClick={() => setProductSortBy(productSortBy === 'amount' ? 'count' : 'amount')}
+                        className={`text-xs font-medium hover:text-blue-600 transition-colors text-right flex items-center justify-end gap-1 ${
+                          productSortBy === 'amount' ? 'text-blue-600 font-bold' : 'text-gray-900'
+                        }`}
                       >
-                        <div className="flex items-center justify-center">
-                          <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
-                            idx === 0 ? 'bg-yellow-400 text-yellow-900' : idx === 1 ? 'bg-gray-300 text-gray-700' : idx === 2 ? 'bg-orange-300 text-orange-900' : 'bg-gray-200 text-gray-600'
-                          }`}>
-                            {product.rank}
+                        {performanceType}
+                        {productSortBy === 'amount' && (
+                          <ArrowDown className="w-3 h-3" />
+                        )}
+                      </button>
+                      <button
+                        onClick={() => setProductSortBy(productSortBy === 'count' ? 'amount' : 'count')}
+                        className={`text-xs font-medium hover:text-blue-600 transition-colors text-right flex items-center justify-end gap-1 ${
+                          productSortBy === 'count' ? 'text-blue-600 font-bold' : 'text-gray-900'
+                        }`}
+                      >
+                        건수
+                        {productSortBy === 'count' && (
+                          <ArrowDown className="w-3 h-3" />
+                        )}
+                      </button>
+                    </div>
+
+                    {/* 데이터 행 */}
+                    <div className="space-y-1">
+                      {getTopProducts().map((product: any, idx: number) => (
+                        <div
+                          key={product.rank}
+                          className="grid gap-2 py-2 relative"
+                          style={{gridTemplateColumns: '45px minmax(120px, 1fr) 100px 80px'}}
+                        >
+                          <div className="flex items-center justify-center">
+                            <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
+                              idx === 0 ? 'bg-yellow-400 text-yellow-900' : idx === 1 ? 'bg-gray-300 text-gray-700' : idx === 2 ? 'bg-orange-300 text-orange-900' : 'bg-gray-200 text-gray-600'
+                            }`}>
+                              {product.rank}
+                            </div>
+                          </div>
+                          <div className="flex items-center min-w-0">
+                            <div className="text-xs text-gray-900 truncate">
+                              {product.name}
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-end">
+                            <div className={`text-xs ${
+                              productSortBy === 'amount' ? 'text-blue-600 font-bold' : 'text-gray-900'
+                            }`}>{product.amount}</div>
+                          </div>
+                          <div className="flex items-center justify-end">
+                            <div className={`text-xs ${
+                              productSortBy === 'count' ? 'text-blue-600 font-bold' : 'text-gray-900'
+                            }`}>{product.count}</div>
                           </div>
                         </div>
-                        <div className="flex items-center min-w-0">
-                          <div className="text-xs text-gray-900 truncate">
-                            {product.name}
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-end">
-                          <div className={`text-xs ${
-                            productSortBy === 'amount' ? 'text-blue-600 font-bold' : 'text-gray-900'
-                          }`}>{product.amount}</div>
-                        </div>
-                        <div className="flex items-center justify-end">
-                          <div className={`text-xs ${
-                            productSortBy === 'count' ? 'text-blue-600 font-bold' : 'text-gray-900'
-                          }`}>{product.count}</div>
-                        </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
