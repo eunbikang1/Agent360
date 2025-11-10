@@ -1443,7 +1443,7 @@ const Agent360Dashboard = () => {
                 <h4 className="text-sm font-semibold text-gray-700 mb-3">설계사 가동률</h4>
                 <div className="text-center mb-3">
                   <div className="text-2xl font-bold text-blue-600">{myKPI.designerActivity.current.toFixed(1)}%</div>
-                  <div className="text-xs text-black">(가동 {myKPI.designerActivity.active}/재적 {myKPI.designerActivity.total}명)</div>
+                  <div className="text-xs text-black">({myKPI.designerActivity.active}/{myKPI.designerActivity.total}명)</div>
                 </div>
                 <div className="text-center">
                   <span className="text-xs text-black">전월 동기 대비 </span>
