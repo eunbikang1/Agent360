@@ -155,7 +155,7 @@ const Agent360Dashboard = () => {
 
   if (isAggregateView) {
     // "전체" 선택 시 데이터 집계 (예시: 배수 적용)
-    const multiplier = selectedHQ === '전체' ? 7 : 3; // 전체 본부면 7배, 전체 지점장이면 3배
+    const multiplier = selectedHQ === '전체' ? 50 : 8; // 전체 본부면 50배, 전체 지점장이면 8배
 
     myKPI = {
       goalAchievement: {
@@ -978,23 +978,25 @@ const Agent360Dashboard = () => {
   const getPortfolioData = () => {
     if (selectedProduct === '전체') {
       return [
-        { name: '건강', value: 38.4, color: '#3b82f6', amount: 161000000, count: 339 }, // 8.8+0.9+0+1.2+4.5 = 16.1, 200+10+0+24+105 = 339
-        { name: '종신/정기', value: 61.6, color: '#10b981', amount: 267000000, count: 118 } // 24.9+1.7+0.1 = 26.7, 114+3+1 = 118
+        { name: '건강', value: 65, color: '#3b82f6', amount: 273000000, count: 460 },
+        { name: '종신/정기', value: 35, color: '#10b981', amount: 147000000, count: 460 }
       ];
     } else if (selectedProduct === '건강') {
       return [
-        { name: '치아', value: 54.7, color: '#3b82f6', amount: 88000000, count: 200 },
-        { name: '새담', value: 27.9, color: '#60a5fa', amount: 45000000, count: 105 },
-        { name: '골담', value: 7.5, color: '#93c5fd', amount: 12000000, count: 24 },
-        { name: '치매', value: 5.6, color: '#bfdbfe', amount: 9000000, count: 10 },
-        { name: '암', value: 0, color: '#dbeafe', amount: 0, count: 0 },
-        { name: '다이나믹', value: 4.3, color: '#eff6ff', amount: 7000000, count: 15 } // 대치값
+        { name: '치아', value: 15.0, color: '#dbeafe', amount: 41000000, count: 69 },
+        { name: '치매', value: 12.0, color: '#93c5fd', amount: 33000000, count: 46 },
+        { name: '암', value: 18.0, color: '#60a5fa', amount: 49000000, count: 92 },
+        { name: '새담', value: 21.0, color: '#3b82f6', amount: 57000000, count: 87 },
+        { name: '새담 플러스', value: 16.0, color: '#2563eb', amount: 44000000, count: 60 },
+        { name: '골담', value: 13.0, color: '#1d4ed8', amount: 35000000, count: 74 },
+        { name: '다이나믹', value: 5.0, color: '#1e40af', amount: 14000000, count: 32 }
       ];
     } else {
       return [
-        { name: '저해지', value: 93.3, color: '#10b981', amount: 249000000, count: 114 },
-        { name: '무해지', value: 6.4, color: '#34d399', amount: 17000000, count: 3 },
-        { name: '정기', value: 0.4, color: '#6ee7b7', amount: 1000000, count: 1 }
+        { name: '저해지 종신', value: 45.0, color: '#10b981', amount: 66000000, count: 184 },
+        { name: '무해지 종신', value: 30.0, color: '#34d399', amount: 44000000, count: 161 },
+        { name: '일반 종신', value: 15.0, color: '#6ee7b7', amount: 22000000, count: 69 },
+        { name: '정기', value: 10.0, color: '#a7f3d0', amount: 15000000, count: 46 }
       ];
     }
   };

@@ -2866,11 +2866,13 @@ const Branch360Dashboard = () => {
                     {/* 건강 세부 상품 */}
                     <div className="ml-6 mt-1 space-y-1">
                       {[
-                        { name: '치아', value: 17.2, absoluteValue: 11.2, countRatio: 43.7, color: '#dbeafe', amount: 100000, count: 200 },
-                        { name: '새담', value: 27.6, absoluteValue: 17.9, countRatio: 22.9, color: '#60a5fa', amount: 160000, count: 105 },
-                        { name: '골담', value: 25.9, absoluteValue: 16.8, countRatio: 5.2, color: '#3b82f6', amount: 150000, count: 24 },
-                        { name: '치매', value: 17.2, absoluteValue: 11.2, countRatio: 2.2, color: '#93c5fd', amount: 100000, count: 10 },
-                        { name: '암', value: 12.1, absoluteValue: 7.8, countRatio: 0.2, color: '#eff6ff', amount: 70000, count: 1 }
+                        { name: '치아', value: 15.0, absoluteValue: 9.8, countRatio: 15.0, color: '#dbeafe', amount: 87000, count: 69 },
+                        { name: '치매', value: 12.0, absoluteValue: 7.8, countRatio: 10.0, color: '#93c5fd', amount: 70000, count: 46 },
+                        { name: '암', value: 18.0, absoluteValue: 11.7, countRatio: 20.0, color: '#60a5fa', amount: 104000, count: 92 },
+                        { name: '새담', value: 21.0, absoluteValue: 13.7, countRatio: 19.0, color: '#3b82f6', amount: 122000, count: 87 },
+                        { name: '새담 플러스', value: 16.0, absoluteValue: 10.4, countRatio: 13.0, color: '#2563eb', amount: 93000, count: 60 },
+                        { name: '골담', value: 13.0, absoluteValue: 8.5, countRatio: 16.0, color: '#1d4ed8', amount: 76000, count: 74 },
+                        { name: '다이나믹', value: 5.0, absoluteValue: 3.3, countRatio: 7.0, color: '#1e40af', amount: 29000, count: 32 }
                       ].map((item, idx) => {
                         const isSelected = selectedProduct === '건강' && selectedSubProduct === item.name;
                         const displayValue = productRatioCriteria === 'amount' ? item.absoluteValue : item.countRatio;
@@ -2890,16 +2892,16 @@ const Branch360Dashboard = () => {
                             {isSelected && (
                               <Check className="w-3 h-3 text-indigo-600 flex-shrink-0 ml-2" />
                             )}
-                            <span className={`text-xs w-16 flex-shrink-0 ${
+                            <span className={`text-xs w-28 flex-shrink-0 ${
                               isSelected ? 'font-bold text-indigo-700' : 'text-gray-600'
                             }`}>└ {item.name}</span>
-                            <div className="flex-1 bg-gray-200 rounded-full h-2.5">
+                            <div className="flex-1 max-w-md bg-gray-200 rounded-full h-2.5">
                               <div
                                 className="h-2.5 rounded-full transition-all"
                                 style={{ width: `${displayValue}%`, backgroundColor: isSelected ? '#4f46e5' : item.color }}
                               />
                             </div>
-                            <span className={`text-xs w-10 text-right flex-shrink-0 ${
+                            <span className={`text-xs w-12 text-right flex-shrink-0 ${
                               isSelected ? 'font-bold text-indigo-700' : 'text-gray-600'
                             }`}>{displayValue.toFixed(1)}%</span>
 
@@ -2962,9 +2964,10 @@ const Branch360Dashboard = () => {
                     {/* 종신/정기 세부 상품 */}
                     <div className="ml-6 mt-1 space-y-1">
                       {[
-                        { name: '저해지', value: 80.1, absoluteValue: 28.0, countRatio: 24.9, color: '#10b981', amount: 250000, count: 114 },
-                        { name: '무해지', value: 12.8, absoluteValue: 4.5, countRatio: 0.7, color: '#34d399', amount: 40000, count: 3 },
-                        { name: '정기', value: 7.1, absoluteValue: 2.5, countRatio: 0.2, color: '#6ee7b7', amount: 22000, count: 1 }
+                        { name: '저해지 종신', value: 45.0, absoluteValue: 15.8, countRatio: 40.0, color: '#10b981', amount: 140000, count: 184 },
+                        { name: '무해지 종신', value: 30.0, absoluteValue: 10.5, countRatio: 35.0, color: '#34d399', amount: 94000, count: 161 },
+                        { name: '일반 종신', value: 15.0, absoluteValue: 5.3, countRatio: 15.0, color: '#6ee7b7', amount: 47000, count: 69 },
+                        { name: '정기', value: 10.0, absoluteValue: 3.5, countRatio: 10.0, color: '#a7f3d0', amount: 31000, count: 46 }
                       ].map((item, idx) => {
                         const isSelected = selectedProduct === '종신/정기' && selectedSubProduct === item.name;
                         const displayValue = productRatioCriteria === 'amount' ? item.absoluteValue : item.countRatio;
@@ -2984,16 +2987,16 @@ const Branch360Dashboard = () => {
                             {isSelected && (
                               <Check className="w-3 h-3 text-indigo-600 flex-shrink-0 ml-2" />
                             )}
-                            <span className={`text-xs w-16 flex-shrink-0 ${
+                            <span className={`text-xs w-28 flex-shrink-0 ${
                               isSelected ? 'font-bold text-indigo-700' : 'text-gray-600'
                             }`}>└ {item.name}</span>
-                            <div className="flex-1 bg-gray-200 rounded-full h-2.5">
+                            <div className="flex-1 max-w-md bg-gray-200 rounded-full h-2.5">
                               <div
                                 className="h-2.5 rounded-full transition-all"
                                 style={{ width: `${displayValue}%`, backgroundColor: isSelected ? '#4f46e5' : item.color }}
                               />
                             </div>
-                            <span className={`text-xs w-10 text-right flex-shrink-0 ${
+                            <span className={`text-xs w-12 text-right flex-shrink-0 ${
                               isSelected ? 'font-bold text-indigo-700' : 'text-gray-600'
                             }`}>{displayValue.toFixed(1)}%</span>
 
