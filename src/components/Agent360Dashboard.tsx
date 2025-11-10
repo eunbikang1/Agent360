@@ -20,6 +20,16 @@ const Agent360Dashboard = () => {
   const [hoveredProduct, setHoveredProduct] = useState<any>(null);
   const [performanceType, setPerformanceType] = useState<'APE' | 'MMP'>((searchParams.get('performanceType') as 'APE' | 'MMP') || 'APE');
 
+  // 2단계 필터 상태 (실제 적용된 값)
+  const [selectedHQ, setSelectedHQ] = useState('강남본부');
+  const [selectedManager, setSelectedManager] = useState('김영수');
+
+  // 2단계 필터 임시 상태 (조회 버튼 누르기 전)
+  const [tempSelectedHQ, setTempSelectedHQ] = useState('강남본부');
+  const [tempSelectedManager, setTempSelectedManager] = useState('김영수');
+  const [showHQDropdown, setShowHQDropdown] = useState(false);
+  const [showManagerDropdown, setShowManagerDropdown] = useState(false);
+
   // 지능형 단위 포매팅 함수
   const formatCurrency = (amount: number, kpi: 'APE' | 'MMP' = 'APE') => {
     // 지점장 지표는 모두 백만원 단위
@@ -38,6 +48,55 @@ const Agent360Dashboard = () => {
     total: 22,
     elapsed: 15,
     remaining: 7
+  };
+
+  // 2단계 계층 구조 데이터 (본부 > 지점장)
+  const organizationHierarchy: any = {
+    '전체': {
+      managers: ['전체']
+    },
+    '강남본부': {
+      managers: ['전체', '김영수', '이민호', '박지성', '정수연', '강태희', '윤서준', '한지민']
+    },
+    '강북': {
+      managers: ['전체', '최수현', '정하늘', '강민지', '서준호', '박은지', '임재현']
+    },
+    '강동': {
+      managers: ['전체', '윤대현', '한지우', '신아름', '오세진', '배민수', '류하나']
+    },
+    '경인': {
+      managers: ['전체', '임태양', '송바다', '배은하', '문성호', '김나영', '이준혁', '차윤서']
+    },
+    '부산': {
+      managers: ['전체', '허별', '문하늘', '오세진', '백지훈', '황미라', '정동욱']
+    },
+    '대구': {
+      managers: ['전체', '황금비', '서은별', '남궁찬', '최민석', '강수진', '박준영']
+    },
+    '남부': {
+      managers: ['전체', '진달래', '류은하', '탁푸른', '송혜교', '김재우', '이서영', '박도현']
+    }
+  };
+
+  // 본부 목록
+  const headquarters = Object.keys(organizationHierarchy);
+
+  // 선택된 본부에 따른 지점장 목록 (temp 값 기반)
+  const getManagers = () => {
+    if (!tempSelectedHQ || tempSelectedHQ === '전체') return ['전체'];
+    return organizationHierarchy[tempSelectedHQ]?.managers || ['전체'];
+  };
+
+  // 필터 변경 핸들러 (임시 상태 변경)
+  const handleHQChange = (hq: string) => {
+    setTempSelectedHQ(hq);
+    setTempSelectedManager('전체');
+    setShowHQDropdown(false);
+  };
+
+  const handleManagerChange = (manager: string) => {
+    setTempSelectedManager(manager);
+    setShowManagerDropdown(false);
   };
 
   // 나의 KPI 데이터 (기본값 - 현재 월용)
@@ -90,6 +149,38 @@ const Agent360Dashboard = () => {
       dailyRequired: performanceType === 'MMP' ? myKPIDefault.goalAchievement.dailyRequired / 12 : myKPIDefault.goalAchievement.dailyRequired
     }
   };
+
+  // 필터에 따른 데이터 조정
+  const isAggregateView = selectedHQ === '전체' || selectedManager === '전체';
+
+  if (isAggregateView) {
+    // "전체" 선택 시 데이터 집계 (예시: 배수 적용)
+    const multiplier = selectedHQ === '전체' ? 7 : 3; // 전체 본부면 7배, 전체 지점장이면 3배
+
+    myKPI = {
+      goalAchievement: {
+        ...myKPI.goalAchievement,
+        actual: Math.round(myKPI.goalAchievement.actual * multiplier),
+        target: Math.round(myKPI.goalAchievement.target * multiplier),
+        gap: Math.round(myKPI.goalAchievement.gap * multiplier),
+        dailyRequired: Math.round(myKPI.goalAchievement.dailyRequired * multiplier),
+        // 순위는 집계 뷰에서 표시하지 않음
+        hqRankTotal: { rank: null, total: null },
+        hqRankRegion: { rank: null, total: null }
+      },
+      designerActivity: {
+        ...myKPI.designerActivity,
+        active: Math.round(myKPI.designerActivity.active * multiplier),
+        total: Math.round(myKPI.designerActivity.total * multiplier),
+        plan: Math.round(myKPI.designerActivity.plan * multiplier)
+      },
+      mobileContract: {
+        ...myKPI.mobileContract,
+        count: Math.round(myKPI.mobileContract.count * multiplier),
+        total: Math.round(myKPI.mobileContract.total * multiplier)
+      }
+    };
+  }
 
   // 월별 성과 추이 데이터
   const monthlyTrend = {
@@ -428,6 +519,8 @@ const Agent360Dashboard = () => {
   // 조회 버튼 클릭 핸들러
   const handleSearchClick = () => {
     setAppliedMonth(tempSelectedMonth);
+    setSelectedHQ(tempSelectedHQ);
+    setSelectedManager(tempSelectedManager);
   };
 
   // 과거 월 데이터 생성 함수
@@ -1040,17 +1133,7 @@ const Agent360Dashboard = () => {
         <div className="px-6 py-4 border-b border-gray-100">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-bold text-gray-900 mb-1">통합 인사이트 뷰</h1>
-              <div className="text-sm text-black">
-                <span className="">강남본부 김영수 지점장</span>
-                <span className="ml-3 text-black">
-                  {isCurrentMonth ? (
-                    <>2025.09.19 마감 기준</>
-                  ) : (
-                    <>{appliedMonth.split('-')[0]}.{appliedMonth.split('-')[1]} 마감일 기준</>
-                  )}
-                </span>
-              </div>
+              <h1 className="text-xl font-bold text-gray-900">통합 인사이트 뷰</h1>
             </div>
             <div className="text-right">
               {isCurrentMonth && (
@@ -1070,9 +1153,71 @@ const Agent360Dashboard = () => {
           <div className="flex items-center justify-between">
             {/* 조회 조건 그룹 */}
             <div className="flex items-center space-x-3">
+              {/* 조회 대상 - 본부 선택 */}
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-700">조회 대상</span>
+                <div className="relative">
+                  <button
+                    onClick={() => {
+                      setShowHQDropdown(!showHQDropdown);
+                      setShowManagerDropdown(false);
+                    }}
+                    className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 flex items-center gap-1.5 min-w-[120px] justify-between"
+                  >
+                    <span>{tempSelectedHQ}</span>
+                    <ChevronDown className="w-4 h-4 text-gray-400" />
+                  </button>
+                  {showHQDropdown && (
+                    <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[140px] max-h-64 overflow-y-auto">
+                      {headquarters.map(hq => (
+                        <div
+                          key={hq}
+                          onClick={() => handleHQChange(hq)}
+                          className={`px-3 py-1.5 hover:bg-gray-50 cursor-pointer text-sm ${
+                            tempSelectedHQ === hq ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700'
+                          }`}
+                        >
+                          {hq}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* 조회 대상 - 지점장 선택 */}
+              <div className="relative">
+                <button
+                  onClick={() => {
+                    setShowManagerDropdown(!showManagerDropdown);
+                    setShowHQDropdown(false);
+                  }}
+                  className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 flex items-center gap-1.5 min-w-[120px] justify-between"
+                  disabled={tempSelectedHQ === '전체'}
+                >
+                  <span>{tempSelectedManager === '전체' ? tempSelectedManager : `${tempSelectedManager}`}</span>
+                  <ChevronDown className="w-4 h-4 text-gray-400" />
+                </button>
+                {showManagerDropdown && tempSelectedHQ !== '전체' && (
+                  <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[140px] max-h-64 overflow-y-auto">
+                    {getManagers().map(manager => (
+                      <div
+                        key={manager}
+                        onClick={() => handleManagerChange(manager)}
+                        className={`px-3 py-1.5 hover:bg-gray-50 cursor-pointer text-sm ${
+                          tempSelectedManager === manager ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700'
+                        }`}
+                      >
+                        {manager}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               {/* 조회년월 선택 */}
-              <div className="flex items-center space-x-3">
-                <span className="text-sm  text-gray-700 min-w-0">조회년월</span>
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-700">조회년월</span>
                 <select
                   value={tempSelectedMonth}
                   onChange={(e) => setTempSelectedMonth(e.target.value)}
@@ -1089,11 +1234,20 @@ const Agent360Dashboard = () => {
               {/* 조회 버튼 */}
               <button
                 onClick={handleSearchClick}
-                className="px-3 py-1.5 bg-gray-400 hover:bg-gray-500 text-white text-sm  rounded-lg flex items-center space-x-1.5 transition-colors"
+                className="px-4 py-2 bg-gray-400 hover:bg-gray-500 text-white text-sm rounded-lg flex items-center space-x-1.5 transition-colors"
               >
                 <Search className="w-4 h-4" />
                 <span>조회</span>
               </button>
+
+              {/* 마감 기준 표시 */}
+              <span className="text-sm text-gray-600">
+                {isCurrentMonth ? (
+                  <>2025.09.19 마감 기준</>
+                ) : (
+                  <>{appliedMonth.split('-')[0]}.{appliedMonth.split('-')[1]} 마감일 기준</>
+                )}
+              </span>
             </div>
 
             {/* 액션 버튼 그룹 */}
@@ -1262,11 +1416,23 @@ const Agent360Dashboard = () => {
               <div className="grid grid-cols-2 gap-3 mt-4 pt-3 border-t">
                 <div className="text-center">
                   <div className="text-xs text-black">본부 순위</div>
-                  <div className="font-semibold text-blue-600">{myKPI.goalAchievement.hqRankRegion.rank}위<span className="text-black">/{myKPI.goalAchievement.hqRankRegion.total}명</span></div>
+                  <div className="font-semibold text-blue-600">
+                    {myKPI.goalAchievement.hqRankRegion.rank !== null ? (
+                      <>{myKPI.goalAchievement.hqRankRegion.rank}위<span className="text-black">/{myKPI.goalAchievement.hqRankRegion.total}명</span></>
+                    ) : (
+                      '-'
+                    )}
+                  </div>
                 </div>
                 <div className="text-center">
                   <div className="text-xs text-black">전체 순위</div>
-                  <div className="font-semibold text-blue-600">{myKPI.goalAchievement.hqRankTotal.rank}위<span className="text-black">/{myKPI.goalAchievement.hqRankTotal.total}명</span></div>
+                  <div className="font-semibold text-blue-600">
+                    {myKPI.goalAchievement.hqRankTotal.rank !== null ? (
+                      <>{myKPI.goalAchievement.hqRankTotal.rank}위<span className="text-black">/{myKPI.goalAchievement.hqRankTotal.total}명</span></>
+                    ) : (
+                      '-'
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

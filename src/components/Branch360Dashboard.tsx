@@ -1689,16 +1689,7 @@ const Branch360Dashboard = () => {
                 돌아가기
               </button>
 
-              <h1 className="text-xl font-bold text-gray-900 mb-1">지점 360° 상세 뷰</h1>
-              <div className="flex items-center text-sm text-gray-600">
-                <span className="font-medium">{selectedAgency} &gt; {selectedBranch}</span>
-                <span className="ml-3 text-gray-500">
-                  {selectedPeriod === '2025-09'
-                    ? '2025.09.19 마감 기준'
-                    : `${selectedPeriod.split('-')[0]}.${selectedPeriod.split('-')[1]} 마감일 기준`
-                  }
-                </span>
-              </div>
+              <h1 className="text-xl font-bold text-gray-900">지점 360° 상세 뷰</h1>
               {/* 방문 추천 태그 표시 */}
               {(() => {
                 const alerts = getBranchAlerts(selectedAgency, selectedBranch);
@@ -1831,6 +1822,14 @@ const Branch360Dashboard = () => {
                     <Search className="w-4 h-4" />
                     <span>조회</span>
                   </button>
+
+                  {/* 마감 기준 표시 */}
+                  <span className="text-sm text-gray-600">
+                    {selectedPeriod === '2025-09'
+                      ? '2025.09.19 마감 기준'
+                      : `${selectedPeriod.split('-')[0]}.${selectedPeriod.split('-')[1]} 마감일 기준`
+                    }
+                  </span>
                 </div>
               </div>
             </div>
