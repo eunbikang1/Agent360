@@ -157,11 +157,24 @@ const Agent360Dashboard = () => {
     // "전체" 선택 시 데이터 집계 (예시: 배수 적용)
     const multiplier = selectedHQ === '전체' ? 50 : 8; // 전체 본부면 50배, 전체 지점장이면 8배
 
+    const newActual = Math.round(myKPI.goalAchievement.actual * multiplier);
+    const newTarget = Math.round(myKPI.goalAchievement.target * multiplier);
+    const newCurrent = (newActual / newTarget) * 100; // 목표달성률 재계산
+
+    const newActive = Math.round(myKPI.designerActivity.active * multiplier);
+    const newTotal = Math.round(myKPI.designerActivity.total * multiplier);
+    const newActivityCurrent = (newActive / newTotal) * 100; // 가동률 재계산
+
+    const newMobileCount = Math.round(myKPI.mobileContract.count * multiplier);
+    const newMobileTotal = Math.round(myKPI.mobileContract.total * multiplier);
+    const newMobileCurrent = (newMobileCount / newMobileTotal) * 100; // 모바일청약률 재계산
+
     myKPI = {
       goalAchievement: {
         ...myKPI.goalAchievement,
-        actual: Math.round(myKPI.goalAchievement.actual * multiplier),
-        target: Math.round(myKPI.goalAchievement.target * multiplier),
+        current: newCurrent,
+        actual: newActual,
+        target: newTarget,
         gap: Math.round(myKPI.goalAchievement.gap * multiplier),
         dailyRequired: Math.round(myKPI.goalAchievement.dailyRequired * multiplier),
         // 순위는 집계 뷰에서 표시하지 않음
@@ -170,14 +183,16 @@ const Agent360Dashboard = () => {
       },
       designerActivity: {
         ...myKPI.designerActivity,
-        active: Math.round(myKPI.designerActivity.active * multiplier),
-        total: Math.round(myKPI.designerActivity.total * multiplier),
+        current: newActivityCurrent,
+        active: newActive,
+        total: newTotal,
         plan: Math.round(myKPI.designerActivity.plan * multiplier)
       },
       mobileContract: {
         ...myKPI.mobileContract,
-        count: Math.round(myKPI.mobileContract.count * multiplier),
-        total: Math.round(myKPI.mobileContract.total * multiplier)
+        current: newMobileCurrent,
+        count: newMobileCount,
+        total: newMobileTotal
       }
     };
   }
@@ -421,7 +436,25 @@ const Agent360Dashboard = () => {
   const getKPIData = () => {
     // 월별 데이터는 선택된 월까지만 표시 (헤더와 연동)
     const selectedMonthNumber = parseInt(appliedMonth.split('-')[1]);
-    return kpiData.slice(0, selectedMonthNumber);
+    const data = kpiData.slice(0, selectedMonthNumber);
+
+    // 필터에 따른 multiplier 적용
+    const dataMultiplier = selectedHQ === '전체' ? 50 : (selectedManager === '전체' ? 8 : 1);
+
+    if (dataMultiplier === 1) {
+      return data;
+    }
+
+    // actual과 target에 multiplier 적용
+    return data.map((item: any) => ({
+      ...item,
+      actual: item.actual ? Math.round(item.actual * dataMultiplier) : item.actual,
+      target: item.target ? Math.round(item.target * dataMultiplier) : item.target,
+      active: item.active ? Math.round(item.active * dataMultiplier) : item.active,
+      total: item.total ? Math.round(item.total * dataMultiplier) : item.total,
+      count: item.count ? Math.round(item.count * dataMultiplier) : item.count,
+      plan: item.plan ? Math.round(item.plan * dataMultiplier) : item.plan
+    }));
   };
   
   const getMaxValue = (data: any[], kpi: string) => {
@@ -591,6 +624,49 @@ const Agent360Dashboard = () => {
       dailyRequired: performanceType === 'MMP' ? historicalKPI.goalAchievement.dailyRequired / 12 : historicalKPI.goalAchievement.dailyRequired
     }
   };
+
+  // 과거 월에도 필터에 따른 multiplier 적용
+  if (isAggregateView) {
+    const multiplier = selectedHQ === '전체' ? 50 : 8;
+
+    const newActual = Math.round(myKPI.goalAchievement.actual * multiplier);
+    const newTarget = Math.round(myKPI.goalAchievement.target * multiplier);
+    const newCurrent = (newActual / newTarget) * 100;
+
+    const newActive = Math.round(myKPI.designerActivity.active * multiplier);
+    const newTotal = Math.round(myKPI.designerActivity.total * multiplier);
+    const newActivityCurrent = (newActive / newTotal) * 100;
+
+    const newMobileCount = Math.round(myKPI.mobileContract.count * multiplier);
+    const newMobileTotal = Math.round(myKPI.mobileContract.total * multiplier);
+    const newMobileCurrent = (newMobileCount / newMobileTotal) * 100;
+
+    myKPI = {
+      goalAchievement: {
+        ...myKPI.goalAchievement,
+        current: newCurrent,
+        actual: newActual,
+        target: newTarget,
+        gap: Math.round(myKPI.goalAchievement.gap * multiplier),
+        dailyRequired: Math.round(myKPI.goalAchievement.dailyRequired * multiplier),
+        hqRankTotal: { rank: null, total: null },
+        hqRankRegion: { rank: null, total: null }
+      },
+      designerActivity: {
+        ...myKPI.designerActivity,
+        current: newActivityCurrent,
+        active: newActive,
+        total: newTotal,
+        plan: Math.round(myKPI.designerActivity.plan * multiplier)
+      },
+      mobileContract: {
+        ...myKPI.mobileContract,
+        current: newMobileCurrent,
+        count: newMobileCount,
+        total: newMobileTotal
+      }
+    };
+  }
 
   // 3년치 월 옵션 생성 (2023년 1월부터 2025년 9월까지)
   const monthOptions = [];
@@ -790,11 +866,22 @@ const Agent360Dashboard = () => {
     const result = getAllData ? sorted : sorted.slice(0, 5);
 
     // KPI에 따른 데이터 변환 (MMP일 때 12로 나눔)
-    const transformedResult = result.map(branch => ({
+    let transformedResult = result.map(branch => ({
       ...branch,
       ape: kpi === 'MMP' ? Math.round(branch.ape / 12) : branch.ape,
       previousApe: branch.previousApe ? (kpi === 'MMP' ? Math.round(branch.previousApe / 12) : branch.previousApe) : branch.previousApe
     }));
+
+    // 필터에 따른 multiplier 적용
+    const dataMultiplier = selectedHQ === '전체' ? 50 : (selectedManager === '전체' ? 8 : 1);
+    if (dataMultiplier !== 1) {
+      transformedResult = transformedResult.map(branch => ({
+        ...branch,
+        ape: Math.round(branch.ape * dataMultiplier),
+        previousApe: branch.previousApe ? Math.round(branch.previousApe * dataMultiplier) : branch.previousApe,
+        target: Math.round(branch.target * dataMultiplier)
+      }));
+    }
 
     // 가동 현황 정보와 함께 반환
     return {
@@ -810,7 +897,8 @@ const Agent360Dashboard = () => {
   // 지점 기본정보 데이터 함수 - 공통 데이터 생성 함수 사용
   const getBranchInfoData = (kpi = 'APE') => {
     // 기존 지점 순위 데이터에서 전체 160개 지점 가져오기 (가동 + 비가동)
-    const rankingData = getBranchRankings(true).data;
+    // 이미 multiplier가 적용된 데이터
+    const rankingData = getBranchRankings(true, performanceType).data;
 
     // 지점 데이터 변환 (160개로 제한) - 공통 데이터 생성 함수 사용
     const branches = rankingData.slice(0, 160).map((branch, index) => {
@@ -818,25 +906,14 @@ const Agent360Dashboard = () => {
       const branchName = branch.branch;
 
       // 공통 함수로 데이터 생성
-      const performance = generateBranchPerformance(agency, branchName);
       const agentCount = generateAgentCount(agency, branchName);
       const address = generateBranchAddress(agency, branchName);
       const phone = generateBranchPhone(agency, branchName);
 
-      // 실적값 계산
-      const performanceValue = kpi === 'MMP'
-        ? Math.round(performance.currentMonthAPE / 12)
-        : performance.currentMonthAPE;
-
-      const previousPerformanceValue = kpi === 'MMP'
-        ? Math.round(performance.previousMonthAPE / 12)
-        : performance.previousMonthAPE;
-
-      // 목표는 ranking 데이터에서 가져옴 (백만원 단위 -> 원 단위로 변환)
-      const targetInWon = (branch.target || 0) * 1000000;
-      const targetValue = kpi === 'MMP'
-        ? Math.round(targetInWon / 12)
-        : targetInWon;
+      // rankingData에서 이미 multiplier가 적용된 ape와 target 사용
+      const performanceValue = branch.ape; // 이미 MMP와 multiplier가 적용됨
+      const previousPerformanceValue = branch.previousApe || 0; // 이미 MMP와 multiplier가 적용됨
+      const targetValue = branch.target * 1000000; // 백만원 -> 원 단위로 변환 (이미 multiplier 적용됨)
 
       return {
         no: index + 1,
@@ -859,6 +936,7 @@ const Agent360Dashboard = () => {
   // 일별 데이터 - 월별로 다른 일수, APE/MMP 기준 적용
   const getDailyData = () => {
     const multiplier = performanceType === 'MMP' ? (1/12) : 1; // MMP = APE/12
+    const dataMultiplier = selectedHQ === '전체' ? 50 : (selectedManager === '전체' ? 8 : 1); // 필터에 따른 배수
     const selectedMonth = parseInt(appliedMonth.split('-')[1]);
     const selectedYear = parseInt(appliedMonth.split('-')[0]);
 
@@ -889,11 +967,11 @@ const Agent360Dashboard = () => {
     const generateMonthData = (baseValues: {ape: number, contract: number, proposal: number}) => {
       const data = [];
 
-      // 9월 영업일의 지수 형태 패턴 (월초 낮고 월말로 갈수록 증가)
+      // 9월 영업일의 일별 실적 패턴 (들쑥날쑥하지만 전반적으로 월말로 갈수록 증가 경향)
       const septemberPattern = [
-        0.3, 0.4, 0.5, 0.6, 0.7, // 1주차: 월수목금 (2,3,4,5일) - 낮은 실적
-        0.8, 0.9, 1.0, 1.2, 1.4, // 2주차: 월화수목금 (9,10,11,12,13일) - 점진적 증가
-        1.6, 1.9, 2.2, 2.5, 2.8  // 3주차: 월화수목금 (16,17,18,19,20일) - 급격히 증가
+        0.6, 0.3, 0.7, 0.4, 0.5, // 1주차: 월수목금 (2,3,4,5일) - 낮은 실적, 들쑥날쑥
+        1.3, 0.8, 1.4, 0.9, 1.2, // 2주차: 월화수목금 (9,10,11,12,13일) - 중간 실적, 들쑥날쑥
+        2.5, 1.9, 2.6, 2.1, 2.6  // 3주차: 월화수목금 (16,17,18,19,20일) - 높은 실적, 들쑥날쑥
       ];
 
       let businessDayIndex = 0;
@@ -932,15 +1010,20 @@ const Agent360Dashboard = () => {
     };
 
     const data = (baseData as any)[selectedProduct] || baseData['전체'];
-    // MMP일 때 apeAmount를 12로 나누기
+    // MMP일 때 apeAmount를 12로 나누고, 필터에 따른 배수 적용
     return data.map((item: any) => ({
       ...item,
-      apeAmount: item.apeAmount * multiplier
+      apeAmount: Math.round(item.apeAmount * multiplier * dataMultiplier),
+      contractCount: Math.round(item.contractCount * dataMultiplier),
+      proposalCount: Math.round(item.proposalCount * dataMultiplier)
     }));
   };
   
   // 필터별 데이터
   const getFilteredData = (key: string) => {
+    // 필터에 따른 배수 계산
+    const dataMultiplier = selectedHQ === '전체' ? 50 : (selectedManager === '전체' ? 8 : 1);
+
     const baseData = performanceType === 'APE' ? {
       ape: { '전체': 35000, '건강': 22750, '종신/정기': 12250 }, // 만원 단위 (350백만원)
       dailyApe: { '전체': 2330, '건강': 1515, '종신/정기': 815 }, // 만원 단위 (일평균)
@@ -971,78 +1054,100 @@ const Agent360Dashboard = () => {
       dailyContract: { '전체': 15, '건강': 10, '종신/정기': 5 },
       contractGrowth: { '전체': 12, '건강': 18, '종신/정기': 8 }
     };
-    return (baseData as any)[key][selectedProduct] || 0;
+
+    const value = (baseData as any)[key][selectedProduct] || 0;
+
+    // 비율이나 성장률은 배수 적용 안 함
+    const noMultiplierKeys = ['apeGrowth', 'dailyApeGrowth', 'apeRatio'];
+    if (noMultiplierKeys.includes(key)) {
+      return value;
+    }
+
+    // 나머지는 배수 적용
+    return Math.round(value * dataMultiplier);
   };
   
   // 상품 포트폴리오 데이터 (금액: MMP 백만원 단위)
   const getPortfolioData = () => {
-    if (selectedProduct === '전체') {
-      return [
-        { name: '건강', value: 65, color: '#3b82f6', amount: 273000000, count: 460 },
-        { name: '종신/정기', value: 35, color: '#10b981', amount: 147000000, count: 460 }
-      ];
-    } else if (selectedProduct === '건강') {
-      return [
-        { name: '치아', value: 15.0, color: '#dbeafe', amount: 41000000, count: 69 },
-        { name: '치매', value: 12.0, color: '#93c5fd', amount: 33000000, count: 46 },
-        { name: '암', value: 18.0, color: '#60a5fa', amount: 49000000, count: 92 },
-        { name: '새담', value: 21.0, color: '#3b82f6', amount: 57000000, count: 87 },
-        { name: '새담 플러스', value: 16.0, color: '#2563eb', amount: 44000000, count: 60 },
-        { name: '골담', value: 13.0, color: '#1d4ed8', amount: 35000000, count: 74 },
-        { name: '다이나믹', value: 5.0, color: '#1e40af', amount: 14000000, count: 32 }
-      ];
-    } else {
-      return [
-        { name: '저해지 종신', value: 45.0, color: '#10b981', amount: 66000000, count: 184 },
-        { name: '무해지 종신', value: 30.0, color: '#34d399', amount: 44000000, count: 161 },
-        { name: '일반 종신', value: 15.0, color: '#6ee7b7', amount: 22000000, count: 69 },
-        { name: '정기', value: 10.0, color: '#a7f3d0', amount: 15000000, count: 46 }
-      ];
-    }
+    const dataMultiplier = selectedHQ === '전체' ? 50 : (selectedManager === '전체' ? 8 : 1);
+
+    const baseData = selectedProduct === '전체' ? [
+      { name: '건강', value: 65, color: '#3b82f6', amount: 273000000, count: 460 },
+      { name: '종신/정기', value: 35, color: '#10b981', amount: 147000000, count: 460 }
+    ] : selectedProduct === '건강' ? [
+      { name: '치아', value: 15.0, color: '#dbeafe', amount: 41000000, count: 69 },
+      { name: '치매', value: 12.0, color: '#93c5fd', amount: 33000000, count: 46 },
+      { name: '암', value: 18.0, color: '#60a5fa', amount: 49000000, count: 92 },
+      { name: '새담', value: 21.0, color: '#3b82f6', amount: 57000000, count: 87 },
+      { name: '새담 플러스', value: 16.0, color: '#2563eb', amount: 44000000, count: 60 },
+      { name: '골담', value: 13.0, color: '#1d4ed8', amount: 35000000, count: 74 },
+      { name: '다이나믹', value: 5.0, color: '#1e40af', amount: 14000000, count: 32 }
+    ] : [
+      { name: '저해지 종신', value: 45.0, color: '#10b981', amount: 66000000, count: 184 },
+      { name: '무해지 종신', value: 30.0, color: '#34d399', amount: 44000000, count: 161 },
+      { name: '일반 종신', value: 15.0, color: '#6ee7b7', amount: 22000000, count: 69 },
+      { name: '정기', value: 10.0, color: '#a7f3d0', amount: 15000000, count: 46 }
+    ];
+
+    // 필터에 따른 배수 적용 (비율은 유지하고 금액과 건수만 배수 적용)
+    return baseData.map(item => ({
+      ...item,
+      amount: Math.round(item.amount * dataMultiplier),
+      count: Math.round(item.count * dataMultiplier)
+    }));
   };
   
   // Top 3 상품 데이터 (APE 기준: MMP * 12)
   const getTopProducts = () => {
-    const productData = {
+    const dataMultiplier = selectedHQ === '전체' ? 50 : (selectedManager === '전체' ? 8 : 1);
+
+    const baseProductData = {
       '전체': {
         byAmount: [
-          { rank: 1, name: 'THE건강해지는종신보험(기본형)', amount: '299', count: '285건' }, // 24.9 * 12 = 298.8 → 299
-          { rank: 2, name: 'THE건강한치아보험V(갱신형)', amount: '106', count: '412건' }, // 8.8 * 12 = 105.6 → 106
-          { rank: 3, name: '새담간편건강보험', amount: '54', count: '198건' } // 4.5 * 12 = 54
+          { rank: 1, name: 'THE건강해지는종신보험(기본형)', amount: 299, count: 285 }, // 24.9 * 12 = 298.8 → 299
+          { rank: 2, name: 'THE건강한치아보험V(갱신형)', amount: 106, count: 412 }, // 8.8 * 12 = 105.6 → 106
+          { rank: 3, name: '새담간편건강보험', amount: 54, count: 198 } // 4.5 * 12 = 54
         ],
         byCount: [
-          { rank: 1, name: 'THE건강한치아보험V(갱신형)', amount: '106', count: '412건' },
-          { rank: 2, name: 'THE건강해지는종신보험(기본형)', amount: '299', count: '285건' },
-          { rank: 3, name: '새담간편건강보험', amount: '54', count: '256건' }
+          { rank: 1, name: 'THE건강한치아보험V(갱신형)', amount: 106, count: 412 },
+          { rank: 2, name: 'THE건강해지는종신보험(기본형)', amount: 299, count: 285 },
+          { rank: 3, name: '새담간편건강보험', amount: 54, count: 256 }
         ]
       },
       '건강': {
         byAmount: [
-          { rank: 1, name: 'THE건강한치아보험V(갱신형)', amount: '106', count: '412건' },
-          { rank: 2, name: '새담간편건강보험', amount: '54', count: '198건' },
-          { rank: 3, name: '골라담간편건강보험Ⅱ(갱신형)', amount: '14', count: '156건' } // 1.2 * 12 = 14.4 → 14
+          { rank: 1, name: 'THE건강한치아보험V(갱신형)', amount: 106, count: 412 },
+          { rank: 2, name: '새담간편건강보험', amount: 54, count: 198 },
+          { rank: 3, name: '골라담간편건강보험Ⅱ(갱신형)', amount: 14, count: 156 } // 1.2 * 12 = 14.4 → 14
         ],
         byCount: [
-          { rank: 1, name: 'THE건강한치아보험V(갱신형)', amount: '106', count: '412건' },
-          { rank: 2, name: '새담간편건강보험', amount: '54', count: '198건' },
-          { rank: 3, name: '선심속치매보험(해약환급금미지급형)', amount: '11', count: '186건' } // 0.9 * 12 = 10.8 → 11
+          { rank: 1, name: 'THE건강한치아보험V(갱신형)', amount: 106, count: 412 },
+          { rank: 2, name: '새담간편건강보험', amount: 54, count: 198 },
+          { rank: 3, name: '선심속치매보험(해약환급금미지급형)', amount: 11, count: 186 } // 0.9 * 12 = 10.8 → 11
         ]
       },
       '종신/정기': {
         byAmount: [
-          { rank: 1, name: 'THE건강해지는종신보험(기본형)', amount: '299', count: '285건' },
-          { rank: 2, name: 'THE채우는종신보험(해약환급금일부지급형)', amount: '20', count: '198건' }, // 1.7 * 12 = 20.4 → 20
-          { rank: 3, name: 'THE건강해지는건강정기보험', amount: '1', count: '142건' } // 0.1 * 12 = 1.2 → 1
+          { rank: 1, name: 'THE건강해지는종신보험(기본형)', amount: 299, count: 285 },
+          { rank: 2, name: 'THE채우는종신보험(해약환급금일부지급형)', amount: 20, count: 198 }, // 1.7 * 12 = 20.4 → 20
+          { rank: 3, name: 'THE건강해지는건강정기보험', amount: 1, count: 142 } // 0.1 * 12 = 1.2 → 1
         ],
         byCount: [
-          { rank: 1, name: 'THE건강해지는종신보험(기본형)', amount: '299', count: '285건' },
-          { rank: 2, name: 'THE간편고지종신보험(해약환급금미지급형)', amount: '20', count: '215건' },
-          { rank: 3, name: 'THE건강해지는건강정기보험', amount: '1', count: '198건' }
+          { rank: 1, name: 'THE건강해지는종신보험(기본형)', amount: 299, count: 285 },
+          { rank: 2, name: 'THE간편고지종신보험(해약환급금미지급형)', amount: 20, count: 215 },
+          { rank: 3, name: 'THE건강해지는건강정기보험', amount: 1, count: 198 }
         ]
       }
     };
-    
-    return (productData as any)[selectedProduct][productSortBy === 'amount' ? 'byAmount' : 'byCount'];
+
+    const products = (baseProductData as any)[selectedProduct][productSortBy === 'amount' ? 'byAmount' : 'byCount'];
+
+    // 필터에 따른 배수 적용
+    return products.map((product: any) => ({
+      ...product,
+      amount: String(Math.round(product.amount * dataMultiplier)),
+      count: `${Math.round(product.count * dataMultiplier)}건`
+    }));
   };
 
   // 모달 리사이즈 핸들러

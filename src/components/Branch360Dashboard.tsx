@@ -725,11 +725,18 @@ const Branch360Dashboard = () => {
       }
     }
 
-    // 일별 비율 생성 (GA채널 특징: 월초 낮고 월말로 지수적으로 증가)
+    // 일별 비율 생성 (들쑥날쑥하지만 전반적으로 월말로 갈수록 증가 경향)
+    // 9월 15 영업일 기준 패턴
+    const dayPatterns = [
+      0.6, 0.3, 0.7, 0.4, 0.5,  // 1주차 - 낮은 실적, 들쑥날쑥
+      1.3, 0.8, 1.4, 0.9, 1.2,  // 2주차 - 중간 실적, 들쑥날쑥
+      2.5, 1.9, 2.6, 2.1, 2.6   // 3주차 - 높은 실적, 들쑥날쑥
+    ];
+
     const ratios = businessDays.map((day, idx) => {
-      // 지수 함수 사용: e^(idx * 0.25) - 월초에 낮고 월말로 갈수록 급증
-      const exponentialRatio = Math.exp(idx * 0.25);
-      return exponentialRatio;
+      // businessDays 길이에 맞게 패턴 조정
+      const patternIndex = Math.floor(idx * dayPatterns.length / businessDays.length);
+      return dayPatterns[Math.min(patternIndex, dayPatterns.length - 1)] || 1.0;
     });
 
     const totalRatio = ratios.reduce((sum, r) => sum + r, 0);
