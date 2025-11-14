@@ -3507,10 +3507,10 @@ const Branch360Dashboard = () => {
                               <td className="px-2 py-2 font-medium text-gray-800">{agent.name}</td>
                               <td className="px-2 py-2 text-right text-gray-600 text-xs">{agent.commissionMonth.replace('개월', '')}</td>
                               <td className="px-2 py-2 text-right font-medium text-green-600 whitespace-nowrap">
-                                {performanceType === 'MMP' ? agent.currentMonth.premium * 10 : agent.currentMonth.premium * 10 * 12}
+                                {performanceType === 'MMP' ? Math.round(agent.currentMonth.premium * 10) : agent.currentMonth.premium * 10 * 12}
                               </td>
                               <td className="px-2 py-2 text-right text-gray-600 whitespace-nowrap">
-                                {agent.previousMonth.premium === 0 ? '-' : (performanceType === 'MMP' ? agent.previousMonth.premium * 10 : agent.previousMonth.premium * 10 * 12)}
+                                {agent.previousMonth.premium === 0 ? '-' : (performanceType === 'MMP' ? Math.round(agent.previousMonth.premium * 10) : agent.previousMonth.premium * 10 * 12)}
                               </td>
                             </tr>
                           )) : (
@@ -4767,9 +4767,9 @@ const Branch360Dashboard = () => {
                       if (value === 0) return '-';
                       // value는 MMP 기준 만원 단위
                       if (modalPerformanceType === 'MMP') {
-                        return (value * 10000).toLocaleString(); // MMP 만원 → 원
+                        return Math.round(value * 10000).toLocaleString(); // MMP 만원 → 원
                       } else {
-                        return (value * 10000 * 12).toLocaleString(); // MMP 만원 → APE 원
+                        return Math.round(value * 10000 * 12).toLocaleString(); // MMP 만원 → APE 원
                       }
                     };
 
@@ -5267,9 +5267,9 @@ const Branch360Dashboard = () => {
                       if (value === 0) return '-';
                       // value는 MMP 기준 만원 단위
                       if (modalPerformanceType === 'MMP') {
-                        return (value * 10000).toLocaleString(); // MMP 만원 → 원
+                        return Math.round(value * 10000).toLocaleString(); // MMP 만원 → 원
                       } else {
-                        return (value * 10000 * 12).toLocaleString(); // MMP 만원 → APE 원
+                        return Math.round(value * 10000 * 12).toLocaleString(); // MMP 만원 → APE 원
                       }
                     };
 
