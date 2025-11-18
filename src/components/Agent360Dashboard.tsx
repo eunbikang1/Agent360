@@ -4,9 +4,11 @@ import { Trophy, Download, Building, ChevronRight, ChevronDown, ChevronUp, Arrow
 import {
   generateBranchPerformance,
   generateAgentCount,
+  generateManagerName,
   generateBranchAddress,
   generateBranchPhone
 } from '../data/branchDataGenerator';
+import { exportAgent360ToExcel } from '../utils/excelExport';
 
 const Agent360Dashboard = () => {
   const navigate = useNavigate();
@@ -495,31 +497,31 @@ const Agent360Dashboard = () => {
     방문: {
       count: 23,
       data: [
-        { date: '9/25', agency: '글로벌금융판매', branch: '하나돔', detail: '주력상품 홍보 및 업무 지원' },
-        { date: '9/24', agency: '메타리치', branch: '골드자산관리센터', detail: '신상품 설명 및 판매 도구 전달' },
-        { date: '9/24', agency: '지금용코리아', branch: '그레이트탑', detail: '분기별 실적 점검 및 개선방안 논의' },
-        { date: '9/23', agency: '더블유에셋', branch: '서울지사', detail: '고객관리 방법 지도 및 상품자료 전달' },
-        { date: '9/23', agency: '글로벌금융판매', branch: '리더스에이치비', detail: '설계사 교육프로그램 안내' },
-        { date: '9/22', agency: '지에이스타금융서비스', branch: '부천코어', detail: '마케팅 지원 및 홍보물 제공' },
-        { date: '9/22', agency: '한국지에이금융서비스', branch: '일산지사', detail: '신규 위촉 설계사 면담' },
-        { date: '9/21', agency: '메가', branch: '인슈에셋고양', detail: '월별 목표 설정 및 달성 전략 수립' },
-        { date: '9/20', agency: '글로벌금융판매', branch: '브릿지재무설계', detail: '고객 서비스 품질 개선 방안 논의' },
-        { date: '9/20', agency: '메타리치', branch: '리치골드', detail: '상품 포트폴리오 다양화 컨설팅' }
+        { date: '9/25', category: '지점', agency: '글로벌금융판매', branch: '하나돔', detail: '주력상품 홍보 및 업무 지원' },
+        { date: '9/24', category: '본사', agency: '메타리치', branch: '골드자산관리센터', detail: '신상품 설명 및 판매 도구 전달' },
+        { date: '9/24', category: '본사', agency: '지금용코리아', branch: '그레이트탑', detail: '분기별 실적 점검 및 개선방안 논의' },
+        { date: '9/23', category: '지점', agency: '더블유에셋', branch: '서울지사', detail: '고객관리 방법 지도 및 상품자료 전달' },
+        { date: '9/23', category: '지점', agency: '글로벌금융판매', branch: '리더스에이치비', detail: '설계사 교육프로그램 안내' },
+        { date: '9/22', category: '지점', agency: '지에이스타금융서비스', branch: '부천코어', detail: '마케팅 지원 및 홍보물 제공' },
+        { date: '9/22', category: '지점', agency: '한국지에이금융서비스', branch: '일산지사', detail: '신규 위촉 설계사 면담' },
+        { date: '9/21', category: '본사', agency: '메가', branch: '인슈에셋고양', detail: '월별 목표 설정 및 달성 전략 수립' },
+        { date: '9/20', category: '지점', agency: '글로벌금융판매', branch: '브릿지재무설계', detail: '고객 서비스 품질 개선 방안 논의' },
+        { date: '9/20', category: '지점', agency: '메타리치', branch: '리치골드', detail: '상품 포트폴리오 다양화 컨설팅' }
       ]
     },
     교육: {
       count: 15,
       data: [
-        { date: '9/25', agency: '글로벌금융판매', branch: '하나돔강북', detail: '신상품 교육: 건강보험 2.0 출시 설명' },
-        { date: '9/24', agency: '메타리치', branch: '보험스토어', detail: '디지털 영업도구 활용법 교육' },
-        { date: '9/23', agency: '지금용코리아', branch: '서울A', detail: '고객 상담 스킬 향상 교육' },
-        { date: '9/23', agency: '더블유에셋', branch: '기업금융본부', detail: '법인 영업 전략 교육' },
-        { date: '9/22', agency: '글로벌금융판매', branch: '케이엘아이케이베스트', detail: '종신보험 상품 설명 및 판매 기법' },
-        { date: '9/21', agency: '지에이스타금융서비스', branch: '부천코어', detail: '고객 니즈 분석 및 맞춤 제안 교육' },
-        { date: '9/20', agency: '한국지에이금융서비스', branch: '일산지사', detail: '신입 설계사 기초 교육' },
-        { date: '9/20', agency: '메가', branch: '인슈에셋고양', detail: '정기보험 상품 교육' },
-        { date: '9/19', agency: '메타리치', branch: '골드자산관리센터', detail: '고객 관리 시스템 사용법 교육' },
-        { date: '9/18', agency: '글로벌금융판매', branch: '굿브즈스카이', detail: '영업 프로세스 개선 교육' }
+        { date: '9/25', category: '건강', agency: '글로벌금융판매', branch: '하나돔강북', detail: '신상품 교육: 건강보험 2.0 출시 설명' },
+        { date: '9/24', category: '기타', agency: '메타리치', branch: '보험스토어', detail: '디지털 영업도구 활용법 교육' },
+        { date: '9/23', category: '기타', agency: '지금용코리아', branch: '서울A', detail: '고객 상담 스킬 향상 교육' },
+        { date: '9/23', category: '기타', agency: '더블유에셋', branch: '기업금융본부', detail: '법인 영업 전략 교육' },
+        { date: '9/22', category: '종신', agency: '글로벌금융판매', branch: '케이엘아이케이베스트', detail: '종신보험 상품 설명 및 판매 기법' },
+        { date: '9/21', category: '기타', agency: '지에이스타금융서비스', branch: '부천코어', detail: '고객 니즈 분석 및 맞춤 제안 교육' },
+        { date: '9/20', category: '기타', agency: '한국지에이금융서비스', branch: '일산지사', detail: '신입 설계사 기초 교육' },
+        { date: '9/20', category: '종신', agency: '메가', branch: '인슈에셋고양', detail: '정기보험 상품 교육' },
+        { date: '9/19', category: '기타', agency: '메타리치', branch: '골드자산관리센터', detail: '고객 관리 시스템 사용법 교육' },
+        { date: '9/18', category: '기타', agency: '글로벌금융판매', branch: '굿브즈스카이', detail: '영업 프로세스 개선 교육' }
       ]
     }
   };
@@ -1231,6 +1233,45 @@ const Agent360Dashboard = () => {
     }
   };
 
+  // 엑셀 다운로드 핸들러
+  const handleExcelDownload = () => {
+    // 전체 지점 데이터 가져오기
+    const branchRankings = getBranchRankings(true); // getAllData = true
+    const branchesData = branchRankings.data.map((branch: any) => ({
+      agency: branch.agency,
+      branch: branch.branch,
+      achievement: branch.achievement,
+      ape: branch.ape,
+      target: branch.target,
+      agentCount: generateAgentCount(branch.agency, branch.branch),
+      designCount: 0, // 실제 데이터로 대체 필요
+      contractCount: 0, // 실제 데이터로 대체 필요
+      mobileRate: 0, // 실제 데이터로 대체 필요
+      manager: generateManagerName(branch.agency, branch.branch),
+      phone: generateBranchPhone(branch.agency, branch.branch),
+      address: generateBranchAddress(branch.agency, branch.branch)
+    }));
+
+    // 일별 실적 데이터
+    const dailyData = getDailyData();
+
+    // 상품별 데이터
+    const productData = getPortfolioData();
+
+    // KPI 데이터
+    const kpiData = myKPI;
+
+    // 엑셀 생성 및 다운로드
+    exportAgent360ToExcel(
+      branchesData,
+      dailyData,
+      productData,
+      kpiData,
+      appliedMonth,
+      performanceType
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
 
@@ -1389,7 +1430,10 @@ const Agent360Dashboard = () => {
                 </div>
               </div>
 
-              <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm  rounded-lg flex items-center space-x-2 transition-colors">
+              <button
+                onClick={handleExcelDownload}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg flex items-center space-x-2 transition-colors"
+              >
                 <Download className="w-4 h-4" />
                 <span>원클릭 엑셀 다운로드</span>
               </button>
@@ -2171,29 +2215,39 @@ const Agent360Dashboard = () => {
 
                   <div className="max-h-48 overflow-y-auto">
                     {/* 컬럼 헤더 */}
-                    <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg mb-2 text-xs  text-gray-700 border-b border-gray-200">
+                    <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg mb-2 text-xs  text-gray-700 border-b border-gray-200">
                       <div className="min-w-[35px] shrink-0">날짜</div>
-                      <div className="min-w-[120px] shrink-0">대리점</div>
-                      <div className="min-w-[120px] shrink-0">지점</div>
-                      <div className="flex-1 min-w-0">활동 내용</div>
+                      <div className="min-w-[80px] w-[80px] shrink-0">대리점</div>
+                      <div className="min-w-[80px] w-[80px] shrink-0">지점</div>
+                      <div className="min-w-[50px] shrink-0 text-center">활동구분</div>
+                      <div className="flex-1 min-w-[200px]">활동 내용</div>
                     </div>
 
                     <div className="space-y-1">
                       {visitEducationData[visitEducationType].data.map((item, index) => (
                         <div
                           key={index}
-                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 text-xs border-l-2 border-transparent hover:border-blue-200 transition-all"
+                          className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 text-xs border-l-2 border-transparent hover:border-blue-200 transition-all"
                         >
                           <div className="text-black min-w-[35px] shrink-0 font-mono">
                             {item.date}
                           </div>
-                          <div className="min-w-[120px] shrink-0 truncate text-gray-900">
+                          <div className="min-w-[80px] w-[80px] shrink-0 truncate text-gray-900">
                             {item.agency}
                           </div>
-                          <div className="min-w-[120px] shrink-0 truncate text-gray-700">
+                          <div className="min-w-[80px] w-[80px] shrink-0 truncate text-gray-700">
                             {item.branch}
                           </div>
-                          <div className="text-black flex-1 min-w-0 truncate">
+                          <div className="min-w-[50px] shrink-0 text-center">
+                            <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
+                              visitEducationType === '방문'
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-blue-100 text-blue-700'
+                            }`}>
+                              {item.category}
+                            </span>
+                          </div>
+                          <div className="text-black flex-1 min-w-[200px]">
                             {item.detail}
                           </div>
                         </div>

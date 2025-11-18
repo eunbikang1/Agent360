@@ -9,6 +9,7 @@ import {
   generateBranchAddress,
   generateBranchPhone
 } from '../data/branchDataGenerator';
+import { exportBranch360ToExcel } from '../utils/excelExport';
 
 const Branch360Dashboard = () => {
   const { agency, branchName } = useParams<{ agency?: string; branchName: string }>();
@@ -169,42 +170,42 @@ const Branch360Dashboard = () => {
 
   // 통합 관리 활동 목록 (최신 순, 10개)
   const recentActivityList = [
-    { date: '2025-09-13', type: '교육', content: 'FIDO 종신보험 상품 교육', manager: '교육 매니저' },
-    { date: '2025-09-12', type: '방문', content: '김○○ 설계사 개별 상담', manager: '설계 매니저' },
-    { date: '2025-09-11', type: '교육', content: '디지털 영업 툴 활용법 세미나', manager: '교육 매니저' },
-    { date: '2025-09-10', type: '방문', content: '신입 설계사 현장 동행', manager: '지점장' },
-    { date: '2025-09-09', type: '교육', content: '고객 상담 스킬 향상 교육', manager: '교육 매니저' },
-    { date: '2025-09-06', type: '방문', content: '우수 설계사 격려 방문', manager: '지점장' },
-    { date: '2025-09-05', type: '교육', content: '보험 상품 업데이트 안내', manager: '교육 매니저' },
-    { date: '2025-09-04', type: '방문', content: '지점 실적 점검 및 피드백', manager: '설계 매니저' },
-    { date: '2025-09-03', type: '교육', content: '컴플라이언스 교육', manager: '교육 매니저' },
-    { date: '2025-09-02', type: '방문', content: '설계사 개별 면담 및 상담', manager: '설계 매니저' },
+    { date: '2025-09-13', type: '교육', category: '종신', content: 'FIDO 종신보험 상품 교육', manager: '교육 매니저' },
+    { date: '2025-09-12', type: '방문', category: '지점', content: '김○○ 설계사 개별 상담', manager: '설계 매니저' },
+    { date: '2025-09-11', type: '교육', category: '기타', content: '디지털 영업 툴 활용법 세미나', manager: '교육 매니저' },
+    { date: '2025-09-10', type: '방문', category: '지점', content: '신입 설계사 현장 동행', manager: '지점장' },
+    { date: '2025-09-09', type: '교육', category: '기타', content: '고객 상담 스킬 향상 교육', manager: '교육 매니저' },
+    { date: '2025-09-06', type: '방문', category: '본사', content: '우수 설계사 격려 방문', manager: '지점장' },
+    { date: '2025-09-05', type: '교육', category: '건강', content: '보험 상품 업데이트 안내', manager: '교육 매니저' },
+    { date: '2025-09-04', type: '방문', category: '본사', content: '지점 실적 점검 및 피드백', manager: '설계 매니저' },
+    { date: '2025-09-03', type: '교육', category: '기타', content: '컴플라이언스 교육', manager: '교육 매니저' },
+    { date: '2025-09-02', type: '방문', category: '지점', content: '설계사 개별 면담 및 상담', manager: '설계 매니저' },
   ];
 
   const educationActivityList = [
-    { date: '2025-09-13', content: 'FIDO 종신보험 상품 교육', manager: '교육 매니저' },
-    { date: '2025-09-11', content: '디지털 영업 툴 활용법 세미나', manager: '교육 매니저' },
-    { date: '2025-09-09', content: '고객 상담 스킬 향상 교육', manager: '교육 매니저' },
-    { date: '2025-09-05', content: '보험 상품 업데이트 안내', manager: '교육 매니저' },
-    { date: '2025-09-03', content: '컴플라이언스 교육', manager: '교육 매니저' },
-    { date: '2025-08-28', content: '마케팅 전략 워크샵', manager: '교육 매니저' },
-    { date: '2025-08-25', content: '신상품 출시 설명회', manager: '교육 매니저' },
-    { date: '2025-08-20', content: '고객관리 시스템 사용법', manager: '교육 매니저' },
-    { date: '2025-08-15', content: '영업 프로세스 개선 교육', manager: '교육 매니저' },
-    { date: '2025-08-10', content: '보험 법규 업데이트 교육', manager: '교육 매니저' },
+    { date: '2025-09-13', type: '교육', category: '종신', content: 'FIDO 종신보험 상품 교육', manager: '교육 매니저' },
+    { date: '2025-09-11', type: '교육', category: '기타', content: '디지털 영업 툴 활용법 세미나', manager: '교육 매니저' },
+    { date: '2025-09-09', type: '교육', category: '기타', content: '고객 상담 스킬 향상 교육', manager: '교육 매니저' },
+    { date: '2025-09-05', type: '교육', category: '건강', content: '보험 상품 업데이트 안내', manager: '교육 매니저' },
+    { date: '2025-09-03', type: '교육', category: '기타', content: '컴플라이언스 교육', manager: '교육 매니저' },
+    { date: '2025-08-28', type: '교육', category: '기타', content: '마케팅 전략 워크샵', manager: '교육 매니저' },
+    { date: '2025-08-25', type: '교육', category: '암', content: '신상품 출시 설명회', manager: '교육 매니저' },
+    { date: '2025-08-20', type: '교육', category: '기타', content: '고객관리 시스템 사용법', manager: '교육 매니저' },
+    { date: '2025-08-15', type: '교육', category: '기타', content: '영업 프로세스 개선 교육', manager: '교육 매니저' },
+    { date: '2025-08-10', type: '교육', category: '치매', content: '보험 법규 업데이트 교육', manager: '교육 매니저' },
   ];
 
   const visitActivityList = [
-    { date: '2025-06-25', content: '김○○ 설계사 개별 상담', manager: '설계 매니저' },
-    { date: '2025-06-22', content: '신입 설계사 현장 동행', manager: '지점장' },
-    { date: '2025-06-18', content: '우수 설계사 격려 방문', manager: '지점장' },
-    { date: '2025-06-15', content: '지점 실적 점검 및 피드백', manager: '설계 매니저' },
-    { date: '2025-06-12', content: '설계사 개별 면담 및 상담', manager: '설계 매니저' },
-    { date: '2025-06-08', content: '고객 불만 처리 지원', manager: '설계 매니저' },
-    { date: '2025-06-05', content: '신규 고객 발굴 지원', manager: '설계 매니저' },
-    { date: '2025-06-02', content: '계약 체결 과정 지원', manager: '설계 매니저' },
-    { date: '2025-05-30', content: '설계사 개인 목표 설정 상담', manager: '설계 매니저' },
-    { date: '2025-05-28', content: '팀 빌딩 활동 참여', manager: '지점장' },
+    { date: '2025-06-25', type: '방문', category: '지점', content: '김○○ 설계사 개별 상담', manager: '설계 매니저' },
+    { date: '2025-06-22', type: '방문', category: '지점', content: '신입 설계사 현장 동행', manager: '지점장' },
+    { date: '2025-06-18', type: '방문', category: '본사', content: '우수 설계사 격려 방문', manager: '지점장' },
+    { date: '2025-06-15', type: '방문', category: '본사', content: '지점 실적 점검 및 피드백', manager: '설계 매니저' },
+    { date: '2025-06-12', type: '방문', category: '지점', content: '설계사 개별 면담 및 상담', manager: '설계 매니저' },
+    { date: '2025-06-08', type: '방문', category: '지점', content: '고객 불만 처리 지원', manager: '설계 매니저' },
+    { date: '2025-06-05', type: '방문', category: '지점', content: '신규 고객 발굴 지원', manager: '설계 매니저' },
+    { date: '2025-06-02', type: '방문', category: '지점', content: '계약 체결 과정 지원', manager: '설계 매니저' },
+    { date: '2025-05-30', type: '방문', category: '지점', content: '설계사 개인 목표 설정 상담', manager: '설계 매니저' },
+    { date: '2025-05-28', type: '방문', category: '본사', content: '팀 빌딩 활동 참여', manager: '지점장' },
   ];
 
   // 지능형 단위 포매팅 함수 (천원 단위)
@@ -884,7 +885,7 @@ const Branch360Dashboard = () => {
   const [showActiveAgentsModal, setShowActiveAgentsModal] = useState(false); // 가동 설계사 모달
   const [showInactiveAgentsModal, setShowInactiveAgentsModal] = useState(false); // 미가동 설계사 모달
   const [modalPerformanceType, setModalPerformanceType] = useState<'APE' | 'MMP'>('MMP'); // 모달 성과 기준
-  const [activeSortBy, setActiveSortBy] = useState<'name' | 'code' | 'tenure' | 'commissionMonth' | 'currentMMP' | 'previousMMP' | 'M0' | 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M0건' | 'M1건' | 'M2건' | 'M3건' | 'M4건' | 'M5건'>('M0'); // 가동 설계사 정렬 기준
+  const [activeSortBy, setActiveSortBy] = useState<'name' | 'code' | 'tenure' | 'commissionMonth' | '가입설계건수' | 'currentMMP' | 'previousMMP' | 'M0' | 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M0건' | 'M1건' | 'M2건' | 'M3건' | 'M4건' | 'M5건'>('M0'); // 가동 설계사 정렬 기준
   const [activeSortOrder, setActiveSortOrder] = useState<'asc' | 'desc'>('desc'); // 가동 설계사 정렬 순서
   const [inactiveSortBy, setInactiveSortBy] = useState<'name' | 'code' | 'tenure' | 'commissionMonth' | 'isActive' | 'previousMMP' | 'M0' | 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M0건' | 'M1건' | 'M2건' | 'M3건' | 'M4건' | 'M5건'>('commissionMonth'); // 미가동 설계사 정렬 기준
   const [inactiveSortOrder, setInactiveSortOrder] = useState<'asc' | 'desc'>('desc'); // 미가동 설계사 정렬 순서
@@ -1674,7 +1675,49 @@ const Branch360Dashboard = () => {
   };
 
   const handleExcelDownload = () => {
-    downloadCSV();
+    // 지점 기본 정보
+    const branchInfo = {
+      agency: selectedAgency,
+      branch: selectedBranch,
+      manager: managerName,
+      phone: generateBranchPhone(selectedAgency, selectedBranch),
+      address: generateBranchAddress(selectedAgency, selectedBranch),
+      ape: branchPerformanceData.currentMonthAPE,
+      target: currentBranchTarget,
+      achievement: branchPerformanceData.achievement,
+      agentCount: generateAgentCount(selectedAgency, selectedBranch),
+      activeAgents: allAgentsData.filter((a: any) => a.previousMonth.premium > 0).length,
+      designCount: 0, // 실제 데이터로 대체 필요
+      contractCount: 0, // 실제 데이터로 대체 필요
+      mobileRate: 0 // 실제 데이터로 대체 필요
+    };
+
+    // 일별 실적 데이터
+    const dailyData = dailyPerformance;
+
+    // 설계사별 데이터
+    const agentsData = allAgentsData;
+
+    // 상품별 데이터
+    const productData = getPortfolioData();
+
+    // KPI 데이터 (간단한 형태로)
+    const kpiData = {
+      achievement: branchPerformanceData.achievement,
+      ape: branchPerformanceData.currentMonthAPE,
+      target: currentBranchTarget
+    };
+
+    // 엑셀 생성 및 다운로드
+    exportBranch360ToExcel(
+      branchInfo,
+      dailyData,
+      agentsData,
+      productData,
+      kpiData,
+      selectedPeriod,
+      performanceType
+    );
   };
 
   return (
@@ -2629,6 +2672,7 @@ const Branch360Dashboard = () => {
                   {/* 헤더 */}
                   <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-t-lg text-xs font-medium text-gray-700 border-b border-gray-200 sticky top-0">
                     <div className="min-w-[35px] shrink-0">날짜</div>
+                    <div className="min-w-[45px] shrink-0 text-center">구분</div>
                     <div className="flex-1">활동 내용</div>
                     <div className="min-w-[70px] shrink-0">담당</div>
                   </div>
@@ -2649,6 +2693,15 @@ const Branch360Dashboard = () => {
                         <div key={index} className="flex items-center gap-3 p-2 hover:bg-gray-50 transition-colors text-xs">
                           <div className="min-w-[35px] shrink-0 text-gray-600 font-medium">
                             {activity.date.split('-')[1]}/{activity.date.split('-')[2]}
+                          </div>
+                          <div className="min-w-[45px] shrink-0 text-center">
+                            <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
+                              activity.type === '교육'
+                                ? 'bg-blue-100 text-blue-700'
+                                : 'bg-green-100 text-green-700'
+                            }`}>
+                              {activity.category}
+                            </span>
                           </div>
                           <div className="flex-1 text-gray-800 truncate">{activity.content}</div>
                           <div className="min-w-[70px] shrink-0 text-gray-600">{activity.manager}</div>
@@ -4500,7 +4553,7 @@ const Branch360Dashboard = () => {
                         보험경력 {activeSortBy === 'tenure' && (activeSortOrder === 'desc' ? '↓' : '↑')}
                       </button>
                     </th>
-                    <th rowSpan={2} className="px-2 py-3 text-center font-semibold text-gray-700 border-b border-r-2 border-gray-300 whitespace-nowrap min-w-[60px]">
+                    <th rowSpan={2} className="px-2 py-3 text-center font-semibold text-gray-700 border-b whitespace-nowrap min-w-[60px]">
                       <button
                         onClick={() => {
                           if (activeSortBy === 'commissionMonth') {
@@ -4513,6 +4566,21 @@ const Branch360Dashboard = () => {
                         className="text-center hover:text-blue-600 transition-colors w-full"
                       >
                         위촉차월 {activeSortBy === 'commissionMonth' && (activeSortOrder === 'desc' ? '↓' : '↑')}
+                      </button>
+                    </th>
+                    <th rowSpan={2} className="px-2 py-3 text-center font-semibold text-gray-700 border-b border-r-2 border-gray-300 whitespace-nowrap min-w-[80px]">
+                      <button
+                        onClick={() => {
+                          if (activeSortBy === '가입설계건수') {
+                            setActiveSortOrder(activeSortOrder === 'desc' ? 'asc' : 'desc');
+                          } else {
+                            setActiveSortBy('가입설계건수');
+                            setActiveSortOrder('desc');
+                          }
+                        }}
+                        className="text-center hover:text-blue-600 transition-colors w-full"
+                      >
+                        가입설계건수 {activeSortBy === '가입설계건수' && (activeSortOrder === 'desc' ? '↓' : '↑')}
                       </button>
                     </th>
                     <th colSpan={6} className="px-2 py-2 text-center font-bold text-gray-800 border-b border-l-2 border-gray-300 bg-gray-100">
@@ -4746,6 +4814,9 @@ const Branch360Dashboard = () => {
                       }
                       // continuousMonths === 1 또는 0: 신규가동, M1~M5 모두 0
 
+                      // 가입설계건수: 당월 청약건수(M0건)의 약 5배 (4~6배 범위로 랜덤)
+                      const designProposalCount = Math.round(baseContracts * (4 + Math.random() * 2));
+
                       return {
                         M0: baseValue,
                         M1: m1Mmp,
@@ -4759,6 +4830,7 @@ const Branch360Dashboard = () => {
                         'M3건': m3Contracts,
                         'M4건': m4Contracts,
                         'M5건': m5Contracts,
+                        '가입설계건수': designProposalCount,
                       };
                     };
 
@@ -4799,6 +4871,10 @@ const Branch360Dashboard = () => {
                           case 'commissionMonth':
                             aValue = parseInt(a.commissionMonth);
                             bValue = parseInt(b.commissionMonth);
+                            break;
+                          case '가입설계건수':
+                            aValue = aMonthly['가입설계건수'];
+                            bValue = bMonthly['가입설계건수'];
                             break;
                           case 'M0':
                             aValue = aMonthly.M0;
@@ -4872,7 +4948,8 @@ const Branch360Dashboard = () => {
                           <td className="px-2 py-3 font-mono text-gray-600">{agent.agentCode}</td>
                           <td className="px-2 py-3 font-medium text-gray-900">{agent.name}</td>
                           <td className="px-2 py-3 text-gray-600">{agent.insuranceCareer}</td>
-                          <td className="px-2 py-3 text-center text-gray-600 border-r-2 border-gray-200">{agent.commissionMonth}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{agent.commissionMonth}</td>
+                          <td className="px-2 py-3 text-center text-gray-900 font-medium border-r-2 border-gray-200">{monthlyData['가입설계건수']}</td>
                           <td className="px-2 py-3 text-center text-gray-900 font-medium">{formatValue(monthlyData.M0)}</td>
                           <td className="px-2 py-3 text-center text-gray-600">{formatValue(monthlyData.M1)}</td>
                           <td className="px-2 py-3 text-center text-gray-600">{formatValue(monthlyData.M2)}</td>
