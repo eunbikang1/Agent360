@@ -151,7 +151,6 @@ const Branch360Dashboard = () => {
   const [expandedEducation, setExpandedEducation] = useState(false);
   const [expandedVisit, setExpandedVisit] = useState(false);
   const [selectedActivityType, setSelectedActivityType] = useState<'최근' | '교육' | '방문'>('최근');
-  const [showConversionTooltip, setShowConversionTooltip] = useState(false);
   const [hoveredProduct, setHoveredProduct] = useState<any>(null);
   const [showProgressTooltip, setShowProgressTooltip] = useState(false);
 
