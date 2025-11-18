@@ -2144,27 +2144,9 @@ const Branch360Dashboard = () => {
 
               {/* 청약 카드 */}
               <div
-                className="bg-white rounded-lg shadow-sm border p-4 flex-1 relative cursor-pointer hover:shadow-md transition-shadow"
-                onMouseEnter={() => setShowConversionTooltip(true)}
-                onMouseLeave={() => setShowConversionTooltip(false)}
+                className="bg-white rounded-lg shadow-sm border p-4 flex-1 relative"
               >
                 <h4 className="text-sm font-semibold text-gray-700 mb-3">청약</h4>
-
-                {/* 호버 툴팁 */}
-                {showConversionTooltip && (() => {
-                  const contractCount = 96;
-                  const rejectedCount = 18; // 거절 18건
-                  const withdrawnCount = 6; // 철회 6건
-
-                  return (
-                    <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-800 text-white text-xs rounded px-3 py-2 whitespace-nowrap z-30 shadow-lg">
-                      <div className="mb-1">청약 {contractCount}건 중</div>
-                      <div>거절: {rejectedCount}건, 철회: {withdrawnCount}건</div>
-                      {/* 화살표 */}
-                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
-                    </div>
-                  );
-                })()}
 
                 {/* 메인 수치 영역 */}
                 <div className="text-center mb-3">
