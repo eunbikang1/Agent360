@@ -87,9 +87,9 @@ const Branch360Dashboard = () => {
           valueA = a.previousMonth.premium;
           valueB = b.previousMonth.premium;
           break;
-        case 'isActive':
-          valueA = a.previousMonth.premium > 0 ? 1 : 0;
-          valueB = b.previousMonth.premium > 0 ? 1 : 0;
+        case '가입설계건수':
+          valueA = a.previousMonth.premium > 0 ? Math.floor(Math.random() * 9) + 1 : 0;
+          valueB = b.previousMonth.premium > 0 ? Math.floor(Math.random() * 9) + 1 : 0;
           break;
         default:
           return 0;
@@ -3651,13 +3651,13 @@ const Branch360Dashboard = () => {
                                 )}
                               </button>
                             </th>
-                            <th className="px-2 py-2 text-center font-medium text-gray-700 whitespace-nowrap w-16">
+                            <th className="px-2 py-2 text-center font-medium text-gray-700 whitespace-nowrap w-20">
                               <button
-                                onClick={() => handleInactiveTableSort('isActive')}
+                                onClick={() => handleInactiveTableSort('가입설계건수')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors mx-auto"
                               >
-                                활동 여부
-                                {inactiveTableSortBy === 'isActive' && (
+                                당월 설계건수
+                                {inactiveTableSortBy === '가입설계건수' && (
                                   <span className="text-gray-500">
                                     {inactiveTableSortOrder === 'desc' ? '↓' : '↑'}
                                   </span>
@@ -3698,10 +3698,8 @@ const Branch360Dashboard = () => {
                               <td className="px-2 py-2 text-gray-600 font-mono text-xs">{agent.agentCode}</td>
                               <td className="px-2 py-2 font-medium text-gray-800">{agent.name}</td>
                               <td className="px-2 py-2 text-right text-gray-600 text-xs">{agent.commissionMonth.replace('개월', '')}</td>
-                              <td className="px-2 py-2 text-center">
-                                <span className={agent.previousMonth.premium > 0 ? 'text-green-600 font-medium' : 'text-gray-400'}>
-                                  {agent.previousMonth.premium > 0 ? 'Y' : 'N'}
-                                </span>
+                              <td className="px-2 py-2 text-center text-gray-900 font-medium">
+                                {agent.previousMonth.premium > 0 ? Math.floor(Math.random() * 9) + 1 : 0}
                               </td>
                               <td className="px-2 py-2 text-right text-gray-400">-</td>
                               <td className="px-2 py-2 text-right text-gray-600 whitespace-nowrap">
@@ -4561,7 +4559,7 @@ const Branch360Dashboard = () => {
                         }}
                         className="text-center hover:text-blue-600 transition-colors w-full"
                       >
-                        당월 가입설계건수 {activeSortBy === '가입설계건수' && (activeSortOrder === 'desc' ? '↓' : '↑')}
+                        당월 설계건수 {activeSortBy === '가입설계건수' && (activeSortOrder === 'desc' ? '↓' : '↑')}
                       </button>
                     </th>
                     <th colSpan={6} className="px-2 py-2 text-center font-bold text-gray-800 border-b border-l-2 border-gray-300 bg-gray-100">
@@ -5084,7 +5082,7 @@ const Branch360Dashboard = () => {
                         }}
                         className="text-center hover:text-blue-600 transition-colors w-full"
                       >
-                        당월 가입설계건수 {inactiveSortBy === '가입설계건수' && (inactiveSortOrder === 'desc' ? '↓' : '↑')}
+                        당월 설계건수 {inactiveSortBy === '가입설계건수' && (inactiveSortOrder === 'desc' ? '↓' : '↑')}
                       </button>
                     </th>
                     <th colSpan={6} className="px-2 py-2 text-center font-bold text-gray-800 border-b border-l-2 border-gray-300 bg-gray-100">
