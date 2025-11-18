@@ -2217,10 +2217,10 @@ const Agent360Dashboard = () => {
                     {/* 컬럼 헤더 */}
                     <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg mb-2 text-xs  text-gray-700 border-b border-gray-200">
                       <div className="min-w-[35px] shrink-0">날짜</div>
+                      <div className="min-w-[50px] shrink-0 text-center">구분</div>
+                      <div className="flex-1 min-w-[200px]">활동 내용</div>
                       <div className="min-w-[80px] w-[80px] shrink-0">대리점</div>
                       <div className="min-w-[80px] w-[80px] shrink-0">지점</div>
-                      <div className="min-w-[50px] shrink-0 text-center">활동구분</div>
-                      <div className="flex-1 min-w-[200px]">활동 내용</div>
                     </div>
 
                     <div className="space-y-1">
@@ -2231,12 +2231,6 @@ const Agent360Dashboard = () => {
                         >
                           <div className="text-black min-w-[35px] shrink-0 font-mono">
                             {item.date}
-                          </div>
-                          <div className="min-w-[80px] w-[80px] shrink-0 truncate text-gray-900">
-                            {item.agency}
-                          </div>
-                          <div className="min-w-[80px] w-[80px] shrink-0 truncate text-gray-700">
-                            {item.branch}
                           </div>
                           <div className="min-w-[50px] shrink-0 text-center">
                             <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
@@ -2249,6 +2243,12 @@ const Agent360Dashboard = () => {
                           </div>
                           <div className="text-black flex-1 min-w-[200px]">
                             {item.detail}
+                          </div>
+                          <div className="min-w-[80px] w-[80px] shrink-0 truncate text-gray-900">
+                            {item.agency}
+                          </div>
+                          <div className="min-w-[80px] w-[80px] shrink-0 truncate text-gray-700">
+                            {item.branch}
                           </div>
                         </div>
                       ))}

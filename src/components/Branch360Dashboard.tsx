@@ -887,7 +887,7 @@ const Branch360Dashboard = () => {
   const [modalPerformanceType, setModalPerformanceType] = useState<'APE' | 'MMP'>('MMP'); // 모달 성과 기준
   const [activeSortBy, setActiveSortBy] = useState<'name' | 'code' | 'tenure' | 'commissionMonth' | '가입설계건수' | 'currentMMP' | 'previousMMP' | 'M0' | 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M0건' | 'M1건' | 'M2건' | 'M3건' | 'M4건' | 'M5건'>('M0'); // 가동 설계사 정렬 기준
   const [activeSortOrder, setActiveSortOrder] = useState<'asc' | 'desc'>('desc'); // 가동 설계사 정렬 순서
-  const [inactiveSortBy, setInactiveSortBy] = useState<'name' | 'code' | 'tenure' | 'commissionMonth' | 'isActive' | 'previousMMP' | 'M0' | 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M0건' | 'M1건' | 'M2건' | 'M3건' | 'M4건' | 'M5건'>('commissionMonth'); // 미가동 설계사 정렬 기준
+  const [inactiveSortBy, setInactiveSortBy] = useState<'name' | 'code' | 'tenure' | 'commissionMonth' | '가입설계건수' | 'previousMMP' | 'M0' | 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M0건' | 'M1건' | 'M2건' | 'M3건' | 'M4건' | 'M5건'>('commissionMonth'); // 미가동 설계사 정렬 기준
   const [inactiveSortOrder, setInactiveSortOrder] = useState<'asc' | 'desc'>('desc'); // 미가동 설계사 정렬 순서
   
   // 에이전트 리스트 데이터 (포함 관계로 정리)
@@ -4568,7 +4568,7 @@ const Branch360Dashboard = () => {
                         위촉차월 {activeSortBy === 'commissionMonth' && (activeSortOrder === 'desc' ? '↓' : '↑')}
                       </button>
                     </th>
-                    <th rowSpan={2} className="px-2 py-3 text-center font-semibold text-gray-700 border-b border-r-2 border-gray-300 whitespace-nowrap min-w-[80px]">
+                    <th rowSpan={2} className="px-2 py-3 text-center font-semibold text-gray-700 border-b border-r-2 border-gray-300 whitespace-nowrap min-w-[100px]">
                       <button
                         onClick={() => {
                           if (activeSortBy === '가입설계건수') {
@@ -4580,7 +4580,7 @@ const Branch360Dashboard = () => {
                         }}
                         className="text-center hover:text-blue-600 transition-colors w-full"
                       >
-                        가입설계건수 {activeSortBy === '가입설계건수' && (activeSortOrder === 'desc' ? '↓' : '↑')}
+                        당월 가입설계건수 {activeSortBy === '가입설계건수' && (activeSortOrder === 'desc' ? '↓' : '↑')}
                       </button>
                     </th>
                     <th colSpan={6} className="px-2 py-2 text-center font-bold text-gray-800 border-b border-l-2 border-gray-300 bg-gray-100">
@@ -5091,19 +5091,19 @@ const Branch360Dashboard = () => {
                         위촉차월 {inactiveSortBy === 'commissionMonth' && (inactiveSortOrder === 'desc' ? '↓' : '↑')}
                       </button>
                     </th>
-                    <th rowSpan={2} className="px-2 py-3 text-center font-semibold text-gray-700 border-b border-r-2 border-gray-300 whitespace-nowrap min-w-[60px]">
+                    <th rowSpan={2} className="px-2 py-3 text-center font-semibold text-gray-700 border-b border-r-2 border-gray-300 whitespace-nowrap min-w-[100px]">
                       <button
                         onClick={() => {
-                          if (inactiveSortBy === 'isActive') {
+                          if (inactiveSortBy === '가입설계건수') {
                             setInactiveSortOrder(inactiveSortOrder === 'desc' ? 'asc' : 'desc');
                           } else {
-                            setInactiveSortBy('isActive');
+                            setInactiveSortBy('가입설계건수');
                             setInactiveSortOrder('desc');
                           }
                         }}
                         className="text-center hover:text-blue-600 transition-colors w-full"
                       >
-                        활동 여부 {inactiveSortBy === 'isActive' && (inactiveSortOrder === 'desc' ? '↓' : '↑')}
+                        당월 가입설계건수 {inactiveSortBy === '가입설계건수' && (inactiveSortOrder === 'desc' ? '↓' : '↑')}
                       </button>
                     </th>
                     <th colSpan={6} className="px-2 py-2 text-center font-bold text-gray-800 border-b border-l-2 border-gray-300 bg-gray-100">
@@ -5323,6 +5323,9 @@ const Branch360Dashboard = () => {
                       const m4Mmp = m4Contracts > 0 ? Math.max(20, Math.round(baseValue * (0.1 + Math.random() * 0.7))) : 0;
                       const m5Mmp = m5Contracts > 0 ? Math.max(20, Math.round(baseValue * (0.3 + Math.random() * 0.4))) : 0;
 
+                      // 가입설계건수: M1에 실적이 있으면 1~9 사이, 없으면 0
+                      const designProposalCount = m1Mmp > 0 ? Math.floor(Math.random() * 9) + 1 : 0;
+
                       return {
                         M0: 0, // 당월은 미가동이므로 0
                         M1: m1Mmp,
@@ -5336,6 +5339,7 @@ const Branch360Dashboard = () => {
                         'M3건': m3Contracts,
                         'M4건': m4Contracts,
                         'M5건': m5Contracts,
+                        '가입설계건수': designProposalCount,
                       };
                     };
 
@@ -5381,11 +5385,10 @@ const Branch360Dashboard = () => {
                             aValue = parseInt(a.commissionMonth);
                             bValue = parseInt(b.commissionMonth);
                             break;
-                          case 'isActive':
-                            // Y(활동 중)가 N(미활동)보다 높은 값으로 정렬
-                            // 실제 표시되는 조건과 동일하게 M1 값 기준
-                            aValue = a.monthlyData.M1 > 0 ? 1 : 0;
-                            bValue = b.monthlyData.M1 > 0 ? 1 : 0;
+                          case '가입설계건수':
+                            // 미가동 설계사의 가입설계건수: M1 > 0이면 10 미만, 아니면 0
+                            aValue = a.monthlyData['가입설계건수'];
+                            bValue = b.monthlyData['가입설계건수'];
                             break;
                           case 'M0':
                             aValue = a.monthlyData.M0;
@@ -5460,10 +5463,8 @@ const Branch360Dashboard = () => {
                           <td className="px-2 py-3 font-medium text-gray-900">{agent.name}</td>
                           <td className="px-2 py-3 text-gray-600">{agent.insuranceCareer}</td>
                           <td className="px-2 py-3 text-center text-gray-600">{agent.commissionMonth}</td>
-                          <td className="px-2 py-3 text-center border-r-2 border-gray-200">
-                            <span className={monthlyData.M1 > 0 ? 'text-green-600 font-medium' : 'text-gray-400'}>
-                              {monthlyData.M1 > 0 ? 'Y' : 'N'}
-                            </span>
+                          <td className="px-2 py-3 text-center text-gray-900 font-medium border-r-2 border-gray-200">
+                            {monthlyData['가입설계건수']}
                           </td>
                           <td className="px-2 py-3 text-center text-red-600 font-medium">{formatInactiveValue(monthlyData.M0)}</td>
                           <td className="px-2 py-3 text-center text-gray-600">{formatInactiveValue(monthlyData.M1)}</td>
