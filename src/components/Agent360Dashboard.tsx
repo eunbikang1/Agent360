@@ -2232,14 +2232,8 @@ const Agent360Dashboard = () => {
                           <div className="text-black min-w-[35px] shrink-0 font-mono">
                             {item.date}
                           </div>
-                          <div className="min-w-[50px] shrink-0 text-center">
-                            <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
-                              visitEducationType === '방문'
-                                ? 'bg-green-100 text-green-700'
-                                : 'bg-blue-100 text-blue-700'
-                            }`}>
-                              {item.category}
-                            </span>
+                          <div className="min-w-[50px] shrink-0 text-center text-gray-600">
+                            {item.category}
                           </div>
                           <div className="text-black flex-1 min-w-[200px]">
                             {item.detail}
@@ -2358,29 +2352,29 @@ const Agent360Dashboard = () => {
 
                     <div className="mb-2 font-semibold text-red-300">🚨 위험 신호 (Risk Signal)</div>
                     <div className="space-y-2 mb-4 text-sm">
-                      <div>• <strong>무실적 전환 지점:</strong> 전월에는 실적이 있었으나, 당월 실적이 '0원'으로 활동이 중단된 지점입니다.</div>
-                      <div>• <strong>실적 급하락:</strong> 전월 동기 대비 실적이 30% 이상 급격히 감소한 지점입니다.</div>
-                      <div>• <strong>장기 미관리:</strong> 목표는 있으나 최근 6개월간 방문·교육 이력 및 실적이 모두 없는 지점입니다.</div>
-                      <div>• <strong>진도율 저조:</strong> 당월 경과일 대비 목표 달성률이 20%p 이상 뒤처지고 있는 지점입니다.</div>
-                      <div>• <strong>핵심설계사 해촉:</strong> 최근 3영업일 내 본부 상위 20% 핵심 설계사의 해촉이 발생한 지점입니다.</div>
-                      <div>• <strong>핵심설계사 미가동:</strong> 본부 상위 20% 핵심 설계사가 당월 현재까지 활동 실적이 없는 지점입니다.</div>
-                      <div>• <strong>신입 이상 계약:</strong> 신입 설계사의 첫 계약이 건강보험이 아닌 '종신/정기보험'으로 체결된 지점입니다.</div>
+                      <div>• <strong>무실적 전환 지점:</strong> 전월에는 실적이 있었으나, 당월 실적이 '0원'으로 활동이 중단된 지점</div>
+                      <div>• <strong>실적 급하락:</strong> 전월 동기 대비 실적이 30% 이상 급격히 감소한 지점</div>
+                      <div>• <strong>장기 미관리:</strong> 목표는 있으나 최근 6개월간 방문·교육 이력 및 실적이 모두 없는 지점</div>
+                      <div>• <strong>진도율 저조:</strong> 당월 경과일 대비 목표 달성률이 20%p 이상 뒤처지고 있는 지점</div>
+                      <div>• <strong>핵심설계사 해촉:</strong> 최근 3영업일 내 본부 상위 20% 핵심 설계사의 해촉이 발생한 지점</div>
+                      <div>• <strong>핵심설계사 미가동:</strong> 본부 상위 20% 핵심 설계사가 당월 현재까지 활동 실적이 없는 지점</div>
+                      <div>• <strong>신입 이상 계약:</strong> 신입 설계사의 첫 계약이 건강보험이 아닌 '종신/정기보험'으로 체결된 지점</div>
                     </div>
 
                     <div className="mb-2 font-semibold text-green-300">🚀 기회 신호 (Opportunity Signal)</div>
                     <div className="space-y-2 mb-4 text-sm">
-                      <div>• <strong>활동 전환 지점:</strong> 전월에는 실적이 없었으나, 당월 실적이 발생하여 활동을 재개한 지점입니다.</div>
-                      <div>• <strong>실적 급상승:</strong> 전월 동기 대비 실적이 30% 이상 크게 성장한 지점입니다.</div>
-                      <div>• <strong>진도율 우수:</strong> 당월 경과일 대비 목표 달성률을 20%p 이상 초과 달성 중인 지점입니다.</div>
-                      <div>• <strong>고액 계약 체결:</strong> 월 납입 보험료 30만 원 이상의 고액 우량 계약이 체결된 지점입니다.</div>
-                      <div>• <strong>생애 첫 계약:</strong> 당월 위촉된 신입 설계사가 첫 실적 달성에 성공한 지점입니다.</div>
+                      <div>• <strong>활동 전환 지점:</strong> 전월에는 실적이 없었으나, 당월 실적이 발생하여 활동을 재개한 지점</div>
+                      <div>• <strong>실적 급상승:</strong> 전월 동기 대비 실적이 30% 이상 크게 성장한 지점</div>
+                      <div>• <strong>진도율 우수:</strong> 당월 경과일 대비 목표 달성률을 20%p 이상 초과 달성 중인 지점</div>
+                      <div>• <strong>고액 계약 체결:</strong> 월 납입 보험료 30만 원 이상의 고액 우량 계약이 체결된 지점</div>
+                      <div>• <strong>생애 첫 계약:</strong> 당월 위촉된 신입 설계사가 첫 실적 달성에 성공한 지점</div>
                     </div>
 
                     <div className="mb-2 font-semibold text-blue-300">📊 변화 탐지 (Change Signal)</div>
                     <div className="space-y-2 mb-3 text-sm">
-                      <div>• <strong>목표 외 실적 발생:</strong> 당월 목표가 설정되지 않았으나 실적이 발생한 의외의 성과 지점입니다.</div>
-                      <div>• <strong>신규 설계사 유입:</strong> 당월 신규 위촉 설계사가 유입되어 조직 확대가 기대되는 지점입니다.</div>
-                      <div>• <strong>포트폴리오 급변화:</strong> 주력 상품군(건강 vs 종신) 비중이 평소 대비 20%p 이상 급격히 변동된 지점입니다.</div>
+                      <div>• <strong>목표 외 실적 발생:</strong> 당월 목표가 설정되지 않았으나 실적이 발생한 의외의 성과 지점</div>
+                      <div>• <strong>신규 설계사 유입:</strong> 당월 신규 위촉 설계사가 유입되어 조직 확대가 기대되는 지점</div>
+                      <div>• <strong>포트폴리오 급변화:</strong> 주력 상품군(건강 vs 종신) 비중이 평소 대비 20%p 이상 급격히 변동된 지점</div>
                     </div>
 
                     <div className="absolute -top-2 right-4 w-0 h-0 border-l-4 border-r-4 border-b-4 border-l-transparent border-r-transparent border-b-gray-800"></div>

@@ -56,7 +56,7 @@ const Branch360Dashboard = () => {
   // 테이블 정렬을 위한 state - 가동/미가동 설계사 별도 상태
   const [activeTableSortBy, setActiveTableSortBy] = useState<string>('currentMMP');
   const [activeTableSortOrder, setActiveTableSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [inactiveTableSortBy, setInactiveTableSortBy] = useState<string>('commissionMonth');
+  const [inactiveTableSortBy, setInactiveTableSortBy] = useState<string>('가입설계건수');
   const [inactiveTableSortOrder, setInactiveTableSortOrder] = useState<'asc' | 'desc'>('desc');
 
   // 테이블 정렬 함수
@@ -150,7 +150,7 @@ const Branch360Dashboard = () => {
   const [showActivityDetails, setShowActivityDetails] = useState(false);
   const [expandedEducation, setExpandedEducation] = useState(false);
   const [expandedVisit, setExpandedVisit] = useState(false);
-  const [selectedActivityType, setSelectedActivityType] = useState<'최근' | '교육' | '방문'>('최근');
+  const [selectedActivityType, setSelectedActivityType] = useState<'최근' | '교육' | '방문'>('교육');
   const [hoveredProduct, setHoveredProduct] = useState<any>(null);
   const [showProgressTooltip, setShowProgressTooltip] = useState(false);
 
@@ -886,7 +886,7 @@ const Branch360Dashboard = () => {
   const [modalPerformanceType, setModalPerformanceType] = useState<'APE' | 'MMP'>('MMP'); // 모달 성과 기준
   const [activeSortBy, setActiveSortBy] = useState<'name' | 'code' | 'tenure' | 'commissionMonth' | '가입설계건수' | 'currentMMP' | 'previousMMP' | 'M0' | 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M0건' | 'M1건' | 'M2건' | 'M3건' | 'M4건' | 'M5건'>('M0'); // 가동 설계사 정렬 기준
   const [activeSortOrder, setActiveSortOrder] = useState<'asc' | 'desc'>('desc'); // 가동 설계사 정렬 순서
-  const [inactiveSortBy, setInactiveSortBy] = useState<'name' | 'code' | 'tenure' | 'commissionMonth' | '가입설계건수' | 'previousMMP' | 'M0' | 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M0건' | 'M1건' | 'M2건' | 'M3건' | 'M4건' | 'M5건'>('commissionMonth'); // 미가동 설계사 정렬 기준
+  const [inactiveSortBy, setInactiveSortBy] = useState<'name' | 'code' | 'tenure' | 'commissionMonth' | '가입설계건수' | 'previousMMP' | 'M0' | 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M0건' | 'M1건' | 'M2건' | 'M3건' | 'M4건' | 'M5건'>('가입설계건수'); // 미가동 설계사 정렬 기준
   const [inactiveSortOrder, setInactiveSortOrder] = useState<'asc' | 'desc'>('desc'); // 미가동 설계사 정렬 순서
   
   // 에이전트 리스트 데이터 (포함 관계로 정리)
@@ -2675,14 +2675,8 @@ const Branch360Dashboard = () => {
                           <div className="min-w-[35px] shrink-0 text-gray-600 font-medium">
                             {activity.date.split('-')[1]}/{activity.date.split('-')[2]}
                           </div>
-                          <div className="min-w-[45px] shrink-0 text-center">
-                            <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
-                              activity.type === '교육'
-                                ? 'bg-blue-100 text-blue-700'
-                                : 'bg-green-100 text-green-700'
-                            }`}>
-                              {activity.category}
-                            </span>
+                          <div className="min-w-[45px] shrink-0 text-center text-gray-600">
+                            {activity.category}
                           </div>
                           <div className="flex-1 text-gray-800 truncate">{activity.content}</div>
                           <div className="min-w-[70px] shrink-0 text-gray-600">{activity.manager}</div>
