@@ -478,7 +478,6 @@ const Agent360Dashboard = () => {
   const [isResizing, setIsResizing] = useState(false);
   const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width: 0, height: 0 });
   const [branchPeriod, setBranchPeriod] = useState<'current' | 'previous'>('current');
-  const [showConversionTooltip, setShowConversionTooltip] = useState(false);
 
   // 잔여 영업일 계산 (9월 25일 기준 7일 남은 것으로 가정)
   const getRemainingBusinessDays = () => {
@@ -1829,30 +1828,12 @@ const Agent360Dashboard = () => {
 
                 {/* 청약 카드 */}
                 <div
-                  className="bg-white rounded-lg shadow-sm border p-4 flex-1 relative cursor-pointer hover:shadow-md transition-shadow"
-                  onMouseEnter={() => setShowConversionTooltip(true)}
-                  onMouseLeave={() => setShowConversionTooltip(false)}
+                  className="bg-white rounded-lg shadow-sm border p-4 flex-1 relative"
                 >
                   <h4 className="text-sm font-semibold text-gray-700 mb-3">청약</h4>
                   <div className="text-center mb-3">
                     <div className="text-2xl font-bold text-blue-600">{getFilteredData('contract')}<span className="text-base text-black">건</span></div>
                   </div>
-
-                  {/* 호버 툴팁 */}
-                  {showConversionTooltip && (() => {
-                    const contractCount = getFilteredData('contract');
-                    const rejectedCount = 24; // 거절 24건
-                    const withdrawnCount = 8; // 철회 8건
-
-                    return (
-                      <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-800 text-white text-xs rounded px-3 py-2 whitespace-nowrap z-30 shadow-lg">
-                        <div className="mb-1">청약 {contractCount}건 중</div>
-                        <div>거절: {rejectedCount}건, 철회: {withdrawnCount}건</div>
-                        {/* 화살표 */}
-                        <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
-                      </div>
-                    );
-                  })()}
                   <div className="text-center">
                     <span className="text-xs text-black">전월 동기 대비 </span>
                     <span className="text-sm text-blue-600">▲ {getFilteredData('contractGrowth')}건</span>
