@@ -2079,7 +2079,7 @@ const Branch360Dashboard = () => {
                       {/* 툴팁 */}
                       <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-gray-800 text-white text-xs rounded px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-30 text-left whitespace-nowrap">
                         <div>Plan(지점): {(performanceType === 'MMP' ? Math.round((corePerformance.branchTargetApe * 10000) / 12) : (corePerformance.branchTargetApe * 10000)).toLocaleString()}원</div>
-                        <div>Plan(담당자): {(performanceType === 'MMP' ? Math.round((corePerformance.managerPersonalTarget * 10000) / 12) : (corePerformance.managerPersonalTarget * 10000)).toLocaleString()}원</div>
+                        <div>Plan(지점장): {(performanceType === 'MMP' ? Math.round((corePerformance.managerPersonalTarget * 10000) / 12) : (corePerformance.managerPersonalTarget * 10000)).toLocaleString()}원</div>
                         <div className="mt-1 pt-1 border-t border-gray-600">목표 담당: {corePerformance.managerPlanContribution.toFixed(1)}%</div>
                         <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
                       </div>
@@ -2091,7 +2091,7 @@ const Branch360Dashboard = () => {
                       {/* 툴팁 */}
                       <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-gray-800 text-white text-xs rounded px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-30 text-left whitespace-nowrap">
                         <div>Actual(지점): {(performanceType === 'MMP' ? Math.round((corePerformance.currentApe * 10000) / 12) : (corePerformance.currentApe * 10000)).toLocaleString()}원</div>
-                        <div>Actual(담당자): {(performanceType === 'MMP' ? Math.round((corePerformance.managerApe * 10000) / 12) : (corePerformance.managerApe * 10000)).toLocaleString()}원</div>
+                        <div>Actual(지점장): {(performanceType === 'MMP' ? Math.round((corePerformance.managerApe * 10000) / 12) : (corePerformance.managerApe * 10000)).toLocaleString()}원</div>
                         <div className="mt-1 pt-1 border-t border-gray-600">실적 담당: {corePerformance.managerContributionRate.toFixed(1)}%</div>
                         <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
                       </div>
