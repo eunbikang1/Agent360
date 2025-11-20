@@ -2248,7 +2248,10 @@ const Agent360Dashboard = () => {
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-semibold text-gray-800">나의 관리 지점</h3>
                 <button
-                  onClick={() => setBranchInfoModal(true)}
+                  onClick={() => {
+                    setModalKPI(performanceType);
+                    setBranchInfoModal(true);
+                  }}
                   className="text-xs text-black hover:text-gray-800 hover:bg-gray-100 rounded transition-colors flex items-center gap-1 px-2 py-1"
                 >
                   <span>전체 보기</span>
