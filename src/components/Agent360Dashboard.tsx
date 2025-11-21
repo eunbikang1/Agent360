@@ -1307,13 +1307,17 @@ const Agent360Dashboard = () => {
               <h1 className="text-xl font-bold text-gray-900">통합 인사이트 뷰</h1>
             </div>
             <div className="text-right">
-              {isCurrentMonth && (
+              {isCurrentMonth ? (
                 <>
                   <div className="text-sm text-black">2025.09.20(금)</div>
                   <div className="text-xs text-gray-400 mt-1">
                     9월 영업일: {businessDays.elapsed}일/{businessDays.total}일 (잔여 {businessDays.remaining}일)
                   </div>
                 </>
+              ) : (
+                <div className="text-xs text-gray-400">
+                  {parseInt(appliedMonth.split('-')[1])}월 영업일: {businessDays.total}일/{businessDays.total}일 (잔여 0일)
+                </div>
               )}
             </div>
           </div>
