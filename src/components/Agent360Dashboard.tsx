@@ -60,22 +60,22 @@ const Agent360Dashboard = () => {
     '강남본부': {
       managers: ['전체', '김영수', '이민호', '박지성', '정수연', '강태희', '윤서준', '한지민']
     },
-    '강북': {
+    '강북본부': {
       managers: ['전체', '최수현', '정하늘', '강민지', '서준호', '박은지', '임재현']
     },
-    '강동': {
+    '강동본부': {
       managers: ['전체', '윤대현', '한지우', '신아름', '오세진', '배민수', '류하나']
     },
-    '경인': {
+    '경인본부': {
       managers: ['전체', '임태양', '송바다', '배은하', '문성호', '김나영', '이준혁', '차윤서']
     },
-    '부산': {
+    '부산본부': {
       managers: ['전체', '허별', '문하늘', '오세진', '백지훈', '황미라', '정동욱']
     },
-    '대구': {
+    '대구본부': {
       managers: ['전체', '황금비', '서은별', '남궁찬', '최민석', '강수진', '박준영']
     },
-    '남부': {
+    '남부본부': {
       managers: ['전체', '진달래', '류은하', '탁푸른', '송혜교', '김재우', '이서영', '박도현']
     }
   };
@@ -85,7 +85,27 @@ const Agent360Dashboard = () => {
 
   // 선택된 본부에 따른 지점장 목록 (temp 값 기반)
   const getManagers = () => {
-    if (!tempSelectedHQ || tempSelectedHQ === '전체') return ['전체'];
+    if (!tempSelectedHQ) return ['전체'];
+
+    if (tempSelectedHQ === '전체') {
+      // "전체" 선택 시 모든 본부의 지점장을 합침
+      const allManagers = new Set<string>();
+
+      Object.keys(organizationHierarchy).forEach(hq => {
+        if (hq !== '전체') {
+          const managers = organizationHierarchy[hq]?.managers || [];
+          managers.forEach((manager: string) => {
+            if (manager !== '전체') {
+              allManagers.add(manager);
+            }
+          });
+        }
+      });
+
+      // "전체"를 맨 앞에 두고 나머지 지점장들을 반환
+      return ['전체', ...Array.from(allManagers)];
+    }
+
     return organizationHierarchy[tempSelectedHQ]?.managers || ['전체'];
   };
 
@@ -571,15 +591,19 @@ const Agent360Dashboard = () => {
     const variation3 = ((seed % 13) - 6) * 0.04; // -0.24 ~ +0.28 범위의 변동
 
     // 과거 월이므로 dailyRequired는 항상 0 (완료된 월)
+    const historicalTarget = myKPIDefault.goalAchievement.target;
+    const historicalActual = Math.round(myKPIDefault.goalAchievement.actual * (1 + variation1 * 0.15));
+    const historicalGap = Math.max(0, historicalTarget - historicalActual); // target - actual (음수면 0)
+
     return {
       goalAchievement: {
         current: Math.round((myKPIDefault.goalAchievement.current + variation1 * 30) * 10) / 10,
-        target: myKPIDefault.goalAchievement.target,
-        actual: Math.round(myKPIDefault.goalAchievement.actual * (1 + variation1 * 0.15)),
+        target: historicalTarget,
+        actual: historicalActual,
         hqAvg: Math.round((myKPIDefault.goalAchievement.hqAvg + variation2 * 25) * 10) / 10,
         nationalAvg: myKPIDefault.goalAchievement.nationalAvg,
         vsLastMonth: Math.round((variation1 * 15 + 10) * 10) / 10,
-        gap: Math.round(Math.abs(variation1 * 5000)),
+        gap: historicalGap,
         dailyRequired: 0, // 완료된 월이므로 0
         hqRankTotal: {
           rank: Math.max(1, Math.min(50, myKPIDefault.goalAchievement.hqRankTotal.rank + Math.round(variation1 * 8))),
@@ -1340,12 +1364,11 @@ const Agent360Dashboard = () => {
                     setShowHQDropdown(false);
                   }}
                   className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 flex items-center gap-1.5 min-w-[120px] justify-between"
-                  disabled={tempSelectedHQ === '전체'}
                 >
                   <span>{tempSelectedManager === '전체' ? tempSelectedManager : `${tempSelectedManager}`}</span>
                   <ChevronDown className="w-4 h-4 text-gray-400" />
                 </button>
-                {showManagerDropdown && tempSelectedHQ !== '전체' && (
+                {showManagerDropdown && (
                   <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[140px] max-h-64 overflow-y-auto">
                     {getManagers().map(manager => (
                       <div
@@ -1538,15 +1561,25 @@ const Agent360Dashboard = () => {
               </div>
 
 
-              {/* 하루 평균 필요 금액 안내 - 현재월에만 표시 */}
-              {isCurrentMonth && (
-                <div className="bg-blue-50 rounded-lg p-4 border border-blue-200 shadow-sm">
-                  <div className="text-sm text-blue-800 text-center">
-                    {myKPI.goalAchievement.actual >= myKPI.goalAchievement.target ? (
-                      <div>
-                        <div className="mb-1">🎉 축하합니다!</div>
-                        <div className="text-lg font-bold">이번달 목표를 달성했어요!</div>
-                      </div>
+              {/* 목표 달성 안내 - 항상 표시 */}
+              <div className="bg-blue-50 rounded-lg p-4 border border-blue-200 shadow-sm">
+                <div className="text-sm text-blue-800 text-center">
+                  {myKPI.goalAchievement.actual >= myKPI.goalAchievement.target ? (
+                    <div>
+                      <div className="mb-1">🎉 축하합니다!</div>
+                      <div className="text-lg font-bold">이번달 목표를 달성했어요!</div>
+                    </div>
+                  ) : !isCurrentMonth ? (
+                      <>
+                        <div className="mb-1">아쉽지만,</div>
+                        <div>
+                          이번달은 목표까지
+                          <div className="inline-block mx-1 px-2 py-1 bg-blue-600 text-white rounded-md font-bold text-base">
+                            {formatCurrency(myKPI.goalAchievement.gap, performanceType)}
+                          </div>
+                          부족으로 마감되었어요
+                        </div>
+                      </>
                     ) : (
                       <>
                         <div className="mb-1">이번달 목표 달성을 위해</div>
@@ -1561,8 +1594,7 @@ const Agent360Dashboard = () => {
                     )}
                   </div>
                 </div>
-              )}
-              
+
               <div className="grid grid-cols-2 gap-3 mt-4 pt-3 border-t">
                 <div className="text-center">
                   <div className="text-xs text-black">본부 순위</div>
