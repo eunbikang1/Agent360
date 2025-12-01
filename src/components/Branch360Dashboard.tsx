@@ -2713,14 +2713,6 @@ const Branch360Dashboard = () => {
 
                 <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-center">
-                    <Phone className="w-4 h-4 text-gray-500 mr-2" />
-                    <span className="text-sm text-gray-600">연락처</span>
-                  </div>
-                  <span className="text-sm font-medium text-gray-900">{branchProfile.phone}</span>
-                </div>
-
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center">
                     <Calendar className="w-4 h-4 text-gray-500 mr-2" />
                     <span className="text-sm text-gray-600">개설일자</span>
                   </div>
