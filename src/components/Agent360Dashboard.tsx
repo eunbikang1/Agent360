@@ -681,8 +681,27 @@ const Agent360Dashboard = () => {
   // 조회 버튼 클릭 핸들러
   const handleSearchClick = () => {
     setAppliedMonth(tempSelectedMonth);
-    setSelectedHQ(tempSelectedHQ);
-    setSelectedManager(tempSelectedManager);
+
+    // 지점장이 선택되어 있고 전체가 아닌 경우, 해당 월의 본부를 자동으로 찾아서 설정
+    if (tempSelectedManager !== '전체') {
+      const correctHQ = findManagerHQ(tempSelectedMonth, tempSelectedManager);
+      if (correctHQ) {
+        setTempSelectedHQ(correctHQ);
+        setSelectedHQ(correctHQ);
+        setSelectedManager(tempSelectedManager);
+
+        // 조직 구조도 해당 월로 업데이트
+        const newOrg = getOrganizationForMonth(tempSelectedMonth);
+        setOrganizationHierarchy(newOrg);
+      } else {
+        // 해당 월에 없으면 전체로 리셋
+        setSelectedHQ('전체');
+        setSelectedManager('전체');
+      }
+    } else {
+      setSelectedHQ(tempSelectedHQ);
+      setSelectedManager(tempSelectedManager);
+    }
   };
 
   // 과거 월 데이터 생성 함수
