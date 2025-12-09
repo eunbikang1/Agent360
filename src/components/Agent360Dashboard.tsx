@@ -149,19 +149,6 @@ const Agent360Dashboard = () => {
     return organizationHierarchy[tempSelectedHQ]?.managers || ['전체'];
   };
 
-  // 지점장의 해당 월 본부 찾기
-  const findManagerHQ = (month: string, manager: string): string | null => {
-    const org = getOrganizationForMonth(month);
-
-    for (const [hq, data] of Object.entries(org)) {
-      if ((data as any).managers?.includes(manager)) {
-        return hq;
-      }
-    }
-
-    return null;
-  };
-
   // 월 변경 핸들러
   const handleMonthChange = (newMonth: string) => {
     // 1. 새 월의 조직 구조 로드
@@ -171,19 +158,13 @@ const Agent360Dashboard = () => {
     // 2. 월 변경
     setTempSelectedMonth(newMonth);
 
-    // 3. 선택된 지점장 추적
-    if (tempSelectedManager !== '전체') {
-      const newHQ = findManagerHQ(newMonth, tempSelectedManager);
-
-      if (newHQ) {
-        // 본부 자동 변경 (지점장 유지)
-        setTempSelectedHQ(newHQ);
-      } else {
-        // 해당 월에 없으면 전체로 리셋
-        setTempSelectedHQ('전체');
-        setTempSelectedManager('전체');
-      }
-    }
+    // 3. 기본값으로 리셋
+    // TODO: 백엔드에서 사용자 권한에 따른 기본값 받아오기
+    // - 슈퍼 권한자: '전체' + '전체'
+    // - 본부장: '해당본부' + '전체'
+    // - 지점장: '해당본부' + '지점장명'
+    setTempSelectedHQ('전체');
+    setTempSelectedManager('전체');
   };
 
   // 이전월/다음월 핸들러
@@ -681,27 +662,8 @@ const Agent360Dashboard = () => {
   // 조회 버튼 클릭 핸들러
   const handleSearchClick = () => {
     setAppliedMonth(tempSelectedMonth);
-
-    // 지점장이 선택되어 있고 전체가 아닌 경우, 해당 월의 본부를 자동으로 찾아서 설정
-    if (tempSelectedManager !== '전체') {
-      const correctHQ = findManagerHQ(tempSelectedMonth, tempSelectedManager);
-      if (correctHQ) {
-        setTempSelectedHQ(correctHQ);
-        setSelectedHQ(correctHQ);
-        setSelectedManager(tempSelectedManager);
-
-        // 조직 구조도 해당 월로 업데이트
-        const newOrg = getOrganizationForMonth(tempSelectedMonth);
-        setOrganizationHierarchy(newOrg);
-      } else {
-        // 해당 월에 없으면 전체로 리셋
-        setSelectedHQ('전체');
-        setSelectedManager('전체');
-      }
-    } else {
-      setSelectedHQ(tempSelectedHQ);
-      setSelectedManager(tempSelectedManager);
-    }
+    setSelectedHQ(tempSelectedHQ);
+    setSelectedManager(tempSelectedManager);
   };
 
   // 과거 월 데이터 생성 함수
