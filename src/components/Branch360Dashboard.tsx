@@ -306,6 +306,37 @@ const Branch360Dashboard = () => {
     }
   };
 
+  // 이전월/다음월 핸들러
+  const handleMonthNavigation = (direction: 'prev' | 'next') => {
+    const [year, month] = tempSelectedPeriod.split('-').map(Number);
+
+    let newYear = year;
+    let newMonth = month;
+
+    if (direction === 'prev') {
+      newMonth--;
+      if (newMonth < 1) {
+        newMonth = 12;
+        newYear--;
+      }
+    } else {
+      newMonth++;
+      if (newMonth > 12) {
+        newMonth = 1;
+        newYear++;
+      }
+    }
+
+    const newMonthStr = `${newYear}-${String(newMonth).padStart(2, '0')}`;
+
+    // 범위 체크 (2023-01 ~ 2025-09)
+    if (newMonthStr < '2023-01' || newMonthStr > '2025-09') {
+      return;
+    }
+
+    setTempSelectedPeriod(newMonthStr);
+  };
+
   // CSV 다운로드 함수
   const downloadCSV = () => {
     const csvHeaders = [
@@ -1793,7 +1824,46 @@ const Branch360Dashboard = () => {
           <div className="flex items-center justify-between">
             {/* 조회 조건 그룹 */}
             <div className="flex items-center space-x-6">
-              {/* 대리점/지점 선택 */}
+              {/* 조회년월 선택 - 최우선 배치 */}
+              <div className="flex items-center space-x-3">
+                <span className="text-sm font-medium text-gray-700 min-w-0">조회년월</span>
+                <div className="flex items-center space-x-2">
+                  {/* 이전월 버튼 */}
+                  <button
+                    onClick={() => handleMonthNavigation('prev')}
+                    disabled={tempSelectedPeriod === '2023-01'}
+                    className="px-2 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                    title="이전월"
+                  >
+                    <ChevronLeft className="w-4 h-4 text-gray-600" />
+                  </button>
+
+                  {/* 월 드롭다운 */}
+                  <select
+                    value={tempSelectedPeriod}
+                    onChange={(e) => setTempSelectedPeriod(e.target.value)}
+                    className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-32"
+                  >
+                    {monthOptions.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* 다음월 버튼 */}
+                  <button
+                    onClick={() => handleMonthNavigation('next')}
+                    disabled={tempSelectedPeriod === '2025-09'}
+                    className="px-2 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                    title="다음월"
+                  >
+                    <ChevronRight className="w-4 h-4 text-gray-600" />
+                  </button>
+                </div>
+              </div>
+
+              {/* 조회 대상 - 대리점/지점 선택 */}
               <div className="flex items-center space-x-3">
                 <span className="text-sm font-medium text-gray-700 min-w-0">조회 대상</span>
                 <div className="flex items-center space-x-2">
@@ -1849,38 +1919,22 @@ const Branch360Dashboard = () => {
                 </div>
               </div>
 
-              {/* 조회년월 선택 및 조회 버튼 */}
-              <div className="flex items-center space-x-3">
-                <span className="text-sm font-medium text-gray-700 min-w-0">조회년월</span>
-                <div className="flex items-center space-x-2">
-                  <select
-                    value={tempSelectedPeriod}
-                    onChange={(e) => setTempSelectedPeriod(e.target.value)}
-                    className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-32"
-                  >
-                    {monthOptions.map(option => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <button
-                    onClick={handleSearch}
-                    className="px-3 py-1.5 bg-gray-400 hover:bg-gray-500 text-white text-sm font-medium rounded-lg flex items-center space-x-1.5 transition-colors"
-                  >
-                    <Search className="w-4 h-4" />
-                    <span>조회</span>
-                  </button>
+              {/* 조회 버튼 */}
+              <button
+                onClick={handleSearch}
+                className="px-3 py-1.5 bg-gray-400 hover:bg-gray-500 text-white text-sm font-medium rounded-lg flex items-center space-x-1.5 transition-colors"
+              >
+                <Search className="w-4 h-4" />
+                <span>조회</span>
+              </button>
 
-                  {/* 마감 기준 표시 */}
-                  <span className="text-sm text-gray-600">
-                    {selectedPeriod === '2025-09'
-                      ? '2025.09.19 마감 기준'
-                      : `${selectedPeriod.split('-')[0]}.${selectedPeriod.split('-')[1]} 마감일 기준`
-                    }
-                  </span>
-                </div>
-              </div>
+              {/* 마감 기준 표시 */}
+              <span className="text-sm text-gray-600">
+                {selectedPeriod === '2025-09'
+                  ? '2025.09.19 마감 기준'
+                  : `${selectedPeriod.split('-')[0]}.${selectedPeriod.split('-')[1]} 마감일 기준`
+                }
+              </span>
             </div>
 
             {/* 액션 버튼 그룹 */}

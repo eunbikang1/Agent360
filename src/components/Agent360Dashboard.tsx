@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Trophy, Download, Building, ChevronRight, ChevronDown, ChevronUp, ArrowUp, ArrowDown, Activity, AlertTriangle, HelpCircle, X, Search, Users } from 'lucide-react';
+import { Trophy, Download, Building, ChevronRight, ChevronLeft, ChevronDown, ChevronUp, ArrowUp, ArrowDown, Activity, AlertTriangle, HelpCircle, X, Search, Users } from 'lucide-react';
 import {
   generateBranchPerformance,
   generateAgentCount,
@@ -52,33 +52,73 @@ const Agent360Dashboard = () => {
     remaining: 7
   };
 
-  // 2단계 계층 구조 데이터 (본부 > 지점장)
-  const organizationHierarchy: any = {
-    '전체': {
-      managers: ['전체']
-    },
-    '강남본부': {
-      managers: ['전체', '김영수', '이민호', '박지성', '정수연', '강태희', '윤서준', '한지민']
-    },
-    '강북본부': {
-      managers: ['전체', '최수현', '정하늘', '강민지', '서준호', '박은지', '임재현']
-    },
-    '강동본부': {
-      managers: ['전체', '윤대현', '한지우', '신아름', '오세진', '배민수', '류하나']
-    },
-    '경인본부': {
-      managers: ['전체', '임태양', '송바다', '배은하', '문성호', '김나영', '이준혁', '차윤서']
-    },
-    '부산본부': {
-      managers: ['전체', '허별', '문하늘', '오세진', '백지훈', '황미라', '정동욱']
-    },
-    '대구본부': {
-      managers: ['전체', '황금비', '서은별', '남궁찬', '최민석', '강수진', '박준영']
-    },
-    '남부본부': {
-      managers: ['전체', '진달래', '류은하', '탁푸른', '송혜교', '김재우', '이서영', '박도현']
+  // 월별 조직 구조 데이터 (김영수: 8월까지 강북본부, 9월부터 강남본부)
+  const getOrganizationForMonth = (month: string) => {
+    const monthNum = parseInt(month.split('-')[1]);
+
+    // 9월 이후: 김영수는 강남본부
+    if (monthNum >= 9) {
+      return {
+        '전체': {
+          managers: ['전체']
+        },
+        '강남본부': {
+          managers: ['전체', '김영수', '이민호', '박지성', '정수연', '강태희', '윤서준', '한지민']
+        },
+        '강북본부': {
+          managers: ['전체', '최수현', '정하늘', '강민지', '서준호', '박은지', '임재현']
+        },
+        '강동본부': {
+          managers: ['전체', '윤대현', '한지우', '신아름', '오세진', '배민수', '류하나']
+        },
+        '경인본부': {
+          managers: ['전체', '임태양', '송바다', '배은하', '문성호', '김나영', '이준혁', '차윤서']
+        },
+        '부산본부': {
+          managers: ['전체', '허별', '문하늘', '오세진', '백지훈', '황미라', '정동욱']
+        },
+        '대구본부': {
+          managers: ['전체', '황금비', '서은별', '남궁찬', '최민석', '강수진', '박준영']
+        },
+        '남부본부': {
+          managers: ['전체', '진달래', '류은하', '탁푸른', '송혜교', '김재우', '이서영', '박도현']
+        }
+      };
+    } else {
+      // 8월 이전: 김영수는 강북본부
+      return {
+        '전체': {
+          managers: ['전체']
+        },
+        '강남본부': {
+          managers: ['전체', '이민호', '박지성', '정수연', '강태희', '윤서준', '한지민']
+        },
+        '강북본부': {
+          managers: ['전체', '김영수', '최수현', '정하늘', '강민지', '서준호', '박은지', '임재현']
+        },
+        '강동본부': {
+          managers: ['전체', '윤대현', '한지우', '신아름', '오세진', '배민수', '류하나']
+        },
+        '경인본부': {
+          managers: ['전체', '임태양', '송바다', '배은하', '문성호', '김나영', '이준혁', '차윤서']
+        },
+        '부산본부': {
+          managers: ['전체', '허별', '문하늘', '오세진', '백지훈', '황미라', '정동욱']
+        },
+        '대구본부': {
+          managers: ['전체', '황금비', '서은별', '남궁찬', '최민석', '강수진', '박준영']
+        },
+        '남부본부': {
+          managers: ['전체', '진달래', '류은하', '탁푸른', '송혜교', '김재우', '이서영', '박도현']
+        }
+      };
     }
   };
+
+  // 현재 월의 조직 구조
+  const [organizationHierarchy, setOrganizationHierarchy] = useState<any>(
+    getOrganizationForMonth(searchParams.get('period') || '2025-09')
+  );
 
   // 본부 목록
   const headquarters = Object.keys(organizationHierarchy);
@@ -107,6 +147,74 @@ const Agent360Dashboard = () => {
     }
 
     return organizationHierarchy[tempSelectedHQ]?.managers || ['전체'];
+  };
+
+  // 지점장의 해당 월 본부 찾기
+  const findManagerHQ = (month: string, manager: string): string | null => {
+    const org = getOrganizationForMonth(month);
+
+    for (const [hq, data] of Object.entries(org)) {
+      if ((data as any).managers?.includes(manager)) {
+        return hq;
+      }
+    }
+
+    return null;
+  };
+
+  // 월 변경 핸들러
+  const handleMonthChange = (newMonth: string) => {
+    // 1. 새 월의 조직 구조 로드
+    const newOrg = getOrganizationForMonth(newMonth);
+    setOrganizationHierarchy(newOrg);
+
+    // 2. 월 변경
+    setTempSelectedMonth(newMonth);
+
+    // 3. 선택된 지점장 추적
+    if (tempSelectedManager !== '전체') {
+      const newHQ = findManagerHQ(newMonth, tempSelectedManager);
+
+      if (newHQ) {
+        // 본부 자동 변경 (지점장 유지)
+        setTempSelectedHQ(newHQ);
+      } else {
+        // 해당 월에 없으면 전체로 리셋
+        setTempSelectedHQ('전체');
+        setTempSelectedManager('전체');
+      }
+    }
+  };
+
+  // 이전월/다음월 핸들러
+  const handleMonthNavigation = (direction: 'prev' | 'next') => {
+    const [year, month] = tempSelectedMonth.split('-').map(Number);
+
+    let newYear = year;
+    let newMonth = month;
+
+    if (direction === 'prev') {
+      newMonth--;
+      if (newMonth < 1) {
+        newMonth = 12;
+        newYear--;
+      }
+    } else {
+      newMonth++;
+      if (newMonth > 12) {
+        newMonth = 1;
+        newYear++;
+      }
+    }
+
+    const newMonthStr = `${newYear}-${String(newMonth).padStart(2, '0')}`;
+
+    // 범위 체크 (2025-01 ~ 2025-09)
+    if (newMonthStr < '2025-01' || newMonthStr > '2025-09') {
+      return;
+    }
+
+    handleMonthChange(newMonthStr);
   };
 
   // 필터 변경 핸들러 (임시 상태 변경)
@@ -1328,6 +1436,44 @@ const Agent360Dashboard = () => {
           <div className="flex items-center justify-between">
             {/* 조회 조건 그룹 */}
             <div className="flex items-center space-x-3">
+              {/* 조회년월 선택 - 최우선 배치 */}
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-700">조회년월</span>
+
+                {/* 이전월 버튼 */}
+                <button
+                  onClick={() => handleMonthNavigation('prev')}
+                  disabled={tempSelectedMonth === '2025-01'}
+                  className="px-2 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                  title="이전월"
+                >
+                  <ChevronLeft className="w-4 h-4 text-gray-600" />
+                </button>
+
+                {/* 월 드롭다운 */}
+                <select
+                  value={tempSelectedMonth}
+                  onChange={(e) => handleMonthChange(e.target.value)}
+                  className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-32"
+                >
+                  {monthOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+
+                {/* 다음월 버튼 */}
+                <button
+                  onClick={() => handleMonthNavigation('next')}
+                  disabled={tempSelectedMonth === '2025-09'}
+                  className="px-2 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                  title="다음월"
+                >
+                  <ChevronRight className="w-4 h-4 text-gray-600" />
+                </button>
+              </div>
+
               {/* 조회 대상 - 본부 선택 */}
               <div className="flex items-center space-x-2">
                 <span className="text-sm text-gray-700">조회 대상</span>
@@ -1387,22 +1533,6 @@ const Agent360Dashboard = () => {
                     ))}
                   </div>
                 )}
-              </div>
-
-              {/* 조회년월 선택 */}
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-700">조회년월</span>
-                <select
-                  value={tempSelectedMonth}
-                  onChange={(e) => setTempSelectedMonth(e.target.value)}
-                  className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-32"
-                >
-                  {monthOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
               </div>
 
               {/* 조회 버튼 */}
