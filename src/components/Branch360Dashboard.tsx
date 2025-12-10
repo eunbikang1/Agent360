@@ -16,6 +16,28 @@ const Branch360Dashboard = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
+  // 보험 경력 포맷 함수: "8.5년" → "8년 6개월"
+  const formatInsuranceCareer = (careerStr: string): string => {
+    // "8.5년" 형식에서 숫자 추출
+    const yearValue = parseFloat(careerStr.replace('년', ''));
+
+    // 년을 개월로 변환
+    const totalMonths = Math.round(yearValue * 12);
+
+    // 개월을 년과 개월로 나눔
+    const years = Math.floor(totalMonths / 12);
+    const months = totalMonths % 12;
+
+    // 포맷팅
+    if (years === 0) {
+      return `${months}개월`;
+    } else if (months === 0) {
+      return `${years}년`;
+    } else {
+      return `${years}년 ${months}개월`;
+    }
+  };
+
   // 실제 대리점/지점 데이터 (Agent360Dashboard와 동일)
   const agencies = ['지금용코리아', '글로벌금융판매', '메타리치', '지에이스타금융서비스', '더블유에셋', '한국지에이금융서비스', '메가'];
   const branchNames = ['서울', '대원', '그레이트탑', '사랑', '케이엘아이케이베스트', '글로벌화이브스타', '화이브스타성화', '하나돔', '하나돔강북', '리더스에프엔', '리더스에이치비', '리더스마이보험체크', '리더스일산', '리더스마이보험', '이센트럴마포', '케이에스에프에스동대문', '케이에스에프에스군자', '케이엘아이은평', '케이엘아이운정', '지금용', '케이에스드래곤슬', '케이에스드래곤행신', '수도디아이씨', '글로벌인슈몽산', '글로벌인슈고양', '글로벌인슈에이치', '브릿지재무설계', '인스라이트서클강북', '굿브즈스카이', '인슈에셋자오선', '보험스토어', '골드자산관리센터', '리치골드', '부천코어', '일산센터', '1인지에이 일산2센터', '서울지사', '기업금융본부', '일산지사', '인슈에셋고양'];
@@ -3365,7 +3387,7 @@ const Branch360Dashboard = () => {
                       <Briefcase className="w-4 h-4 text-gray-500 mr-2" />
                       <span className="text-sm text-gray-600">평균 보험 경력</span>
                     </div>
-                    <span className="text-sm font-medium">{branchProfile.designerAvgCareer}년</span>
+                    <span className="text-sm font-medium">{formatInsuranceCareer(branchProfile.designerAvgCareer + '년')}</span>
                   </div>
                   <div className="text-xs text-gray-400 mt-2">*생명보험협회 등록 기준</div>
                 </div>
@@ -4966,7 +4988,7 @@ const Branch360Dashboard = () => {
                           <td className="px-2 py-3 text-center text-gray-600">{idx + 1}</td>
                           <td className="px-2 py-3 font-mono text-gray-600">{agent.agentCode}</td>
                           <td className="px-2 py-3 font-medium text-gray-900">{agent.name}</td>
-                          <td className="px-2 py-3 text-gray-600">{agent.insuranceCareer}</td>
+                          <td className="px-2 py-3 text-gray-600">{formatInsuranceCareer(agent.insuranceCareer)}</td>
                           <td className="px-2 py-3 text-center text-gray-600">{agent.commissionMonth}</td>
                           <td className="px-2 py-3 text-center text-gray-900 font-medium border-r-2 border-gray-200">{monthlyData['가입설계건수']}</td>
                           <td className="px-2 py-3 text-center text-gray-900 font-medium">{formatValue(monthlyData.M0)}</td>
@@ -5480,7 +5502,7 @@ const Branch360Dashboard = () => {
                           <td className="px-2 py-3 text-center text-gray-600">{idx + 1}</td>
                           <td className="px-2 py-3 font-mono text-gray-600">{agent.agentCode}</td>
                           <td className="px-2 py-3 font-medium text-gray-900">{agent.name}</td>
-                          <td className="px-2 py-3 text-gray-600">{agent.insuranceCareer}</td>
+                          <td className="px-2 py-3 text-gray-600">{formatInsuranceCareer(agent.insuranceCareer)}</td>
                           <td className="px-2 py-3 text-center text-gray-600">{agent.commissionMonth}</td>
                           <td className="px-2 py-3 text-center text-gray-900 font-medium border-r-2 border-gray-200">
                             {monthlyData['가입설계건수']}
