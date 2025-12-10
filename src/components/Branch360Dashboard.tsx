@@ -3560,7 +3560,7 @@ const Branch360Dashboard = () => {
                                 onClick={() => handleActiveTableSort('commissionMonth')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors ml-auto"
                               >
-                                위촉차월
+                                위촉월차
                                 {activeTableSortBy === 'commissionMonth' && (
                                   <span className="text-gray-500">
                                     {activeTableSortOrder === 'desc' ? '↓' : '↑'}
@@ -3705,7 +3705,7 @@ const Branch360Dashboard = () => {
                                 onClick={() => handleInactiveTableSort('commissionMonth')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors ml-auto"
                               >
-                                위촉차월
+                                위촉월차
                                 {inactiveTableSortBy === 'commissionMonth' && (
                                   <span className="text-gray-500">
                                     {inactiveTableSortOrder === 'desc' ? '↓' : '↑'}
@@ -4410,7 +4410,7 @@ const Branch360Dashboard = () => {
                     }}
                     className="text-left hover:text-blue-600 transition-colors"
                   >
-                    위촉차월 {agentSortBy === 'commissionMonth' && (agentSortOrder === 'desc' ? '↓' : '↑')}
+                    위촉월차 {agentSortBy === 'commissionMonth' && (agentSortOrder === 'desc' ? '↓' : '↑')}
                   </button>
                   <button
                     onClick={() => {
@@ -4606,7 +4606,7 @@ const Branch360Dashboard = () => {
                         }}
                         className="text-center hover:text-blue-600 transition-colors w-full"
                       >
-                        위촉차월 {activeSortBy === 'commissionMonth' && (activeSortOrder === 'desc' ? '↓' : '↑')}
+                        위촉월차 {activeSortBy === 'commissionMonth' && (activeSortOrder === 'desc' ? '↓' : '↑')}
                       </button>
                     </th>
                     <th rowSpan={2} className="px-2 py-3 text-center font-semibold text-gray-700 border-b border-r-2 border-gray-300 whitespace-nowrap min-w-[100px]">
@@ -5129,7 +5129,7 @@ const Branch360Dashboard = () => {
                         }}
                         className="text-center hover:text-blue-600 transition-colors w-full"
                       >
-                        위촉차월 {inactiveSortBy === 'commissionMonth' && (inactiveSortOrder === 'desc' ? '↓' : '↑')}
+                        위촉월차 {inactiveSortBy === 'commissionMonth' && (inactiveSortOrder === 'desc' ? '↓' : '↑')}
                       </button>
                     </th>
                     <th rowSpan={2} className="px-2 py-3 text-center font-semibold text-gray-700 border-b border-r-2 border-gray-300 whitespace-nowrap min-w-[100px]">
