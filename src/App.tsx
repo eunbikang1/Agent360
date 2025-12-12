@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Agent360Dashboard from './components/Agent360Dashboard';
 import Branch360Dashboard from './components/Branch360Dashboard';
 // import Branch360DashboardAlt from './components/Branch360DashboardAlt';
