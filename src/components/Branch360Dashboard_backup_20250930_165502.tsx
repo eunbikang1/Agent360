@@ -1,42 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { Building, Users, Phone, MapPin, Calendar, TrendingUp, ChevronDown, User, ArrowDown, Download, Briefcase, AlertTriangle, TrendingDown, UserPlus, Search, ChevronRight, ChevronLeft, Check } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import {
-  generateBranchPerformance,
-  generateAgentCount,
-  generateManagerName,
-  generateBranchAddress,
-  generateBranchPhone
-} from '../data/branchDataGenerator';
-import { exportBranch360ToExcel } from '../utils/excelExport';
+import { Building, Users, Phone, MapPin, Calendar, TrendingUp, ChevronDown, User, ArrowDown, Download, Briefcase, AlertTriangle, TrendingDown, UserPlus, Search, ChevronRight } from 'lucide-react';
 
 const Branch360Dashboard = () => {
   const { agency, branchName } = useParams<{ agency?: string; branchName: string }>();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-
-  // 보험 경력 포맷 함수: "8.5년" → "8년 6개월"
-  const formatInsuranceCareer = (careerStr: string): string => {
-    // "8.5년" 형식에서 숫자 추출
-    const yearValue = parseFloat(careerStr.replace('년', ''));
-
-    // 년을 개월로 변환
-    const totalMonths = Math.round(yearValue * 12);
-
-    // 개월을 년과 개월로 나눔
-    const years = Math.floor(totalMonths / 12);
-    const months = totalMonths % 12;
-
-    // 포맷팅
-    if (years === 0) {
-      return `${months}개월`;
-    } else if (months === 0) {
-      return `${years}년`;
-    } else {
-      return `${years}년 ${months}개월`;
-    }
-  };
 
   // 실제 대리점/지점 데이터 (Agent360Dashboard와 동일)
   const agencies = ['지금용코리아', '글로벌금융판매', '메타리치', '지에이스타금융서비스', '더블유에셋', '한국지에이금융서비스', '메가'];
@@ -72,13 +41,12 @@ const Branch360Dashboard = () => {
   };
 
   const [selectedProduct, setSelectedProduct] = useState<'전체' | '건강' | '종신/정기'>(searchParams.get('product') as '전체' | '건강' | '종신/정기' || '전체');
-  const [selectedSubProduct, setSelectedSubProduct] = useState<string>('전체'); // 세부 상품군 (골담, 새담 등)
-  const [performanceType, setPerformanceType] = useState<'APE' | 'MMP'>((searchParams.get('performanceType') as 'APE' | 'MMP') || 'APE');
+  const [performanceType, setPerformanceType] = useState<'APE' | 'MMP'>('APE');
 
   // 테이블 정렬을 위한 state - 가동/미가동 설계사 별도 상태
-  const [activeTableSortBy, setActiveTableSortBy] = useState<string>('currentMMP');
+  const [activeTableSortBy, setActiveTableSortBy] = useState<string>('');
   const [activeTableSortOrder, setActiveTableSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [inactiveTableSortBy, setInactiveTableSortBy] = useState<string>('가입설계건수');
+  const [inactiveTableSortBy, setInactiveTableSortBy] = useState<string>('');
   const [inactiveTableSortOrder, setInactiveTableSortOrder] = useState<'asc' | 'desc'>('desc');
 
   // 테이블 정렬 함수
@@ -108,10 +76,6 @@ const Branch360Dashboard = () => {
         case 'previousMMP':
           valueA = a.previousMonth.premium;
           valueB = b.previousMonth.premium;
-          break;
-        case '가입설계건수':
-          valueA = a.previousMonth.premium > 0 ? Math.floor(Math.random() * 9) + 1 : 0;
-          valueB = b.previousMonth.premium > 0 ? Math.floor(Math.random() * 9) + 1 : 0;
           break;
         default:
           return 0;
@@ -172,9 +136,9 @@ const Branch360Dashboard = () => {
   const [showActivityDetails, setShowActivityDetails] = useState(false);
   const [expandedEducation, setExpandedEducation] = useState(false);
   const [expandedVisit, setExpandedVisit] = useState(false);
-  const [selectedActivityType, setSelectedActivityType] = useState<'최근' | '교육' | '방문'>('교육');
+  const [selectedActivityType, setSelectedActivityType] = useState<'최근' | '교육' | '방문'>('최근');
+  const [showConversionTooltip, setShowConversionTooltip] = useState(false);
   const [hoveredProduct, setHoveredProduct] = useState<any>(null);
-  const [showProgressTooltip, setShowProgressTooltip] = useState(false);
 
   // 상세 활동 데이터
   const detailedEducationData = [
@@ -191,42 +155,42 @@ const Branch360Dashboard = () => {
 
   // 통합 관리 활동 목록 (최신 순, 10개)
   const recentActivityList = [
-    { date: '2025-09-13', type: '교육', category: '종신', content: 'FIDO 종신보험 상품 교육', manager: '교육 매니저' },
-    { date: '2025-09-12', type: '방문', category: '지점', content: '김○○ 설계사 개별 상담', manager: '설계 매니저' },
-    { date: '2025-09-11', type: '교육', category: '기타', content: '디지털 영업 툴 활용법 세미나', manager: '교육 매니저' },
-    { date: '2025-09-10', type: '방문', category: '지점', content: '신입 설계사 현장 동행', manager: '지점장' },
-    { date: '2025-09-09', type: '교육', category: '기타', content: '고객 상담 스킬 향상 교육', manager: '교육 매니저' },
-    { date: '2025-09-06', type: '방문', category: '본사', content: '우수 설계사 격려 방문', manager: '지점장' },
-    { date: '2025-09-05', type: '교육', category: '건강', content: '보험 상품 업데이트 안내', manager: '교육 매니저' },
-    { date: '2025-09-04', type: '방문', category: '본사', content: '지점 실적 점검 및 피드백', manager: '설계 매니저' },
-    { date: '2025-09-03', type: '교육', category: '기타', content: '컴플라이언스 교육', manager: '교육 매니저' },
-    { date: '2025-09-02', type: '방문', category: '지점', content: '설계사 개별 면담 및 상담', manager: '설계 매니저' },
+    { date: '2025-09-13', type: '교육', content: 'FIDO 종신보험 상품 교육', manager: '교육 매니저' },
+    { date: '2025-09-12', type: '방문', content: '김○○ 설계사 개별 상담', manager: '설계 매니저' },
+    { date: '2025-09-11', type: '교육', content: '디지털 영업 툴 활용법 세미나', manager: '교육 매니저' },
+    { date: '2025-09-10', type: '방문', content: '신입 설계사 현장 동행', manager: '지점장' },
+    { date: '2025-09-09', type: '교육', content: '고객 상담 스킬 향상 교육', manager: '교육 매니저' },
+    { date: '2025-09-06', type: '방문', content: '우수 설계사 격려 방문', manager: '지점장' },
+    { date: '2025-09-05', type: '교육', content: '보험 상품 업데이트 안내', manager: '교육 매니저' },
+    { date: '2025-09-04', type: '방문', content: '지점 실적 점검 및 피드백', manager: '설계 매니저' },
+    { date: '2025-09-03', type: '교육', content: '컴플라이언스 교육', manager: '교육 매니저' },
+    { date: '2025-09-02', type: '방문', content: '설계사 개별 면담 및 상담', manager: '설계 매니저' },
   ];
 
   const educationActivityList = [
-    { date: '2025-09-13', type: '교육', category: '종신', content: 'FIDO 종신보험 상품 교육', manager: '교육 매니저' },
-    { date: '2025-09-11', type: '교육', category: '기타', content: '디지털 영업 툴 활용법 세미나', manager: '교육 매니저' },
-    { date: '2025-09-09', type: '교육', category: '기타', content: '고객 상담 스킬 향상 교육', manager: '교육 매니저' },
-    { date: '2025-09-05', type: '교육', category: '건강', content: '보험 상품 업데이트 안내', manager: '교육 매니저' },
-    { date: '2025-09-03', type: '교육', category: '기타', content: '컴플라이언스 교육', manager: '교육 매니저' },
-    { date: '2025-08-28', type: '교육', category: '기타', content: '마케팅 전략 워크샵', manager: '교육 매니저' },
-    { date: '2025-08-25', type: '교육', category: '암', content: '신상품 출시 설명회', manager: '교육 매니저' },
-    { date: '2025-08-20', type: '교육', category: '기타', content: '고객관리 시스템 사용법', manager: '교육 매니저' },
-    { date: '2025-08-15', type: '교육', category: '기타', content: '영업 프로세스 개선 교육', manager: '교육 매니저' },
-    { date: '2025-08-10', type: '교육', category: '치매', content: '보험 법규 업데이트 교육', manager: '교육 매니저' },
+    { date: '2025-09-13', content: 'FIDO 종신보험 상품 교육', manager: '교육 매니저' },
+    { date: '2025-09-11', content: '디지털 영업 툴 활용법 세미나', manager: '교육 매니저' },
+    { date: '2025-09-09', content: '고객 상담 스킬 향상 교육', manager: '교육 매니저' },
+    { date: '2025-09-05', content: '보험 상품 업데이트 안내', manager: '교육 매니저' },
+    { date: '2025-09-03', content: '컴플라이언스 교육', manager: '교육 매니저' },
+    { date: '2025-08-28', content: '마케팅 전략 워크샵', manager: '교육 매니저' },
+    { date: '2025-08-25', content: '신상품 출시 설명회', manager: '교육 매니저' },
+    { date: '2025-08-20', content: '고객관리 시스템 사용법', manager: '교육 매니저' },
+    { date: '2025-08-15', content: '영업 프로세스 개선 교육', manager: '교육 매니저' },
+    { date: '2025-08-10', content: '보험 법규 업데이트 교육', manager: '교육 매니저' },
   ];
 
   const visitActivityList = [
-    { date: '2025-06-25', type: '방문', category: '지점', content: '김○○ 설계사 개별 상담', manager: '설계 매니저' },
-    { date: '2025-06-22', type: '방문', category: '지점', content: '신입 설계사 현장 동행', manager: '지점장' },
-    { date: '2025-06-18', type: '방문', category: '본사', content: '우수 설계사 격려 방문', manager: '지점장' },
-    { date: '2025-06-15', type: '방문', category: '본사', content: '지점 실적 점검 및 피드백', manager: '설계 매니저' },
-    { date: '2025-06-12', type: '방문', category: '지점', content: '설계사 개별 면담 및 상담', manager: '설계 매니저' },
-    { date: '2025-06-08', type: '방문', category: '지점', content: '고객 불만 처리 지원', manager: '설계 매니저' },
-    { date: '2025-06-05', type: '방문', category: '지점', content: '신규 고객 발굴 지원', manager: '설계 매니저' },
-    { date: '2025-06-02', type: '방문', category: '지점', content: '계약 체결 과정 지원', manager: '설계 매니저' },
-    { date: '2025-05-30', type: '방문', category: '지점', content: '설계사 개인 목표 설정 상담', manager: '설계 매니저' },
-    { date: '2025-05-28', type: '방문', category: '본사', content: '팀 빌딩 활동 참여', manager: '지점장' },
+    { date: '2025-06-25', content: '김○○ 설계사 개별 상담', manager: '설계 매니저' },
+    { date: '2025-06-22', content: '신입 설계사 현장 동행', manager: '지점장' },
+    { date: '2025-06-18', content: '우수 설계사 격려 방문', manager: '지점장' },
+    { date: '2025-06-15', content: '지점 실적 점검 및 피드백', manager: '설계 매니저' },
+    { date: '2025-06-12', content: '설계사 개별 면담 및 상담', manager: '설계 매니저' },
+    { date: '2025-06-08', content: '고객 불만 처리 지원', manager: '설계 매니저' },
+    { date: '2025-06-05', content: '신규 고객 발굴 지원', manager: '설계 매니저' },
+    { date: '2025-06-02', content: '계약 체결 과정 지원', manager: '설계 매니저' },
+    { date: '2025-05-30', content: '설계사 개인 목표 설정 상담', manager: '설계 매니저' },
+    { date: '2025-05-28', content: '팀 빌딩 활동 참여', manager: '지점장' },
   ];
 
   // 지능형 단위 포매팅 함수 (천원 단위)
@@ -326,37 +290,6 @@ const Branch360Dashboard = () => {
     if (tempSelectedAgency !== selectedAgency || tempSelectedBranch !== selectedBranch) {
       navigate(`/branch/${encodeURIComponent(tempSelectedAgency)}/${encodeURIComponent(tempSelectedBranch)}?${params.toString()}`);
     }
-  };
-
-  // 이전월/다음월 핸들러
-  const handleMonthNavigation = (direction: 'prev' | 'next') => {
-    const [year, month] = tempSelectedPeriod.split('-').map(Number);
-
-    let newYear = year;
-    let newMonth = month;
-
-    if (direction === 'prev') {
-      newMonth--;
-      if (newMonth < 1) {
-        newMonth = 12;
-        newYear--;
-      }
-    } else {
-      newMonth++;
-      if (newMonth > 12) {
-        newMonth = 1;
-        newYear++;
-      }
-    }
-
-    const newMonthStr = `${newYear}-${String(newMonth).padStart(2, '0')}`;
-
-    // 범위 체크 (2023-01 ~ 2025-09)
-    if (newMonthStr < '2023-01' || newMonthStr > '2025-09') {
-      return;
-    }
-
-    setTempSelectedPeriod(newMonthStr);
   };
 
   // CSV 다운로드 함수
@@ -475,19 +408,6 @@ const Branch360Dashboard = () => {
     // 더블유에셋 > 일산센터
     else if (agency === '더블유에셋' && branch === '일산센터') {
       alerts.push({
-        type: '위험',
-        title: '계약 품질 이슈',
-        description: '최근 3 영업일 동안 인수거절/청약철회 2건 이상 발생',
-        icon: <AlertTriangle className="w-3 h-3" />,
-        color: 'text-red-600',
-        bgColor: 'bg-red-100',
-        priority: 1
-      });
-    }
-
-    // 글로벌금융판매 > 리더스일산
-    else if (agency === '글로벌금융판매' && branch === '리더스일산') {
-      alerts.push({
         type: '기회',
         title: '실적 급상승',
         description: '전월 동기 대비 APE +30% 이상 급등',
@@ -496,10 +416,6 @@ const Branch360Dashboard = () => {
         bgColor: 'bg-green-100',
         priority: 2
       });
-    }
-
-    // 어센틱금융그룹 > 구미 스튜디오
-    else if (agency === '어센틱금융그룹' && branch === '구미 스튜디오') {
       alerts.push({
         type: '기회',
         title: '고액 계약 체결',
@@ -511,8 +427,8 @@ const Branch360Dashboard = () => {
       });
     }
 
-    // 라이프파트너스 > 부산센터
-    else if (agency === '라이프파트너스' && branch === '부산센터') {
+    // 지에이스타금융서비스 > 그레이트탑
+    else if (agency === '지에이스타금융서비스' && branch === '그레이트탑') {
       alerts.push({
         type: '기회',
         title: '신규 가동',
@@ -524,8 +440,8 @@ const Branch360Dashboard = () => {
       });
     }
 
-    // 한국지에이금융서비스 > 일산지사
-    else if (agency === '한국지에이금융서비스' && branch === '일산지사') {
+    // 한국지에이금융서비스 > 케이엘아이케이베스트
+    else if (agency === '한국지에이금융서비스' && branch === '케이엘아이케이베스트') {
       alerts.push({
         type: '변화',
         title: '연속 가동자 이탈',
@@ -537,8 +453,8 @@ const Branch360Dashboard = () => {
       });
     }
 
-    // 지에이스타금융서비스 > 부천코어
-    else if (agency === '지에이스타금융서비스' && branch === '부천코어') {
+    // 메가 > 사랑
+    else if (agency === '메가' && branch === '사랑') {
       alerts.push({
         type: '변화',
         title: '신규 위촉 발생',
@@ -550,8 +466,8 @@ const Branch360Dashboard = () => {
       });
     }
 
-    // 메가 > 인슈에셋고양
-    else if (agency === '메가' && branch === '인슈에셋고양') {
+    // 지금용코리아 > 서울
+    else if (agency === '지금용코리아' && branch === '서울') {
       alerts.push({
         type: '변화',
         title: '포트폴리오 급변',
@@ -560,71 +476,6 @@ const Branch360Dashboard = () => {
         color: 'text-blue-600',
         bgColor: 'bg-blue-100',
         priority: 3
-      });
-    }
-
-    // 글로벌금융판매 > 브릿지재무설계
-    else if (agency === '글로벌금융판매' && branch === '브릿지재무설계') {
-      alerts.push({
-        type: '기회',
-        title: '고객 만족도 상승',
-        description: '고객 만족도가 상승하는 추세',
-        icon: <TrendingUp className="w-3 h-3" />,
-        color: 'text-green-600',
-        bgColor: 'bg-green-100',
-        priority: 2
-      });
-    }
-
-    // 한국지에이금융서비스 > 김포지사
-    else if (agency === '한국지에이금융서비스' && branch === '김포지사') {
-      alerts.push({
-        type: '기회',
-        title: '계약 품질 개선',
-        description: '계약 품질이 개선되는 추세',
-        icon: <TrendingUp className="w-3 h-3" />,
-        color: 'text-green-600',
-        bgColor: 'bg-green-100',
-        priority: 2
-      });
-    }
-
-    // 메타리치 > 리치골드
-    else if (agency === '메타리치' && branch === '리치골드') {
-      alerts.push({
-        type: '위험',
-        title: '장기 미관리 상태',
-        description: '6개월 이상 방문/교육 없고 실적도 없는 상태',
-        icon: <AlertTriangle className="w-3 h-3" />,
-        color: 'text-red-600',
-        bgColor: 'bg-red-100',
-        priority: 1
-      });
-    }
-
-    // 어센틱금융그룹 > 대구센터
-    else if (agency === '어센틱금융그룹' && branch === '대구센터') {
-      alerts.push({
-        type: '변화',
-        title: '신입 설계사 급증',
-        description: '신입 설계사가 급증하는 추세',
-        icon: <UserPlus className="w-3 h-3" />,
-        color: 'text-blue-600',
-        bgColor: 'bg-blue-100',
-        priority: 3
-      });
-    }
-
-    // 라이프파트너스 > 대전센터
-    else if (agency === '라이프파트너스' && branch === '대전센터') {
-      alerts.push({
-        type: '위험',
-        title: '실적 부진 지속',
-        description: '실적 부진이 지속되는 상태',
-        icon: <TrendingDown className="w-3 h-3" />,
-        color: 'text-red-600',
-        bgColor: 'bg-red-100',
-        priority: 1
       });
     }
 
@@ -650,103 +501,39 @@ const Branch360Dashboard = () => {
     setShowBranchDropdown(false);
   };
 
-  // 핵심 성과 지표 (전일 마감 기준) - 동적 생성
-  const branchPerformanceData = generateBranchPerformance(selectedAgency, selectedBranch);
-  const managerName = generateManagerName(selectedAgency, selectedBranch);
-
-  // Agent360Dashboard와 동일한 목표 계산 로직
-  const calculateBranchTarget = (agency: string, branch: string, currentMonthAPE: number) => {
-    const seed = agency.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) +
-                 branch.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const targetRandom = ((seed * 9301 + 49297) % 233280) / 233280;
-
-    let target = 30; // 기본 30백만원
-    const apeInMillions = currentMonthAPE / 1000000;
-
-    if (apeInMillions > 15) {
-      target = 15 + Math.floor(targetRandom * 25);
-      if (targetRandom > 0.6) target = Math.floor(apeInMillions * 0.8);
-    } else if (apeInMillions > 5) {
-      target = 5 + Math.floor(targetRandom * 15);
-      if (targetRandom > 0.5) target = Math.floor(apeInMillions * 0.85);
-    } else if (apeInMillions > 1) {
-      target = 3 + Math.floor(targetRandom * 12);
-      if (targetRandom > 0.4) target = Math.floor(apeInMillions * 0.9);
-    } else if (apeInMillions > 0) {
-      target = 2 + Math.floor(targetRandom * 8);
-      if (targetRandom < 0.3) target = Math.floor(apeInMillions * 1.2);
-    }
-
-    return Math.max(target, 2); // 최소 2백만원
-  };
-
-  // 현재 지점의 목표 계산
-  const currentBranchTarget = calculateBranchTarget(selectedAgency, selectedBranch, branchPerformanceData.currentMonthAPE);
-  const targetApeInWon = currentBranchTarget * 1000000; // 원 단위
-
-  // 전체 지점 데이터 생성하여 기여도 계산
-  const totalBranches = 160;
-  const allBranchesData = [];
-
-  for (let i = 0; i < totalBranches; i++) {
-    const agencyIndex = i % agencies.length;
-    const branchIndex = i % branchNames.length;
-    const suffixes = ['', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
-    const suffix = suffixes[Math.floor(i / branchNames.length)];
-
-    const agency = agencies[agencyIndex];
-    const branch = branchNames[branchIndex] + suffix;
-    const performance = generateBranchPerformance(agency, branch);
-    const target = calculateBranchTarget(agency, branch, performance.currentMonthAPE);
-
-    allBranchesData.push({
-      agency,
-      branch,
-      currentMonthAPE: performance.currentMonthAPE,
-      target: target * 1000000 // 원 단위
-    });
-  }
-
-  const totalTargetSum = allBranchesData.reduce((sum, b) => sum + b.target, 0);
-  const totalPerformanceSum = allBranchesData.reduce((sum, b) => sum + b.currentMonthAPE, 0);
-
-  const targetContribution = totalTargetSum > 0 ? (targetApeInWon / totalTargetSum) * 100 : 0;
-  const performanceContribution = totalPerformanceSum > 0 ? (branchPerformanceData.currentMonthAPE / totalPerformanceSum) * 100 : 0;
-
+  // 핵심 성과 지표 (전일 마감 기준)
   const corePerformance = {
     // 목표 달성률 (APE/MMP 기준)
-    achievementRate: targetApeInWon > 0 ? (branchPerformanceData.currentMonthAPE / targetApeInWon) * 100 : 0,
-    currentApe: branchPerformanceData.currentMonthAPE / 10000, // 만원 단위
-    targetApe: targetApeInWon / 10000, // 만원 단위
-    achievementVsLastMonth: branchPerformanceData.currentMonthAPE > branchPerformanceData.previousMonthAPE ? 8.5 : -5.2,
+    achievementRate: 32.67, // 98/300
+    currentApe: performanceType === 'MMP' ? 98 / 12 : 98, // 만원 단위 (98만원)
+    targetApe: performanceType === 'MMP' ? 300 / 12 : 300, // 만원 단위 (300만원)
+    achievementVsLastMonth: 8.5, // 전월 동기 대비 %p
 
     // 지점장 실적 기여도
-    managerContributionRate: performanceContribution,
-    managerApe: 35000, // 지점장 개인 실적 (만원) 3.5억
-    managerName: managerName,
-    managerPersonalTarget: 50000, // 지점장 개인 목표 (만원) 5억
-    branchTargetApe: targetApeInWon / 10000,
-    managerPlanContribution: targetContribution,
-    managerContribVsLastMonth: -2.3,
-    totalBranchApe: branchPerformanceData.currentMonthAPE / 10000, // 만원 단위
+    managerContributionRate: 0.28, // 역삼지점 실적(98만원) ÷ 지점장 전체 실적(3.5억 = 35000만원) * 100
+    managerApe: performanceType === 'MMP' ? 35000 / 12 : 35000, // 지점장 개인 실적 (만원) 3.5억
+    managerName: '김영수', // 지점장 이름
+    managerPersonalTarget: performanceType === 'MMP' ? 50000 / 12 : 50000, // 지점장 개인 목표 (만원) 5억
+    branchTargetApe: performanceType === 'MMP' ? 300 / 12 : 300, // 역삼지점 목표 APE (만원) 300만원
+    managerPlanContribution: 0.6, // 역삼지점 목표(300만원) ÷ 지점장 목표(5억 = 50000만원) * 100
+    managerContribVsLastMonth: -2.3, // 전월 동기 대비 %p
+    totalBranchApe: performanceType === 'MMP' ? 98 / 12 : 98, // 역삼지점 실적 APE (만원) 98만원
 
     // 월누적 APE
-    monthlyApeAmount: branchPerformanceData.currentMonthAPE / 10000, // 만원
-    apeGrowthAmount: (branchPerformanceData.currentMonthAPE - branchPerformanceData.previousMonthAPE) / 10000,
-    apeGrowthPercent: branchPerformanceData.previousMonthAPE > 0
-      ? ((branchPerformanceData.currentMonthAPE - branchPerformanceData.previousMonthAPE) / branchPerformanceData.previousMonthAPE * 100)
-      : 0,
-    apeDailyAverage: Math.round(branchPerformanceData.currentMonthAPE / 10000 / 15),
+    monthlyApeAmount: performanceType === 'MMP' ? 98 / 12 : 98, // 만원
+    apeGrowthAmount: performanceType === 'MMP' ? 20 / 12 : 20, // 전월 동기 대비 증가분 (만원)
+    apeGrowthPercent: 25.6, // 전월 동기 대비 %
+    apeDailyAverage: performanceType === 'MMP' ? Math.round(98/12/15) : Math.round(98/15), // 일평균 APE (만원)
 
     // 월누적 설계
-    proposalCount: 250,
-    proposalGrowth: 18,
-    proposalDailyAverage: Math.round(250/15),
+    proposalCount: 162,
+    proposalGrowth: 12, // 전월 동기 대비
+    proposalDailyAverage: Math.round(162/15),
 
     // 월누적 청약
-    contractCount: 150,
-    contractGrowth: 12,
-    contractDailyAverage: Math.round(150/15)
+    contractCount: 95,
+    contractGrowth: -5, // 전월 동기 대비
+    contractDailyAverage: Math.round(95/15)
   };
 
   // 선택된 월에 따른 동적 일별 실적 데이터 생성
@@ -763,8 +550,8 @@ const Branch360Dashboard = () => {
 
     const dailyData = [];
 
-    // 9월의 경우 15 영업일 총합 = 10000천원 (APE 기준, 1000만원)
-    const targetTotal = isCurrentMonth ? 10000 : 10000; // 천원 단위
+    // 9월의 경우 15 영업일 총합 = 980천원 (APE 기준)
+    const targetTotal = isCurrentMonth ? 980 : 980; // 천원 단위
     const businessDays = [];
 
     // 먼저 영업일/주말 구분
@@ -778,18 +565,10 @@ const Branch360Dashboard = () => {
       }
     }
 
-    // 일별 비율 생성 (들쑥날쑥하지만 전반적으로 월말로 갈수록 증가 경향)
-    // 9월 15 영업일 기준 패턴
-    const dayPatterns = [
-      0.6, 0.3, 0.7, 0.4, 0.5,  // 1주차 - 낮은 실적, 들쑥날쑥
-      1.3, 0.8, 1.4, 0.9, 1.2,  // 2주차 - 중간 실적, 들쑥날쑥
-      2.5, 1.9, 2.6, 2.1, 2.6   // 3주차 - 높은 실적, 들쑥날쑥
-    ];
-
+    // 일별 비율 생성 (고정된 패턴으로 자연스러운 변동)
     const ratios = businessDays.map((day, idx) => {
-      // businessDays 길이에 맞게 패턴 조정
-      const patternIndex = Math.floor(idx * dayPatterns.length / businessDays.length);
-      return dayPatterns[Math.min(patternIndex, dayPatterns.length - 1)] || 1.0;
+      const baseRatio = 1 + (Math.sin(idx * 0.5) * 0.3) + ((day % 7) * 0.03 - 0.1);
+      return Math.max(0.5, baseRatio);
     });
 
     const totalRatio = ratios.reduce((sum, r) => sum + r, 0);
@@ -807,11 +586,7 @@ const Branch360Dashboard = () => {
           designCount: 0,
           isWeekend: true,
           healthRatio: 0,
-          lifeRatio: 0,
-          healthContract: 0,
-          lifeContract: 0,
-          healthDesign: 0,
-          lifeDesign: 0
+          lifeRatio: 0
         });
       } else {
         const dayIndex = businessDays.indexOf(day);
@@ -823,19 +598,10 @@ const Branch360Dashboard = () => {
           apeAmount = apeAmount / 12;
         }
 
-        // 청약/설계 건수도 영업일이 지날수록 증가 (지수 함수 사용)
-        const baseContract = 2 + Math.floor(ratio / totalRatio * businessDays.length * 0.8);
-        const contractCount = Math.max(2, Math.min(15, baseContract));
-        const designCount = Math.max(3, Math.min(20, Math.floor(contractCount * 1.5)));
-
+        const contractCount = Math.max(2, Math.min(8, Math.floor(3 + dayIndex * 0.2 + (day % 3))));
+        const designCount = Math.max(3, Math.min(10, Math.floor(contractCount * 1.4)));
         const healthRatio = 60 + (day % 20);
         const lifeRatio = 100 - healthRatio;
-
-        // 건강/종신정기 건수 분리
-        const healthContract = Math.round(contractCount * healthRatio / 100);
-        const lifeContract = contractCount - healthContract;
-        const healthDesign = Math.round(designCount * healthRatio / 100);
-        const lifeDesign = designCount - healthDesign;
 
         dailyData.push({
           day,
@@ -844,11 +610,7 @@ const Branch360Dashboard = () => {
           designCount,
           isWeekend: false,
           healthRatio,
-          lifeRatio,
-          healthContract,
-          lifeContract,
-          healthDesign,
-          lifeDesign
+          lifeRatio
         });
       }
     }
@@ -865,7 +627,6 @@ const Branch360Dashboard = () => {
   const [hoveredDayData, setHoveredDayData] = useState<any>(null);
   const [selectedMetric, setSelectedMetric] = useState<string>(performanceType);
   const [productSortBy, setProductSortBy] = useState<'amount' | 'count'>('amount');
-  const [productRatioCriteria, setProductRatioCriteria] = useState<'amount' | 'count'>('amount'); // 상품군 비중 기준
   const [dailyMetric, setDailyMetric] = useState<'APE' | 'MMP' | '청약' | '설계'>(performanceType); // 일별 차트 지표
   const [hoveredAverage, setHoveredAverage] = useState<{type: 'daily' | 'monthly', value: number} | null>(null); // 평균선 호버
   const [showExpectedProgressTooltip, setShowExpectedProgressTooltip] = useState(false); // 기대진도 툴팁
@@ -927,7 +688,7 @@ const Branch360Dashboard = () => {
   const [agentListModal, setAgentListModal] = useState(false);
   const [selectedAgent] = useState<any>(null);
   const [agentDetailModal, setAgentDetailModal] = useState(false);
-  const [agentSortBy, setAgentSortBy] = useState('commissionMonth');
+  const [agentSortBy, setAgentSortBy] = useState('mmp0');
   const [agentSortOrder, setAgentSortOrder] = useState<'desc' | 'asc'>('desc');
   const [showAllAgentsModal, setShowAllAgentsModal] = useState(false);
   const [agentPeriod, setAgentPeriod] = useState<'current' | 'previous'>('current');
@@ -936,12 +697,24 @@ const Branch360Dashboard = () => {
   const [showManagementHistoryModal, setShowManagementHistoryModal] = useState(false); // 관리활동 더보기 모달
   const [showActiveAgentsModal, setShowActiveAgentsModal] = useState(false); // 가동 설계사 모달
   const [showInactiveAgentsModal, setShowInactiveAgentsModal] = useState(false); // 미가동 설계사 모달
-  const [modalPerformanceType, setModalPerformanceType] = useState<'APE' | 'MMP'>('MMP'); // 모달 성과 기준
-  const [activeSortBy, setActiveSortBy] = useState<'name' | 'code' | 'tenure' | 'commissionMonth' | '가입설계건수' | 'currentMMP' | 'previousMMP' | 'M0' | 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M0건' | 'M1건' | 'M2건' | 'M3건' | 'M4건' | 'M5건'>('M0'); // 가동 설계사 정렬 기준
+  const [activeSortBy, setActiveSortBy] = useState<'name' | 'code' | 'tenure' | 'commissionMonth' | 'currentMMP' | 'previousMMP' | 'M0' | 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M0건' | 'M1건' | 'M2건' | 'M3건' | 'M4건' | 'M5건'>('M0'); // 가동 설계사 정렬 기준
   const [activeSortOrder, setActiveSortOrder] = useState<'asc' | 'desc'>('desc'); // 가동 설계사 정렬 순서
-  const [inactiveSortBy, setInactiveSortBy] = useState<'name' | 'code' | 'tenure' | 'commissionMonth' | '가입설계건수' | 'previousMMP' | 'M0' | 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M0건' | 'M1건' | 'M2건' | 'M3건' | 'M4건' | 'M5건'>('가입설계건수'); // 미가동 설계사 정렬 기준
+  const [inactiveSortBy, setInactiveSortBy] = useState<'name' | 'code' | 'tenure' | 'commissionMonth' | 'previousMMP' | 'M0' | 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M0건' | 'M1건' | 'M2건' | 'M3건' | 'M4건' | 'M5건'>('commissionMonth'); // 미가동 설계사 정렬 기준
   const [inactiveSortOrder, setInactiveSortOrder] = useState<'asc' | 'desc'>('desc'); // 미가동 설계사 정렬 순서
   
+  const currentAgentStatus = {
+    total: 47, // 총 소속 설계사
+    active: 29, // 당월 가동 설계사 (12+6+5+6=29명)
+    newThisMonth: 2, // 당월 신규 위촉 (새로 입사한 설계사)
+    resignedThisMonth: 1, // 당월 해촉
+    netChange: 1, // 순증감 (신규위촉2 - 해촉1)
+    continuous6Months: 8, // 6개월 연속 가동 (순수 6개월만)
+    continuous3Months: 15, // 3개월 연속 가동 (6개월 8명 + 3개월 7명 = 15명)
+    continuous2Months: 23, // 2개월 연속 가동 (3개월 15명 + 2개월 8명 = 23명)
+    newActive: 6 // 전월 미가동→가동 전환
+  };
+
+
   // 에이전트 리스트 데이터 (포함 관계로 정리)
   const baseAgentLists = {
     // 6개월 연속 가동 (순수 6개월만)
@@ -961,11 +734,11 @@ const Branch360Dashboard = () => {
       '이지은', '김선호', '김준영', '이하늘', '박상호', '정미선', '조영수', '차서영',
       // 3개월 순수
       '손민준', '박지수', '정동현', '차민정', '박지영', '정예린', '조은경',
-      // 2개월 순수 (실제 당월 가동 설계사만)
-      '손지원', '김동현', '이민지', '박형준', '김나영', '이성민', '김배태', '박예진'
+      // 2개월 순수
+      '손지원', '김동현', '이민지', '박형준', '김나영', '이성민', '정주영', '조민석'
     ],
     newActive: [
-      '최지후', '김대우', '이예진' // 신규 가동
+      '김배태', '박예진', '최지후', '김대우', '이예진', '박시원' // 전월 미가동→가동 전환
     ],
     newCommissioned: [
       '정민준', '조상원' // 당월 신규 위촉 (새로 입사한 설계사)
@@ -975,303 +748,262 @@ const Branch360Dashboard = () => {
     ]
   };
 
-  const currentAgentStatus = {
-    total: 51, // 총 소속 설계사
-    active: 26, // 당월 가동 설계사 (26명)
-    newThisMonth: 2, // 당월 신규 위촉
-    resignedThisMonth: 1, // 당월 해촉
-    netChange: 1, // 순증감
-    continuous6Months: baseAgentLists.continuous6Months.length, // 6개월 연속 가동 (8명)
-    continuous3Months: baseAgentLists.continuous3Months.length, // 3개월 연속 가동 (15명)
-    continuous2Months: baseAgentLists.continuous2Months.length, // 2개월 연속 가동 (23명)
-    newActive: baseAgentLists.newActive.length // 신규 가동 (3명)
-  };
-
-  // 전체 51명 설계사 데이터 생성 (완전 고정 데이터)
+  // 전체 47명 설계사 데이터 생성 (완전 고정 데이터)
   const generateAllAgentsData = () => {
-    // 기본 데이터 (비율 유지용)
-    const baseData = [
-      // 6개월 연속 가동 (8명)
+    return [
+      // TOP 5 우수 설계사
       {
-        name: '이지은', agentCode: 'AG001', experience: '8.5년차', commissionMonth:'102개월', insuranceCareer: '8.5년', gender: '여',
-        currentMonth: { premium: 10, contracts: 13, rank: 1 },
-        previousMonth: { premium: 26, contracts: 11, rank: 2 },
-        threeMonthAverage: { premium: 27, contracts: 12 },
-        productMix: { health: 70, life: 30 }, isActive: true, continuousMonths: 6
+        name: '이지은', agentCode: 'AG001', experience: '8.5년차', commissionMonth:'102개월', insuranceCareer: '8.5년',
+        currentMonth: { premium: 96, contracts: 13, rank: 1 },
+        previousMonth: { premium: 186, contracts: 11, rank: 2 },
+        threeMonthAverage: { premium: 195, contracts: 12 },
+        productMix: { health: 70, life: 30 }, isActive: true
       },
       {
-        name: '김선호', agentCode: 'AG002', experience: '6.2년차', commissionMonth:'74개월', insuranceCareer: '6.2년', gender: '남',
-        currentMonth: { premium: 9, contracts: 12, rank: 2 },
-        previousMonth: { premium: 26, contracts: 13, rank: 1 },
-        threeMonthAverage: { premium: 26, contracts: 12 },
-        productMix: { health: 55, life: 45 }, isActive: true, continuousMonths: 6
+        name: '김선호', agentCode: 'AG002', experience: '6.2년차', commissionMonth:'74개월', insuranceCareer: '6.2년',
+        currentMonth: { premium: 86, contracts: 12, rank: 2 },
+        previousMonth: { premium: 192, contracts: 13, rank: 1 },
+        threeMonthAverage: { premium: 189, contracts: 12 },
+        productMix: { health: 55, life: 45 }, isActive: true
       },
       {
-        name: '김준영', agentCode: 'AG003', experience: '12.8년차', commissionMonth:'153개월', insuranceCareer: '12.8년', gender: '남',
-        currentMonth: { premium: 8, contracts: 11, rank: 3 },
-        previousMonth: { premium: 23, contracts: 10, rank: 3 },
-        threeMonthAverage: { premium: 23, contracts: 10 },
-        productMix: { health: 65, life: 35 }, isActive: true, continuousMonths: 6
+        name: '김준영', agentCode: 'AG003', experience: '12.8년차', commissionMonth:'153개월', insuranceCareer: '12.8년',
+        currentMonth: { premium: 79, contracts: 11, rank: 3 },
+        previousMonth: { premium: 164, contracts: 10, rank: 3 },
+        threeMonthAverage: { premium: 168, contracts: 10 },
+        productMix: { health: 65, life: 35 }, isActive: true
       },
       {
-        name: '이하늘', agentCode: 'AG004', experience: '4.3년차', commissionMonth:'51개월', insuranceCareer: '4.3년', gender: '여',
-        currentMonth: { premium: 7, contracts: 9, rank: 4 },
-        previousMonth: { premium: 21, contracts: 8, rank: 4 },
-        threeMonthAverage: { premium: 21, contracts: 8 },
-        productMix: { health: 40, life: 60 }, isActive: true, continuousMonths: 6
+        name: '이하늘', agentCode: 'AG004', experience: '4.3년차', commissionMonth:'51개월', insuranceCareer: '4.3년',
+        currentMonth: { premium: 73, contracts: 9, rank: 4 },
+        previousMonth: { premium: 152, contracts: 8, rank: 4 },
+        threeMonthAverage: { premium: 155, contracts: 8 },
+        productMix: { health: 40, life: 60 }, isActive: true
       },
       {
-        name: '박상호', agentCode: 'AG005', experience: '7.6년차', commissionMonth:'91개월', insuranceCareer: '7.6년', gender: '남',
-        currentMonth: { premium: 7, contracts: 10, rank: 5 },
-        previousMonth: { premium: 19, contracts: 9, rank: 5 },
-        threeMonthAverage: { premium: 19, contracts: 9 },
-        productMix: { health: 80, life: 20 }, isActive: true, continuousMonths: 6
-      },
-      {
-        name: '정미선', agentCode: 'AG006', experience: '5.4년차', commissionMonth:'65개월', insuranceCareer: '5.4년', gender: '여',
-        currentMonth: { premium: 3, contracts: 8, rank: 6 },
-        previousMonth: { premium: 6, contracts: 7, rank: 6 },
-        threeMonthAverage: { premium: 6, contracts: 7 },
-        productMix: { health: 55, life: 45 }, isActive: true, continuousMonths: 6
-      },
-      {
-        name: '조영수', agentCode: 'AG007', experience: '3.7년차', commissionMonth:'44개월', insuranceCareer: '3.7년', gender: '남',
-        currentMonth: { premium: 3, contracts: 7, rank: 7 },
-        previousMonth: { premium: 6, contracts: 6, rank: 7 },
-        threeMonthAverage: { premium: 6, contracts: 6 },
-        productMix: { health: 75, life: 25 }, isActive: true, continuousMonths: 6
-      },
-      {
-        name: '차서영', agentCode: 'AG008', experience: '10.2년차', commissionMonth:'122개월', insuranceCareer: '10.2년', gender: '여',
-        currentMonth: { premium: 3, contracts: 6, rank: 8 },
-        previousMonth: { premium: 5, contracts: 5, rank: 8 },
-        threeMonthAverage: { premium: 6, contracts: 5 },
-        productMix: { health: 60, life: 40 }, isActive: true, continuousMonths: 6
+        name: '박상호', agentCode: 'AG005', experience: '7.6년차', commissionMonth:'91개월', insuranceCareer: '7.6년',
+        currentMonth: { premium: 67, contracts: 10, rank: 5 },
+        previousMonth: { premium: 139, contracts: 9, rank: 5 },
+        threeMonthAverage: { premium: 142, contracts: 9 },
+        productMix: { health: 80, life: 20 }, isActive: true
       },
 
-      // 3개월 연속 가동 추가 (7명)
+      // 6-12위: 연속 가동 설계사
       {
-        name: '손민준', agentCode: 'AG009', experience: '2.9년차', commissionMonth:'35개월', insuranceCareer: '2.9년', gender: '남',
-        currentMonth: { premium: 3, contracts: 5, rank: 9 },
-        previousMonth: { premium: 5, contracts: 4, rank: 9 },
-        threeMonthAverage: { premium: 5, contracts: 4 },
-        productMix: { health: 45, life: 55 }, isActive: true, continuousMonths: 3
+        name: '정미선', agentCode: 'AG006', experience: '5.4년차', commissionMonth:'65개월', insuranceCareer: '5.4년',
+        currentMonth: { premium: 61, contracts: 8, rank: 6 },
+        previousMonth: { premium: 125, contracts: 7, rank: 6 },
+        threeMonthAverage: { premium: 128, contracts: 7 },
+        productMix: { health: 55, life: 45 }, isActive: true
       },
       {
-        name: '박지수', agentCode: 'AG010', experience: '6.8년차', commissionMonth:'81개월', insuranceCareer: '6.8년', gender: '여',
-        currentMonth: { premium: 3, contracts: 4, rank: 10 },
-        previousMonth: { premium: 5, contracts: 3, rank: 10 },
-        threeMonthAverage: { premium: 5, contracts: 3 },
-        productMix: { health: 85, life: 15 }, isActive: true, continuousMonths: 3
+        name: '조영수', agentCode: 'AG007', experience: '3.7년차', commissionMonth:'44개월', insuranceCareer: '3.7년',
+        currentMonth: { premium: 54, contracts: 7, rank: 7 },
+        previousMonth: { premium: 114, contracts: 6, rank: 7 },
+        threeMonthAverage: { premium: 116, contracts: 6 },
+        productMix: { health: 75, life: 25 }, isActive: true
       },
       {
-        name: '정동현', agentCode: 'AG011', experience: '4.5년차', commissionMonth:'54개월', insuranceCareer: '4.5년', gender: '남',
-        currentMonth: { premium: 3, contracts: 3, rank: 11 },
-        previousMonth: { premium: 5, contracts: 2, rank: 11 },
-        threeMonthAverage: { premium: 5, contracts: 2 },
-        productMix: { health: 50, life: 50 }, isActive: true, continuousMonths: 3
+        name: '차서영', agentCode: 'AG008', experience: '10.2년차', commissionMonth:'122개월', insuranceCareer: '10.2년',
+        currentMonth: { premium: 48, contracts: 6, rank: 8 },
+        previousMonth: { premium: 98, contracts: 5, rank: 8 },
+        threeMonthAverage: { premium: 101, contracts: 5 },
+        productMix: { health: 60, life: 40 }, isActive: true
       },
       {
-        name: '차민정', agentCode: 'AG012', experience: '1.8년차', commissionMonth:'21개월', insuranceCareer: '1.8년', gender: '여',
-        currentMonth: { premium: 3, contracts: 2, rank: 12 },
-        previousMonth: { premium: 5, contracts: 2, rank: 12 },
-        threeMonthAverage: { premium: 5, contracts: 2 },
-        productMix: { health: 70, life: 30 }, isActive: true, continuousMonths: 3
+        name: '손민준', agentCode: 'AG009', experience: '2.9년차', commissionMonth:'35개월', insuranceCareer: '2.9년',
+        currentMonth: { premium: 42, contracts: 5, rank: 9 },
+        previousMonth: { premium: 87, contracts: 4, rank: 9 },
+        threeMonthAverage: { premium: 89, contracts: 4 },
+        productMix: { health: 45, life: 55 }, isActive: true
       },
       {
-        name: '박지영', agentCode: 'AG013', experience: '3.2년차', commissionMonth:'38개월', insuranceCareer: '3.2년', gender: '여',
-        currentMonth: { premium: 3, contracts: 1, rank: 13 },
-        previousMonth: { premium: 5, contracts: 1, rank: 13 },
-        threeMonthAverage: { premium: 5, contracts: 1 },
-        productMix: { health: 80, life: 20 }, isActive: true, continuousMonths: 3
+        name: '박지수', agentCode: 'AG010', experience: '6.8년차', commissionMonth:'81개월', insuranceCareer: '6.8년',
+        currentMonth: { premium: 39, contracts: 4, rank: 10 },
+        previousMonth: { premium: 79, contracts: 3, rank: 10 },
+        threeMonthAverage: { premium: 81, contracts: 3 },
+        productMix: { health: 85, life: 15 }, isActive: true
       },
       {
-        name: '정예린', agentCode: 'AG014', experience: '5.7년차', commissionMonth:'68개월', insuranceCareer: '5.7년', gender: '여',
-        currentMonth: { premium: 3, contracts: 1, rank: 14 },
-        previousMonth: { premium: 5, contracts: 1, rank: 14 },
-        threeMonthAverage: { premium: 5, contracts: 1 },
-        productMix: { health: 40, life: 60 }, isActive: true, continuousMonths: 3
+        name: '정동현', agentCode: 'AG011', experience: '4.5년차', commissionMonth:'54개월', insuranceCareer: '4.5년',
+        currentMonth: { premium: 35, contracts: 3, rank: 11 },
+        previousMonth: { premium: 72, contracts: 2, rank: 11 },
+        threeMonthAverage: { premium: 74, contracts: 2 },
+        productMix: { health: 50, life: 50 }, isActive: true
       },
       {
-        name: '조은경', agentCode: 'AG015', experience: '2.5년차', commissionMonth:'30개월', insuranceCareer: '2.5년', gender: '여',
-        currentMonth: { premium: 3, contracts: 1, rank: 15 },
-        previousMonth: { premium: 5, contracts: 1, rank: 15 },
-        threeMonthAverage: { premium: 5, contracts: 1 },
-        productMix: { health: 75, life: 25 }, isActive: true, continuousMonths: 3
-      },
-
-      // 2개월 연속 가동 추가 (8명)
-      {
-        name: '손지원', agentCode: 'AG016', experience: '4.1년차', commissionMonth:'49개월', insuranceCareer: '4.1년', gender: '여',
-        currentMonth: { premium: 3, contracts: 1, rank: 16 },
-        previousMonth: { premium: 5, contracts: 1, rank: 16 },
-        threeMonthAverage: { premium: 5, contracts: 1 },
-        productMix: { health: 60, life: 40 }, isActive: true, continuousMonths: 2
-      },
-      {
-        name: '김동현', agentCode: 'AG017', experience: '7.3년차', commissionMonth:'87개월', insuranceCareer: '7.3년', gender: '남',
-        currentMonth: { premium: 3, contracts: 1, rank: 17 },
-        previousMonth: { premium: 5, contracts: 1, rank: 17 },
-        threeMonthAverage: { premium: 5, contracts: 1 },
-        productMix: { health: 50, life: 50 }, isActive: true, continuousMonths: 2
-      },
-      {
-        name: '이민지', agentCode: 'AG018', experience: '1.9년차', commissionMonth:'23개월', insuranceCareer: '1.9년', gender: '여',
-        currentMonth: { premium: 3, contracts: 1, rank: 18 },
-        previousMonth: { premium: 2, contracts: 1, rank: 18 },
-        threeMonthAverage: { premium: 2, contracts: 1 },
-        productMix: { health: 85, life: 15 }, isActive: true, continuousMonths: 2
-      },
-      {
-        name: '박형준', agentCode: 'AG019', experience: '5.2년차', commissionMonth:'62개월', insuranceCareer: '5.2년', gender: '남',
-        currentMonth: { premium: 3, contracts: 1, rank: 19 },
-        previousMonth: { premium: 2, contracts: 1, rank: 19 },
-        threeMonthAverage: { premium: 2, contracts: 1 },
-        productMix: { health: 65, life: 35 }, isActive: true, continuousMonths: 2
-      },
-      {
-        name: '김나영', agentCode: 'AG020', experience: '3.6년차', commissionMonth:'43개월', insuranceCareer: '3.6년', gender: '여',
-        currentMonth: { premium: 3, contracts: 1, rank: 20 },
-        previousMonth: { premium: 2, contracts: 1, rank: 20 },
-        threeMonthAverage: { premium: 2, contracts: 1 },
-        productMix: { health: 70, life: 30 }, isActive: true, continuousMonths: 2
-      },
-      {
-        name: '이성민', agentCode: 'AG021', experience: '2.1년차', commissionMonth:'25개월', insuranceCareer: '2.1년', gender: '남',
-        currentMonth: { premium: 3, contracts: 1, rank: 21 },
-        previousMonth: { premium: 2, contracts: 1, rank: 21 },
-        threeMonthAverage: { premium: 2, contracts: 1 },
-        productMix: { health: 50, life: 50 }, isActive: true, continuousMonths: 2
-      },
-      {
-        name: '김배태', agentCode: 'AG022', experience: '4.1년차', commissionMonth:'2개월', insuranceCareer: '4.1년', gender: '남',
-        currentMonth: { premium: 3, contracts: 2, rank: 22 },
-        previousMonth: { premium: 2, contracts: 1, rank: 22 },
-        threeMonthAverage: { premium: 2, contracts: 1 },
-        productMix: { health: 65, life: 35 }, isActive: true, continuousMonths: 2
-      },
-      {
-        name: '박예진', agentCode: 'AG023', experience: '1.3년차', commissionMonth:'2개월', insuranceCareer: '1.3년', gender: '여',
-        currentMonth: { premium: 3, contracts: 1, rank: 23 },
-        previousMonth: { premium: 2, contracts: 1, rank: 23 },
-        threeMonthAverage: { premium: 2, contracts: 1 },
-        productMix: { health: 55, life: 45 }, isActive: true, continuousMonths: 2
+        name: '차민정', agentCode: 'AG012', experience: '1.8년차', commissionMonth:'21개월', insuranceCareer: '1.8년',
+        currentMonth: { premium: 31, contracts: 2, rank: 12 },
+        previousMonth: { premium: 65, contracts: 2, rank: 12 },
+        threeMonthAverage: { premium: 66, contracts: 2 },
+        productMix: { health: 70, life: 30 }, isActive: true
       },
 
-      // 신규 가동 (3명) - M1~M5 모두 0
+      // 13-20위: 연속 가동 설계사 (3개월)
       {
-        name: '최지후', agentCode: 'AG024', experience: '2.3년차', commissionMonth:'1개월', insuranceCareer: '2.3년', gender: '남',
-        currentMonth: { premium: 2, contracts: 1, rank: 24 },
+        name: '김배태', agentCode: 'AG013', experience: '4.1년차', commissionMonth:'1개월', insuranceCareer: '4.1년',
+        currentMonth: { premium: 28, contracts: 2, rank: 13 },
+        previousMonth: { premium: 0, contracts: 0, rank: null },
+        threeMonthAverage: { premium: 59, contracts: 1 },
+        productMix: { health: 65, life: 35 }, isActive: true
+      },
+      {
+        name: '박예진', agentCode: 'AG014', experience: '1.3년차', commissionMonth:'1개월', insuranceCareer: '1.3년',
+        currentMonth: { premium: 25, contracts: 1, rank: 14 },
+        previousMonth: { premium: 0, contracts: 0, rank: null },
+        threeMonthAverage: { premium: 53, contracts: 1 },
+        productMix: { health: 55, life: 45 }, isActive: true
+      },
+      {
+        name: '박지영', agentCode: 'AG015', experience: '3.2년차', commissionMonth:'38개월', insuranceCareer: '3.2년',
+        currentMonth: { premium: 22, contracts: 1, rank: 15 },
+        previousMonth: { premium: 45, contracts: 1, rank: 15 },
+        threeMonthAverage: { premium: 46, contracts: 1 },
+        productMix: { health: 80, life: 20 }, isActive: true
+      },
+      {
+        name: '정예린', agentCode: 'AG016', experience: '5.7년차', commissionMonth:'68개월', insuranceCareer: '5.7년',
+        currentMonth: { premium: 19, contracts: 1, rank: 16 },
+        previousMonth: { premium: 39, contracts: 1, rank: 16 },
+        threeMonthAverage: { premium: 40, contracts: 1 },
+        productMix: { health: 40, life: 60 }, isActive: true
+      },
+      {
+        name: '조은경', agentCode: 'AG017', experience: '2.5년차', commissionMonth:'30개월', insuranceCareer: '2.5년',
+        currentMonth: { premium: 17, contracts: 1, rank: 17 },
+        previousMonth: { premium: 34, contracts: 1, rank: 17 },
+        threeMonthAverage: { premium: 35, contracts: 1 },
+        productMix: { health: 75, life: 25 }, isActive: true
+      },
+      {
+        name: '손지원', agentCode: 'AG018', experience: '4.1년차', commissionMonth:'49개월', insuranceCareer: '4.1년',
+        currentMonth: { premium: 14, contracts: 1, rank: 18 },
+        previousMonth: { premium: 28, contracts: 1, rank: 18 },
+        threeMonthAverage: { premium: 29, contracts: 1 },
+        productMix: { health: 60, life: 40 }, isActive: true
+      },
+      {
+        name: '김동현', agentCode: 'AG019', experience: '7.3년차', commissionMonth:'87개월', insuranceCareer: '7.3년',
+        currentMonth: { premium: 12, contracts: 1, rank: 19 },
+        previousMonth: { premium: 24, contracts: 1, rank: 19 },
+        threeMonthAverage: { premium: 25, contracts: 1 },
+        productMix: { health: 50, life: 50 }, isActive: true
+      },
+      {
+        name: '이민지', agentCode: 'AG020', experience: '1.9년차', commissionMonth:'23개월', insuranceCareer: '1.9년',
+        currentMonth: { premium: 10, contracts: 1, rank: 20 },
+        previousMonth: { premium: 20, contracts: 1, rank: 20 },
+        threeMonthAverage: { premium: 21, contracts: 1 },
+        productMix: { health: 85, life: 15 }, isActive: true
+      },
+
+      // 21-25위: 연속 가동 설계사 (2개월)
+      {
+        name: '박형준', agentCode: 'AG021', experience: '6.5년차', commissionMonth:'78개월', insuranceCareer: '6.5년',
+        currentMonth: { premium: 8, contracts: 1, rank: 21 },
+        previousMonth: { premium: 16, contracts: 1, rank: 21 },
+        threeMonthAverage: { premium: 17, contracts: 1 },
+        productMix: { health: 45, life: 55 }, isActive: true
+      },
+      {
+        name: '김나영', agentCode: 'AG022', experience: '3.8년차', commissionMonth:'45개월', insuranceCareer: '3.8년',
+        currentMonth: { premium: 7, contracts: 1, rank: 22 },
+        previousMonth: { premium: 13, contracts: 1, rank: 22 },
+        threeMonthAverage: { premium: 14, contracts: 1 },
+        productMix: { health: 70, life: 30 }, isActive: true
+      },
+      {
+        name: '이성민', agentCode: 'AG023', experience: '8.1년차', commissionMonth:'97개월', insuranceCareer: '8.1년',
+        currentMonth: { premium: 6, contracts: 1, rank: 23 },
+        previousMonth: { premium: 10, contracts: 1, rank: 23 },
+        threeMonthAverage: { premium: 11, contracts: 1 },
+        productMix: { health: 55, life: 45 }, isActive: true
+      },
+      {
+        name: '정주영', agentCode: 'AG024', experience: '2.3년차', commissionMonth:'27개월', insuranceCareer: '2.3년',
+        currentMonth: { premium: 0, contracts: 0, rank: null }, // 당월 무실적
+        previousMonth: { premium: 8, contracts: 1, rank: 24 },
+        threeMonthAverage: { premium: 8, contracts: 1 },
+        productMix: { health: 80, life: 20 }, isActive: true
+      },
+      {
+        name: '조민석', agentCode: 'AG025', experience: '5.2년차', commissionMonth:'62개월', insuranceCareer: '5.2년',
+        currentMonth: { premium: 0, contracts: 0, rank: null }, // 당월 무실적
+        previousMonth: { premium: 6, contracts: 1, rank: 25 },
+        threeMonthAverage: { premium: 6, contracts: 1 },
+        productMix: { health: 65, life: 35 }, isActive: true
+      },
+
+      // 26-29위: 신규 가동 (당월 처음 실적)
+      {
+        name: '최지후', agentCode: 'AG026', experience: '1.5년차', commissionMonth:'18개월', insuranceCareer: '1.5년',
+        currentMonth: { premium: 5, contracts: 1, rank: 26 },
+        previousMonth: { premium: 0, contracts: 0, rank: null },
+        threeMonthAverage: { premium: 2, contracts: 0 },
+        productMix: { health: 40, life: 60 }, isActive: true
+      },
+      {
+        name: '김대우', agentCode: 'AG027', experience: '4.7년차', commissionMonth:'56개월', insuranceCareer: '4.7년',
+        currentMonth: { premium: 4, contracts: 1, rank: 27 },
+        previousMonth: { premium: 0, contracts: 0, rank: null },
+        threeMonthAverage: { premium: 2, contracts: 0 },
+        productMix: { health: 75, life: 25 }, isActive: true
+      },
+      {
+        name: '이예진', agentCode: 'AG028', experience: '7.9년차', commissionMonth:'94개월', insuranceCareer: '7.9년',
+        currentMonth: { premium: 3, contracts: 1, rank: 28 },
         previousMonth: { premium: 0, contracts: 0, rank: null },
         threeMonthAverage: { premium: 1, contracts: 0 },
-        productMix: { health: 60, life: 40 }, isActive: true, continuousMonths: 1
+        productMix: { health: 60, life: 40 }, isActive: true
       },
       {
-        name: '김대우', agentCode: 'AG025', experience: '3.1년차', commissionMonth:'1개월', insuranceCareer: '3.1년', gender: '남',
-        currentMonth: { premium: 2, contracts: 1, rank: 25 },
+        name: '박시원', agentCode: 'AG029', experience: '3.4년차', commissionMonth:'41개월', insuranceCareer: '3.4년',
+        currentMonth: { premium: 2, contracts: 1, rank: 29 },
         previousMonth: { premium: 0, contracts: 0, rank: null },
         threeMonthAverage: { premium: 1, contracts: 0 },
-        productMix: { health: 50, life: 50 }, isActive: true, continuousMonths: 1
-      },
-      {
-        name: '이예진', agentCode: 'AG026', experience: '1.5년차', commissionMonth:'1개월', insuranceCareer: '1.5년', gender: '여',
-        currentMonth: { premium: 2, contracts: 1, rank: 26 },
-        previousMonth: { premium: 0, contracts: 0, rank: null },
-        threeMonthAverage: { premium: 1, contracts: 0 },
-        productMix: { health: 80, life: 20 }, isActive: true, continuousMonths: 1
-      },
-      {
-        name: '강민수', agentCode: 'AG027', experience: '5.2년차', commissionMonth:'62개월', insuranceCareer: '5.2년', gender: '남',
-        currentMonth: { premium: 0, contracts: 0, rank: null },
-        previousMonth: { premium: 0, contracts: 0, rank: null },
-        threeMonthAverage: { premium: 0, contracts: 0 },
-        productMix: { health: 65, life: 35 }, isActive: false
-      },
-      {
-        name: '윤정호', agentCode: 'AG028', experience: '1.5년차', commissionMonth:'18개월', insuranceCareer: '1.5년', gender: '남',
-        currentMonth: { premium: 0, contracts: 0, rank: null },
-        previousMonth: { premium: 0, contracts: 0, rank: null },
-        threeMonthAverage: { premium: 0, contracts: 0 },
-        productMix: { health: 40, life: 60 }, isActive: false
-      },
-      {
-        name: '서준혁', agentCode: 'AG029', experience: '4.7년차', commissionMonth:'56개월', insuranceCareer: '4.7년', gender: '남',
-        currentMonth: { premium: 0, contracts: 0, rank: null },
-        previousMonth: { premium: 0, contracts: 0, rank: null },
-        threeMonthAverage: { premium: 0, contracts: 0 },
-        productMix: { health: 75, life: 25 }, isActive: false
+        productMix: { health: 50, life: 50 }, isActive: true
       },
 
-      // 26-27위: 전월 미가동 (당월 무실적)
+      // 30-31위: 신규 위촉 (당월 입사, 실적 있음)
       {
-        name: '송재현', agentCode: 'AG050', experience: '6.5년차', commissionMonth:'78개월', insuranceCareer: '6.5년', gender: '남',
-        currentMonth: { premium: 0, contracts: 0, rank: null },
+        name: '정민준', agentCode: 'AG030', experience: '9.2년차', commissionMonth:'110개월', insuranceCareer: '9.2년',
+        currentMonth: { premium: 1, contracts: 1, rank: 30 },
         previousMonth: { premium: 0, contracts: 0, rank: null },
         threeMonthAverage: { premium: 0, contracts: 0 },
-        productMix: { health: 45, life: 55 }, isActive: false
+        productMix: { health: 85, life: 15 }, isActive: true
       },
       {
-        name: '한수진', agentCode: 'AG051', experience: '3.8년차', commissionMonth:'45개월', insuranceCareer: '3.8년', gender: '여',
-        currentMonth: { premium: 0, contracts: 0, rank: null },
+        name: '조상원', agentCode: 'AG031', experience: '5.9년차', commissionMonth:'70개월', insuranceCareer: '5.9년',
+        currentMonth: { premium: 1, contracts: 1, rank: 31 },
         previousMonth: { premium: 0, contracts: 0, rank: null },
         threeMonthAverage: { premium: 0, contracts: 0 },
-        productMix: { health: 70, life: 30 }, isActive: false
-      },
-
-      // 28-31위: 전월 가동→미가동 전환 (당월 무실적)
-      {
-        name: '이수현', agentCode: 'AG052', experience: '7.9년차', commissionMonth:'94개월', insuranceCareer: '7.9년', gender: '여',
-        currentMonth: { premium: 0, contracts: 0, rank: null },
-        previousMonth: { premium: 30, contracts: 1, rank: 28 },
-        threeMonthAverage: { premium: 10, contracts: 0 },
-        productMix: { health: 60, life: 40 }, isActive: false
-      },
-      {
-        name: '박시원', agentCode: 'AG053', experience: '3.4년차', commissionMonth:'41개월', insuranceCareer: '3.4년', gender: '여',
-        currentMonth: { premium: 0, contracts: 0, rank: null },
-        previousMonth: { premium: 20, contracts: 1, rank: 29 },
-        threeMonthAverage: { premium: 7, contracts: 0 },
-        productMix: { health: 50, life: 50 }, isActive: false
-      },
-      {
-        name: '정민준', agentCode: 'AG030', experience: '9.2년차', commissionMonth:'110개월', insuranceCareer: '9.2년', gender: '남',
-        currentMonth: { premium: 0, contracts: 0, rank: null },
-        previousMonth: { premium: 15, contracts: 1, rank: 30 },
-        threeMonthAverage: { premium: 5, contracts: 0 },
-        productMix: { health: 85, life: 15 }, isActive: false
-      },
-      {
-        name: '조상원', agentCode: 'AG031', experience: '5.9년차', commissionMonth:'70개월', insuranceCareer: '5.9년', gender: '남',
-        currentMonth: { premium: 0, contracts: 0, rank: null },
-        previousMonth: { premium: 10, contracts: 1, rank: 31 },
-        threeMonthAverage: { premium: 3, contracts: 0 },
-        productMix: { health: 45, life: 55 }, isActive: false
+        productMix: { health: 45, life: 55 }, isActive: true
       },
 
       // 32-35위: 전월 가동→미가동 전환
       {
-        name: '윤서연', agentCode: 'AG032', experience: '11.3년차', commissionMonth:'135개월', insuranceCareer: '11.3년', gender: '여',
+        name: '윤서연', agentCode: 'AG032', experience: '11.3년차', commissionMonth:'135개월', insuranceCareer: '11.3년',
         currentMonth: { premium: 0, contracts: 0, rank: null },
         previousMonth: { premium: 45, contracts: 2, rank: 15 },
         threeMonthAverage: { premium: 22, contracts: 1 },
         productMix: { health: 70, life: 30 }, isActive: false
       },
       {
-        name: '장민호', agentCode: 'AG033', experience: '4.4년차', commissionMonth:'52개월', insuranceCareer: '4.4년', gender: '남',
+        name: '장민호', agentCode: 'AG033', experience: '4.4년차', commissionMonth:'52개월', insuranceCareer: '4.4년',
         currentMonth: { premium: 0, contracts: 0, rank: null },
         previousMonth: { premium: 38, contracts: 2, rank: 18 },
         threeMonthAverage: { premium: 19, contracts: 1 },
         productMix: { health: 55, life: 45 }, isActive: false
       },
       {
-        name: '강예슬', agentCode: 'AG034', experience: '6.7년차', commissionMonth:'80개월', insuranceCareer: '6.7년', gender: '여',
+        name: '강예슬', agentCode: 'AG034', experience: '6.7년차', commissionMonth:'80개월', insuranceCareer: '6.7년',
         currentMonth: { premium: 0, contracts: 0, rank: null },
         previousMonth: { premium: 32, contracts: 1, rank: 20 },
         threeMonthAverage: { premium: 16, contracts: 0 },
         productMix: { health: 80, life: 20 }, isActive: false
       },
       {
-        name: '오준혁', agentCode: 'AG035', experience: '2.1년차', commissionMonth:'25개월', insuranceCareer: '2.1년', gender: '남',
+        name: '오준혁', agentCode: 'AG035', experience: '2.1년차', commissionMonth:'25개월', insuranceCareer: '2.1년',
         currentMonth: { premium: 0, contracts: 0, rank: null },
         previousMonth: { premium: 28, contracts: 1, rank: 22 },
         threeMonthAverage: { premium: 14, contracts: 0 },
@@ -1279,51 +1011,19 @@ const Branch360Dashboard = () => {
       },
 
       // 36-47위: 미가동 설계사
-      { name: '김스우', agentCode: 'AG036', experience: '7.4년차', commissionMonth:'88개월', insuranceCareer: '7.4년', gender: '여', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 85, contracts: 3, rank: 25 }, threeMonthAverage: { premium: 28, contracts: 1 }, productMix: { health: 75, life: 25 }, isActive: false },
-      { name: '이지인', agentCode: 'AG037', experience: '3.6년차', commissionMonth:'43개월', insuranceCareer: '3.6년', gender: '여', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 72, contracts: 2, rank: 28 }, threeMonthAverage: { premium: 24, contracts: 1 }, productMix: { health: 60, life: 40 }, isActive: false },
-      { name: '박성민', agentCode: 'AG038', experience: '5.1년차', commissionMonth:'61개월', insuranceCareer: '5.1년', gender: '남', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 91, contracts: 4, rank: 22 }, threeMonthAverage: { premium: 30, contracts: 1 }, productMix: { health: 50, life: 50 }, isActive: false },
-      { name: '정선영', agentCode: 'AG039', experience: '8.7년차', commissionMonth:'104개월', insuranceCareer: '8.7년', gender: '여', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 68, contracts: 2, rank: 31 }, threeMonthAverage: { premium: 23, contracts: 1 }, productMix: { health: 85, life: 15 }, isActive: false },
-      { name: '조지우', agentCode: 'AG040', experience: '2.8년차', commissionMonth:'33개월', insuranceCareer: '2.8년', gender: '남', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 45, life: 55 }, isActive: false },
-      { name: '차예린', agentCode: 'AG041', experience: '6.3년차', commissionMonth:'75개월', insuranceCareer: '6.3년', gender: '여', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 70, life: 30 }, isActive: false },
-      { name: '손이상', agentCode: 'AG042', experience: '1.7년차', commissionMonth:'20개월', insuranceCareer: '1.7년', gender: '남', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 55, life: 45 }, isActive: false },
-      { name: '김은영', agentCode: 'AG043', experience: '4.9년차', commissionMonth:'58개월', insuranceCareer: '4.9년', gender: '여', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 80, life: 20 }, isActive: false },
-      { name: '이승찬', agentCode: 'AG044', experience: '10.5년차', commissionMonth:'126개월', insuranceCareer: '10.5년', gender: '남', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 40, life: 60 }, isActive: false },
-      { name: '박서우', agentCode: 'AG045', experience: '3.1년차', commissionMonth:'37개월', insuranceCareer: '3.1년', gender: '남', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 75, life: 25 }, isActive: false },
-      { name: '정민규', agentCode: 'AG046', experience: '7.8년차', commissionMonth:'93개월', insuranceCareer: '7.8년', gender: '남', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 60, life: 40 }, isActive: false },
-      { name: '조예림', agentCode: 'AG047', experience: '5.6년차', commissionMonth:'67개월', insuranceCareer: '5.6년', gender: '여', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 50, life: 50 }, isActive: false }
+      { name: '김스우', agentCode: 'AG036', experience: '7.4년차', commissionMonth:'88개월', insuranceCareer: '7.4년', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 85, contracts: 3, rank: 25 }, threeMonthAverage: { premium: 28, contracts: 1 }, productMix: { health: 75, life: 25 }, isActive: false },
+      { name: '이지인', agentCode: 'AG037', experience: '3.6년차', commissionMonth:'43개월', insuranceCareer: '3.6년', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 72, contracts: 2, rank: 28 }, threeMonthAverage: { premium: 24, contracts: 1 }, productMix: { health: 60, life: 40 }, isActive: false },
+      { name: '박성민', agentCode: 'AG038', experience: '5.1년차', commissionMonth:'61개월', insuranceCareer: '5.1년', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 91, contracts: 4, rank: 22 }, threeMonthAverage: { premium: 30, contracts: 1 }, productMix: { health: 50, life: 50 }, isActive: false },
+      { name: '정선영', agentCode: 'AG039', experience: '8.7년차', commissionMonth:'104개월', insuranceCareer: '8.7년', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 68, contracts: 2, rank: 31 }, threeMonthAverage: { premium: 23, contracts: 1 }, productMix: { health: 85, life: 15 }, isActive: false },
+      { name: '조지우', agentCode: 'AG040', experience: '2.8년차', commissionMonth:'33개월', insuranceCareer: '2.8년', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 45, life: 55 }, isActive: false },
+      { name: '차예린', agentCode: 'AG041', experience: '6.3년차', commissionMonth:'75개월', insuranceCareer: '6.3년', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 70, life: 30 }, isActive: false },
+      { name: '손이상', agentCode: 'AG042', experience: '1.7년차', commissionMonth:'20개월', insuranceCareer: '1.7년', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 55, life: 45 }, isActive: false },
+      { name: '김은영', agentCode: 'AG043', experience: '4.9년차', commissionMonth:'58개월', insuranceCareer: '4.9년', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 80, life: 20 }, isActive: false },
+      { name: '이승찬', agentCode: 'AG044', experience: '10.5년차', commissionMonth:'126개월', insuranceCareer: '10.5년', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 40, life: 60 }, isActive: false },
+      { name: '박서우', agentCode: 'AG045', experience: '3.1년차', commissionMonth:'37개월', insuranceCareer: '3.1년', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 75, life: 25 }, isActive: false },
+      { name: '정민규', agentCode: 'AG046', experience: '7.8년차', commissionMonth:'93개월', insuranceCareer: '7.8년', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 60, life: 40 }, isActive: false },
+      { name: '조예림', agentCode: 'AG047', experience: '5.6년차', commissionMonth:'67개월', insuranceCareer: '5.6년', currentMonth: { premium: 0, contracts: 0, rank: null }, previousMonth: { premium: 0, contracts: 0, rank: null }, threeMonthAverage: { premium: 0, contracts: 0 }, productMix: { health: 50, life: 50 }, isActive: false }
     ];
-
-    // 가동 설계사들의 기본 실적 합계 계산 (백만원 단위)
-    const activeAgentsBasePremiumSum = baseData
-      .filter(agent => agent.isActive)
-      .reduce((sum, agent) => sum + agent.currentMonth.premium, 0);
-
-    // 지점 APE를 백만원 단위로 변환
-    const branchAPEInMillions = branchPerformanceData.currentMonthAPE / 1000000;
-
-    // 스케일 팩터 계산 (최소값 1 보장)
-    const scaleFactor = activeAgentsBasePremiumSum > 0 && branchAPEInMillions > 0
-      ? branchAPEInMillions / activeAgentsBasePremiumSum
-      : 1;
-
-    // 모든 설계사의 실적에 스케일 팩터 적용
-    const scaledData = baseData.map(agent => ({
-      ...agent,
-      currentMonth: {
-        ...agent.currentMonth,
-        premium: Math.round(agent.currentMonth.premium * scaleFactor * 10) / 10 // 소수점 1자리
-      },
-      previousMonth: {
-        ...agent.previousMonth,
-        premium: Math.round(agent.previousMonth.premium * scaleFactor * 10) / 10
-      },
-      threeMonthAverage: {
-        ...agent.threeMonthAverage,
-        premium: Math.round(agent.threeMonthAverage.premium * scaleFactor * 10) / 10
-      }
-    }));
-
-    return scaledData;
   };
 
   const allAgentsData = generateAllAgentsData();
@@ -1478,7 +1178,6 @@ const Branch360Dashboard = () => {
   
   const handleCategoryClick = (category: string) => {
     setSelectedAgentCategory(category);
-    setModalPerformanceType(performanceType);
     setAgentListModal(true);
   };
 
@@ -1510,78 +1209,6 @@ const Branch360Dashboard = () => {
           { rank: 3, name: '골라담간편건강보험Ⅱ(갱신형)', amount: '88', count: '6건' }
         ]
       },
-      '골담': {
-        byAmount: [
-          { rank: 1, name: '골라담간편건강보험Ⅱ(갱신형)', amount: '153', count: '8건' },
-          { rank: 2, name: '골라담간편건강보험Ⅱ(비갱신형)', amount: '142', count: '6건' },
-          { rank: 3, name: '골라담간편건강보험(갱신형)', amount: '98', count: '5건' }
-        ],
-        byCount: [
-          { rank: 1, name: '골라담간편건강보험Ⅱ(갱신형)', amount: '153', count: '8건' },
-          { rank: 2, name: '골라담간편건강보험Ⅱ(비갱신형)', amount: '142', count: '6건' },
-          { rank: 3, name: '골라담간편건강보험(갱신형)', amount: '98', count: '5건' }
-        ]
-      },
-      '새담': {
-        byAmount: [
-          { rank: 1, name: '새로담는암건강보험(갱신형)', amount: '127', count: '7건' },
-          { rank: 2, name: '새로담는건강보험Ⅱ(갱신형)', amount: '115', count: '6건' },
-          { rank: 3, name: '새로담는건강보험(비갱신형)', amount: '89', count: '4건' }
-        ],
-        byCount: [
-          { rank: 1, name: '새로담는암건강보험(갱신형)', amount: '127', count: '7건' },
-          { rank: 2, name: '새로담는건강보험Ⅱ(갱신형)', amount: '115', count: '6건' },
-          { rank: 3, name: '새로담는건강보험(비갱신형)', amount: '89', count: '4건' }
-        ]
-      },
-      '치아': {
-        byAmount: [
-          { rank: 1, name: 'THE건강한치아보험V(갱신형)', amount: '64', count: '5건' },
-          { rank: 2, name: 'THE건강한치아보험V(비갱신형)', amount: '58', count: '4건' },
-          { rank: 3, name: '치아보험플러스(갱신형)', amount: '42', count: '3건' }
-        ],
-        byCount: [
-          { rank: 1, name: 'THE건강한치아보험V(갱신형)', amount: '64', count: '5건' },
-          { rank: 2, name: 'THE건강한치아보험V(비갱신형)', amount: '58', count: '4건' },
-          { rank: 3, name: '치아보험플러스(갱신형)', amount: '42', count: '3건' }
-        ]
-      },
-      '치매': {
-        byAmount: [
-          { rank: 1, name: '치매간병보험(갱신형)', amount: '115', count: '6건' },
-          { rank: 2, name: '치매걱정없는간병보험(갱신형)', amount: '98', count: '5건' },
-          { rank: 3, name: 'THE안심되는치매간병보험', amount: '76', count: '4건' }
-        ],
-        byCount: [
-          { rank: 1, name: '치매간병보험(갱신형)', amount: '115', count: '6건' },
-          { rank: 2, name: '치매걱정없는간병보험(갱신형)', amount: '98', count: '5건' },
-          { rank: 3, name: 'THE안심되는치매간병보험', amount: '76', count: '4건' }
-        ]
-      },
-      '암': {
-        byAmount: [
-          { rank: 1, name: '암치료비걱정없는암보험(갱신형)', amount: '63', count: '4건' },
-          { rank: 2, name: 'THE암보험플러스(갱신형)', amount: '52', count: '3건' },
-          { rank: 3, name: '암보험Ⅱ(비갱신형)', amount: '38', count: '2건' }
-        ],
-        byCount: [
-          { rank: 1, name: '암치료비걱정없는암보험(갱신형)', amount: '63', count: '4건' },
-          { rank: 2, name: 'THE암보험플러스(갱신형)', amount: '52', count: '3건' },
-          { rank: 3, name: '암보험Ⅱ(비갱신형)', amount: '38', count: '2건' }
-        ]
-      },
-      '다이나믹': {
-        byAmount: [
-          { rank: 1, name: '다이나믹건강보험Ⅱ(갱신형)', amount: '115', count: '6건' },
-          { rank: 2, name: '다이나믹건강보험(갱신형)', amount: '98', count: '5건' },
-          { rank: 3, name: '다이나믹건강보험플러스', amount: '72', count: '4건' }
-        ],
-        byCount: [
-          { rank: 1, name: '다이나믹건강보험Ⅱ(갱신형)', amount: '115', count: '6건' },
-          { rank: 2, name: '다이나믹건강보험(갱신형)', amount: '98', count: '5건' },
-          { rank: 3, name: '다이나믹건강보험플러스', amount: '72', count: '4건' }
-        ]
-      },
       '종신/정기': {
         byAmount: [
           { rank: 1, name: 'THE건강해지는종신보험(기본형)', amount: '285', count: '14건' },
@@ -1593,62 +1220,20 @@ const Branch360Dashboard = () => {
           { rank: 2, name: 'THE건강해지는건강정기보험', amount: '142', count: '8건' },
           { rank: 3, name: 'THE채우는종신보험(해약환급금일부지급형)', amount: '102', count: '6건' }
         ]
-      },
-      '저해지': {
-        byAmount: [
-          { rank: 1, name: 'THE채우는종신보험(해약환급금일부지급형)', amount: '154', count: '8건' },
-          { rank: 2, name: '무배당종신보험(저해지형)', amount: '132', count: '6건' },
-          { rank: 3, name: 'THE변하지않는종신보험(저해지)', amount: '98', count: '5건' }
-        ],
-        byCount: [
-          { rank: 1, name: 'THE채우는종신보험(해약환급금일부지급형)', amount: '154', count: '8건' },
-          { rank: 2, name: '무배당종신보험(저해지형)', amount: '132', count: '6건' },
-          { rank: 3, name: 'THE변하지않는종신보험(저해지)', amount: '98', count: '5건' }
-        ]
-      },
-      '무해지': {
-        byAmount: [
-          { rank: 1, name: 'THE건강해지는종신보험(무해지형)', amount: '120', count: '7건' },
-          { rank: 2, name: '무배당종신보험(무해지형)', amount: '105', count: '6건' },
-          { rank: 3, name: 'THE변하지않는종신보험(무해지)', amount: '82', count: '4건' }
-        ],
-        byCount: [
-          { rank: 1, name: 'THE건강해지는종신보험(무해지형)', amount: '120', count: '7건' },
-          { rank: 2, name: '무배당종신보험(무해지형)', amount: '105', count: '6건' },
-          { rank: 3, name: 'THE변하지않는종신보험(무해지)', amount: '82', count: '4건' }
-        ]
-      },
-      '정기': {
-        byAmount: [
-          { rank: 1, name: 'THE건강해지는건강정기보험', amount: '69', count: '5건' },
-          { rank: 2, name: '정기보험플러스(갱신형)', amount: '52', count: '4건' },
-          { rank: 3, name: 'THE정기보험Ⅱ(비갱신형)', amount: '38', count: '3건' }
-        ],
-        byCount: [
-          { rank: 1, name: 'THE건강해지는건강정기보험', amount: '69', count: '5건' },
-          { rank: 2, name: '정기보험플러스(갱신형)', amount: '52', count: '4건' },
-          { rank: 3, name: 'THE정기보험Ⅱ(비갱신형)', amount: '38', count: '3건' }
-        ]
       }
     };
 
-    // selectedSubProduct가 '전체'가 아니면 세부 상품군 데이터 사용
-    const key = selectedSubProduct !== '전체' ? selectedSubProduct : selectedProduct;
-    return (productData as any)[key][productSortBy === 'amount' ? 'byAmount' : 'byCount'];
+    return (productData as any)[selectedProduct][productSortBy === 'amount' ? 'byAmount' : 'byCount'];
   };
   
   const handleShowAllAgents = () => {
-    setModalPerformanceType(performanceType);
     setShowAllAgentsModal(true);
   };
 
 
 
 
-  // 지점 특성 - 동적 생성
-  const branchAddress = generateBranchAddress(selectedAgency, selectedBranch);
-  const branchPhone = generateBranchPhone(selectedAgency, selectedBranch);
-
+  // 지점 특성
   const branchProfile = {
     partnershipDate: '2022.10.24',
     partnershipMonths: 23,
@@ -1663,14 +1248,14 @@ const Branch360Dashboard = () => {
     },
     salesProcess: {
       monthlyProposal: 162,
-      monthlyApplication: 104,
+      monthlyApplication: 104, 
       monthlyContract: 95,
       conversionRate: 64.2, // 설계→청약 전환율
       contractRate: 91.3, // 청약→체결률
       rejectionRate: 8.7 // 인수거절률
     },
-    address: branchAddress,
-    phone: branchPhone
+    address: '서울특별시 강남구 테헤란로 123 역삼빌딩 5층',
+    phone: '02-1234-5678'
   };
 
   // 고객/계약 특성 데이터 (이번달 vs 3개월 평균)
@@ -1727,49 +1312,7 @@ const Branch360Dashboard = () => {
   };
 
   const handleExcelDownload = () => {
-    // 지점 기본 정보
-    const branchInfo = {
-      agency: selectedAgency,
-      branch: selectedBranch,
-      manager: managerName,
-      phone: generateBranchPhone(selectedAgency, selectedBranch),
-      address: generateBranchAddress(selectedAgency, selectedBranch),
-      ape: branchPerformanceData.currentMonthAPE,
-      target: currentBranchTarget,
-      achievement: branchPerformanceData.achievement,
-      agentCount: generateAgentCount(selectedAgency, selectedBranch),
-      activeAgents: allAgentsData.filter((a: any) => a.previousMonth.premium > 0).length,
-      designCount: 0, // 실제 데이터로 대체 필요
-      contractCount: 0, // 실제 데이터로 대체 필요
-      mobileRate: 0 // 실제 데이터로 대체 필요
-    };
-
-    // 일별 실적 데이터
-    const dailyData = dailyPerformance;
-
-    // 설계사별 데이터
-    const agentsData = allAgentsData;
-
-    // 상품별 데이터
-    const productData = getPortfolioData();
-
-    // KPI 데이터 (간단한 형태로)
-    const kpiData = {
-      achievement: branchPerformanceData.achievement,
-      ape: branchPerformanceData.currentMonthAPE,
-      target: currentBranchTarget
-    };
-
-    // 엑셀 생성 및 다운로드
-    exportBranch360ToExcel(
-      branchInfo,
-      dailyData,
-      agentsData,
-      productData,
-      kpiData,
-      selectedPeriod,
-      performanceType
-    );
+    downloadCSV();
   };
 
   return (
@@ -1782,16 +1325,16 @@ const Branch360Dashboard = () => {
         <div className="px-6 py-4 border-b border-gray-100">
           <div className="flex items-center justify-between">
             <div>
-              {/* 뒤로가기 버튼 */}
-              <button
-                onClick={() => navigate('/')}
-                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors mb-2"
-              >
-                <ChevronLeft className="w-4 h-4" />
-                돌아가기
-              </button>
-
-              <h1 className="text-xl font-bold text-gray-900">지점 360° 상세 뷰</h1>
+              <h1 className="text-xl font-bold text-gray-900 mb-1">지점 360° 상세 뷰</h1>
+              <div className="flex items-center text-sm text-gray-600">
+                <span className="font-medium">{selectedAgency} &gt; {selectedBranch}</span>
+                <span className="ml-3 text-gray-500">
+                  {selectedPeriod === '2025-09'
+                    ? '2025.09.19 마감 기준'
+                    : `${selectedPeriod.split('-')[0]}.${selectedPeriod.split('-')[1]} 마감일 기준`
+                  }
+                </span>
+              </div>
               {/* 방문 추천 태그 표시 */}
               {(() => {
                 const alerts = getBranchAlerts(selectedAgency, selectedBranch);
@@ -1846,46 +1389,7 @@ const Branch360Dashboard = () => {
           <div className="flex items-center justify-between">
             {/* 조회 조건 그룹 */}
             <div className="flex items-center space-x-6">
-              {/* 조회년월 선택 - 최우선 배치 */}
-              <div className="flex items-center space-x-3">
-                <span className="text-sm font-medium text-gray-700 min-w-0">조회년월</span>
-                <div className="flex items-center space-x-2">
-                  {/* 이전월 버튼 */}
-                  <button
-                    onClick={() => handleMonthNavigation('prev')}
-                    disabled={tempSelectedPeriod === '2023-01'}
-                    className="px-2 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
-                    title="이전월"
-                  >
-                    <ChevronLeft className="w-4 h-4 text-gray-600" />
-                  </button>
-
-                  {/* 월 드롭다운 */}
-                  <select
-                    value={tempSelectedPeriod}
-                    onChange={(e) => setTempSelectedPeriod(e.target.value)}
-                    className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-32"
-                  >
-                    {monthOptions.map(option => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-
-                  {/* 다음월 버튼 */}
-                  <button
-                    onClick={() => handleMonthNavigation('next')}
-                    disabled={tempSelectedPeriod === '2025-09'}
-                    className="px-2 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
-                    title="다음월"
-                  >
-                    <ChevronRight className="w-4 h-4 text-gray-600" />
-                  </button>
-                </div>
-              </div>
-
-              {/* 조회 대상 - 대리점/지점 선택 */}
+              {/* 대리점/지점 선택 */}
               <div className="flex items-center space-x-3">
                 <span className="text-sm font-medium text-gray-700 min-w-0">조회 대상</span>
                 <div className="flex items-center space-x-2">
@@ -1941,22 +1445,30 @@ const Branch360Dashboard = () => {
                 </div>
               </div>
 
-              {/* 조회 버튼 */}
-              <button
-                onClick={handleSearch}
-                className="px-3 py-1.5 bg-gray-400 hover:bg-gray-500 text-white text-sm font-medium rounded-lg flex items-center space-x-1.5 transition-colors"
-              >
-                <Search className="w-4 h-4" />
-                <span>조회</span>
-              </button>
-
-              {/* 마감 기준 표시 */}
-              <span className="text-sm text-gray-600">
-                {selectedPeriod === '2025-09'
-                  ? '2025.09.19 마감 기준'
-                  : `${selectedPeriod.split('-')[0]}.${selectedPeriod.split('-')[1]} 마감일 기준`
-                }
-              </span>
+              {/* 조회년월 선택 및 조회 버튼 */}
+              <div className="flex items-center space-x-3">
+                <span className="text-sm font-medium text-gray-700 min-w-0">조회년월</span>
+                <div className="flex items-center space-x-2">
+                  <select
+                    value={tempSelectedPeriod}
+                    onChange={(e) => setTempSelectedPeriod(e.target.value)}
+                    className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-32"
+                  >
+                    {monthOptions.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={handleSearch}
+                    className="px-3 py-1.5 bg-gray-400 hover:bg-gray-500 text-white text-sm font-medium rounded-lg flex items-center space-x-1.5 transition-colors"
+                  >
+                    <Search className="w-4 h-4" />
+                    <span>조회</span>
+                  </button>
+                </div>
+              </div>
             </div>
 
             {/* 액션 버튼 그룹 */}
@@ -2043,42 +1555,36 @@ const Branch360Dashboard = () => {
                   <span className="group relative cursor-help">
                     {formatCurrency(corePerformance.currentApe * 10000)}
                     <span className="invisible group-hover:visible absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap z-10">
-                      {(performanceType === 'MMP' ? Math.round((corePerformance.currentApe * 10000) / 12) : (corePerformance.currentApe * 10000)).toLocaleString()}원
+                      {formatCurrencyFull(corePerformance.currentApe * 10000)}
                     </span>
                   </span>
                   {' / '}
                   <span className="group relative cursor-help">
                     {formatCurrency(corePerformance.targetApe * 10000)}
                     <span className="invisible group-hover:visible absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap z-10">
-                      {(performanceType === 'MMP' ? Math.round((corePerformance.targetApe * 10000) / 12) : (corePerformance.targetApe * 10000)).toLocaleString()}원
+                      {formatCurrencyFull(corePerformance.targetApe * 10000)}
                     </span>
                   </span>
                 </div>
 
-                <div
-                  className="w-full bg-gray-200 rounded-full h-5 mb-2 relative"
-                  onMouseEnter={() => setShowProgressTooltip(true)}
-                  onMouseLeave={() => setShowProgressTooltip(false)}
-                >
-                  <div className="bg-blue-500 h-5 rounded-full transition-all" style={{width: `${Math.min(corePerformance.achievementRate, 100)}%`}}></div>
-                  {/* 프로그레스 바 툴팁 */}
-                  {showProgressTooltip && (
-                    <div
-                      className="absolute -top-16 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded px-3 py-2 whitespace-nowrap z-20 shadow-lg text-left"
-                    >
-                      <div>9월 - {performanceType}</div>
-                      <div>NB Plan: {(performanceType === 'MMP' ? Math.round((corePerformance.targetApe * 10000) / 12) : (corePerformance.targetApe * 10000)).toLocaleString()}원</div>
-                      <div>Actual: {(performanceType === 'MMP' ? Math.round((corePerformance.currentApe * 10000) / 12) : (corePerformance.currentApe * 10000)).toLocaleString()}원</div>
-                      <div>{corePerformance.achievementRate.toFixed(1)}% 달성</div>
-                      <div className="text-yellow-300">전체평균 59.4%</div>
-                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
-                    </div>
-                  )}
+                <div className="w-full bg-gray-200 rounded-full h-5 mb-2 relative">
+                  <div className="bg-blue-500 h-5 rounded-full transition-all" style={{width: `${corePerformance.achievementRate}%`}}></div>
                   {/* 전체 평균선 (59%) */}
                   <div
-                    className="absolute top-0 h-5 w-0.5 bg-orange-500 z-10"
+                    className="absolute top-0 h-5 w-0.5 bg-orange-500 z-10 cursor-pointer"
                     style={{left: `59%`}}
+                    onMouseEnter={() => setShowExpectedProgressTooltip(true)}
+                    onMouseLeave={() => setShowExpectedProgressTooltip(false)}
                   />
+                  {/* 전체 평균 툴팁 */}
+                  {showExpectedProgressTooltip && (
+                    <div
+                      className="absolute top-6 bg-gray-800 text-white text-xs rounded px-3 py-2 whitespace-nowrap z-20 shadow-lg"
+                      style={{left: `59%`, transform: 'translateX(-50%)'}}
+                    >
+                      <div className="font-bold mb-1">전체 지점 평균 59.4%</div>
+                    </div>
+                  )}
                 </div>
 
                 {/* 평균 표시 텍스트 */}
@@ -2098,13 +1604,11 @@ const Branch360Dashboard = () => {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-xs text-gray-500 mb-1">
-                    {corePerformance.currentApe >= corePerformance.targetApe ? '목표 초과' : '목표까지'}
-                  </div>
+                  <div className="text-xs text-gray-500 mb-1">목표까지</div>
                   <div className="font-semibold text-lg text-blue-600 group relative cursor-help">
                     {formatCurrency(Math.abs(corePerformance.targetApe - corePerformance.currentApe) * 10000)}
                     <span className="invisible group-hover:visible absolute bottom-full right-0 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap z-10">
-                      {(performanceType === 'MMP' ? Math.round(Math.abs(corePerformance.targetApe - corePerformance.currentApe) * 10000 / 12) : Math.abs(corePerformance.targetApe - corePerformance.currentApe) * 10000).toLocaleString()}원
+                      {formatCurrencyFull(Math.abs(corePerformance.targetApe - corePerformance.currentApe) * 10000)}
                     </span>
                   </div>
                   <div className="text-xs text-gray-500">
@@ -2116,26 +1620,17 @@ const Branch360Dashboard = () => {
               {/* 하루 평균 필요 금액 안내 */}
               <div className="bg-blue-50 rounded-lg p-4 border border-blue-200 shadow-sm">
                 <div className="text-sm font-medium text-blue-800 text-center">
-                  {corePerformance.currentApe >= corePerformance.targetApe ? (
-                    <div>
-                      <div className="mb-1">🎉 축하합니다!</div>
-                      <div className="text-lg font-bold">이번달 목표를 달성했어요!</div>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="mb-1">이번달 목표 달성을 위해</div>
-                      <div>
-                        하루 평균
-                        <span className="inline-block mx-1 px-2 py-1 bg-blue-600 text-white rounded-md font-bold text-base group relative cursor-help">
-                          {formatCurrency((corePerformance.targetApe - corePerformance.currentApe) / 7 * 10000)}
-                          <span className="invisible group-hover:visible absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-gray-900 bg-white rounded whitespace-nowrap z-10 border border-gray-300">
-                            {(performanceType === 'MMP' ? Math.round((corePerformance.targetApe - corePerformance.currentApe) / 7 * 10000 / 12) : Math.round((corePerformance.targetApe - corePerformance.currentApe) / 7 * 10000)).toLocaleString()}원
-                          </span>
-                        </span>
-                        이 필요해요!
-                      </div>
-                    </>
-                  )}
+                  <div className="mb-1">이번달 목표 달성을 위해</div>
+                  <div>
+                    하루 평균
+                    <span className="inline-block mx-1 px-2 py-1 bg-blue-600 text-white rounded-md font-bold text-base group relative cursor-help">
+                      {formatCurrency((corePerformance.targetApe - corePerformance.currentApe) / 7 * 10000)}
+                      <span className="invisible group-hover:visible absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-gray-900 bg-white rounded whitespace-nowrap z-10 border border-gray-300">
+                        {formatCurrencyFull((corePerformance.targetApe - corePerformance.currentApe) / 7 * 10000)}
+                      </span>
+                    </span>
+                    이 필요해요!
+                  </div>
                 </div>
               </div>
 
@@ -2144,7 +1639,7 @@ const Branch360Dashboard = () => {
                 <div className="bg-blue-50 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className="text-sm font-semibold text-gray-700">기여도</div>
-                    <div className="text-xs text-gray-600 bg-white px-2 py-1 rounded">{selectedAgency} {selectedBranch}</div>
+                    <div className="text-xs text-gray-600 bg-white px-2 py-1 rounded">글로벌화이브스타 지점</div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
@@ -2154,8 +1649,8 @@ const Branch360Dashboard = () => {
 
                       {/* 툴팁 */}
                       <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-gray-800 text-white text-xs rounded px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-30 text-left whitespace-nowrap">
-                        <div>Plan(지점): {(performanceType === 'MMP' ? Math.round((corePerformance.branchTargetApe * 10000) / 12) : (corePerformance.branchTargetApe * 10000)).toLocaleString()}원</div>
-                        <div>Plan(지점장): {(performanceType === 'MMP' ? Math.round((corePerformance.managerPersonalTarget * 10000) / 12) : (corePerformance.managerPersonalTarget * 10000)).toLocaleString()}원</div>
+                        <div>Bf Plan(지점): {formatCurrencyFull(corePerformance.branchTargetApe * 10000)}</div>
+                        <div>Bf Plan(담당자): {formatCurrencyFull(corePerformance.managerPersonalTarget * 10000)}</div>
                         <div className="mt-1 pt-1 border-t border-gray-600">목표 담당: {corePerformance.managerPlanContribution.toFixed(1)}%</div>
                         <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
                       </div>
@@ -2166,8 +1661,8 @@ const Branch360Dashboard = () => {
 
                       {/* 툴팁 */}
                       <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-gray-800 text-white text-xs rounded px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-30 text-left whitespace-nowrap">
-                        <div>Actual(지점): {(performanceType === 'MMP' ? Math.round((corePerformance.currentApe * 10000) / 12) : (corePerformance.currentApe * 10000)).toLocaleString()}원</div>
-                        <div>Actual(지점장): {(performanceType === 'MMP' ? Math.round((corePerformance.managerApe * 10000) / 12) : (corePerformance.managerApe * 10000)).toLocaleString()}원</div>
+                        <div>Bf {performanceType}(지점): {formatCurrencyFull(corePerformance.currentApe * 10000)}</div>
+                        <div>Bf {performanceType}(담당자): {formatCurrencyFull(corePerformance.managerApe * 10000)}</div>
                         <div className="mt-1 pt-1 border-t border-gray-600">실적 담당: {corePerformance.managerContributionRate.toFixed(1)}%</div>
                         <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
                       </div>
@@ -2197,7 +1692,7 @@ const Branch360Dashboard = () => {
 
               {/* 체결률 화살표 */}
               {(() => {
-                const contractCount = 95; // 청약 건수 (95건)
+                const contractCount = 96; // 청약 건수 (96건)
                 const conversionRate = Math.round((contractCount / corePerformance.proposalCount) * 100);
 
                 return (
@@ -2219,9 +1714,27 @@ const Branch360Dashboard = () => {
 
               {/* 청약 카드 */}
               <div
-                className="bg-white rounded-lg shadow-sm border p-4 flex-1 relative"
+                className="bg-white rounded-lg shadow-sm border p-4 flex-1 relative cursor-pointer hover:shadow-md transition-shadow"
+                onMouseEnter={() => setShowConversionTooltip(true)}
+                onMouseLeave={() => setShowConversionTooltip(false)}
               >
                 <h4 className="text-sm font-semibold text-gray-700 mb-3">청약</h4>
+
+                {/* 호버 툴팁 */}
+                {showConversionTooltip && (() => {
+                  const contractCount = 96;
+                  const rejectedCount = 18; // 거절 18건
+                  const withdrawnCount = 6; // 철회 6건
+
+                  return (
+                    <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-800 text-white text-xs rounded px-3 py-2 whitespace-nowrap z-30 shadow-lg">
+                      <div className="mb-1">청약 {contractCount}건 중</div>
+                      <div>거절: {rejectedCount}건, 철회: {withdrawnCount}건</div>
+                      {/* 화살표 */}
+                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+                    </div>
+                  );
+                })()}
 
                 {/* 메인 수치 영역 */}
                 <div className="text-center mb-3">
@@ -2268,26 +1781,16 @@ const Branch360Dashboard = () => {
                   <div className="w-3 h-0.5 bg-yellow-400" style={{width: '12px'}}></div>
                   일 평균: {(() => {
                     const currentData = dailyPerformance.filter(d => !d.isWeekend);
-                    const workingDays = currentData.length;
-
-                    if (dailyMetric === performanceType) {
-                      // 당월 전체 실적 / 영업일수
-                      const totalPerformance = performanceType === 'MMP'
-                        ? branchPerformanceData.currentMonthAPE / 12
-                        : branchPerformanceData.currentMonthAPE;
-                      const average = totalPerformance / workingDays;
-                      return performanceType === 'MMP'
-                        ? `${(average / 1000).toFixed(1)}천원`
-                        : `${Math.round(average / 1000).toLocaleString()}천원`;
-                    } else {
-                      // 청약/설계는 기존대로 일별 평균
-                      const values = dailyMetric === '청약'
-                        ? currentData.map(d => d.contractCount)
-                        : currentData.map(d => d.designCount);
-                      const average = values.reduce((sum, val) => sum + val, 0) / values.length;
-                      return `${Math.round(average)}건`;
-                    }
-                  })()}
+                    const values = dailyMetric === performanceType
+                      ? currentData.map(d => d.apeAmount)
+                      : dailyMetric === '청약'
+                      ? currentData.map(d => d.contractCount)
+                      : currentData.map(d => d.designCount);
+                    const average = values.reduce((sum, val) => sum + val, 0) / values.length;
+                    return dailyMetric === performanceType
+                      ? `${Math.round(average).toLocaleString()} 천원`
+                      : `${average.toFixed(1)}건`;
+                  })()} 
                 </div>
                 {/* 평균선 */}
                 <svg className="absolute inset-6 w-[calc(100%-3rem)] h-[calc(100%-3rem)]" viewBox="0 0 100 100" preserveAspectRatio="none" style={{zIndex: 1, pointerEvents: 'none'}}>
@@ -2300,7 +1803,7 @@ const Branch360Dashboard = () => {
                       : currentData.map(d => d.designCount);
                     const average = values.reduce((sum, val) => sum + val, 0) / values.length;
                     const maxValue = Math.max(...values);
-                    const avgY = 100 - ((average / maxValue) * 70) - 10;
+                    const avgY = 100 - ((average / maxValue) * 90) - 5;
 
                     return (
                       <g>
@@ -2336,7 +1839,7 @@ const Branch360Dashboard = () => {
                 )}
                 
                 {/* 막대 그래프 */}
-                <div className="flex items-end justify-center gap-1 h-full relative" style={{paddingTop: '50px', paddingBottom: '10px'}}>
+                <div className="flex items-end justify-between h-full relative" style={{paddingTop: '20px'}}>
                   {dailyPerformance.filter(d => !d.isWeekend).map((data, i) => {
                     const currentValue = dailyMetric === performanceType ? data.apeAmount :
                                        dailyMetric === '청약' ? data.contractCount : data.designCount;
@@ -2347,10 +1850,10 @@ const Branch360Dashboard = () => {
                       : Math.max(...dailyPerformance.filter(d => !d.isWeekend).map(d => d.designCount));
 
                     // 막대 높이 계산 (평일만 표시됨)
-                    const barHeight = currentValue === 0 ? 2 : (currentValue / maxValue) * 110;
+                    const barHeight = currentValue === 0 ? 2 : (currentValue / maxValue) * 160;
                     const healthHeight = (barHeight * data.healthRatio) / 100;
                     const lifeHeight = (barHeight * data.lifeRatio) / 100;
-
+                    
                     return (
                       <div key={data.day} className="flex flex-col items-center relative" style={{width: '20px'}}>
                         {/* 막대 그래프 - 건강(파란색) + 종신(초록색) */}
@@ -2372,32 +1875,18 @@ const Branch360Dashboard = () => {
                         </div>
 
                         {/* 영업일자 */}
-                        <div className="text-xs text-gray-600 mt-3" style={{fontSize: '10px'}}>{i + 1}</div>
+                        <div className="text-xs text-gray-600 mt-2" style={{fontSize: '10px'}}>{i + 1}</div>
 
                         {/* 툴팁 */}
                         {hoveredDayData && hoveredDayData.idx === i && (
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-gray-800 text-white text-xs rounded px-3 py-2 whitespace-nowrap z-20">
-                            <div className="mb-1">9월 {data.day}일 ({i + 1} 영업일차)</div>
-                            {dailyMetric === performanceType ? (
-                              <>
-                                <div className="font-semibold">{performanceType}: {Math.round(data.apeAmount * 1000).toLocaleString()}원</div>
-                                <div className="text-blue-400">건강: {Math.round(data.apeAmount * 1000 * data.healthRatio / 100).toLocaleString()}원</div>
-                                <div className="text-green-400">종신/정기: {Math.round(data.apeAmount * 1000 * data.lifeRatio / 100).toLocaleString()}원</div>
-                              </>
-                            ) : dailyMetric === '청약' ? (
-                              <>
-                                <div className="font-semibold">청약: {data.contractCount}건</div>
-                                <div className="text-blue-400">건강: {data.healthContract}건</div>
-                                <div className="text-green-400">종신/정기: {data.lifeContract}건</div>
-                              </>
-                            ) : (
-                              <>
-                                <div className="font-semibold">설계: {data.designCount}건</div>
-                                <div className="text-blue-400">건강: {data.healthDesign}건</div>
-                                <div className="text-green-400">종신/정기: {data.lifeDesign}건</div>
-                              </>
-                            )}
-                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-20">
+                            <div>9월 {data.day}일 ({i + 1} 영업일차)</div>
+                            <div>
+                              {dailyMetric === performanceType ? `${performanceType}: ${Math.round(data.apeAmount * 1000).toLocaleString()}원` :
+                               dailyMetric === '청약' ? `청약: ${data.contractCount}건` :
+                               `설계: ${data.designCount}건`}
+                            </div>
+                            <div>건강: {data.healthRatio}% | 종신/정기: {data.lifeRatio}%</div>
                           </div>
                         )}
                       </div>
@@ -2456,7 +1945,7 @@ const Branch360Dashboard = () => {
                     const yearData = {
                       '2023': [1200, 1150, 1300, 1100, 1250, 1180, 1350, 1200, 1100, 1050, 950, 800],
                       '2024': [900, 1000, 1100, 950, 1150, 1050, 1200, 1100, 1000, 850, 750, 650],
-                      '2025': [850, 920, 875, 1050, 980, 1120, 1030, 1180, 1000]
+                      '2025': [850, 920, 875, 1050, 980, 1120, 1030, 1180, 1090]
                     };
                     const contractData = {
                       '2023': [180, 175, 190, 165, 185, 170, 195, 180, 165, 155, 145, 130],
@@ -2481,7 +1970,7 @@ const Branch360Dashboard = () => {
                     const yearData = {
                       '2023': [1200, 1150, 1300, 1100, 1250, 1180, 1350, 1200, 1100, 1050, 950, 800],
                       '2024': [900, 1000, 1100, 950, 1150, 1050, 1200, 1100, 1000, 850, 750, 650],
-                      '2025': [850, 920, 875, 1050, 980, 1120, 1030, 1180, 1000]
+                      '2025': [850, 920, 875, 1050, 980, 1120, 1030, 1180, 1090]
                     };
                     const contractData = {
                       '2023': [180, 175, 190, 165, 185, 170, 195, 180, 165, 155, 145, 130],
@@ -2496,7 +1985,7 @@ const Branch360Dashboard = () => {
                       ? dataExcludingCurrent.reduce((sum, val) => sum + val, 0) / dataExcludingCurrent.length
                       : 0;
                     const maxValue = Math.max(...allData.slice(0, currentMonth));
-                    const avgY = 100 - ((average / maxValue) * 70) - 10;
+                    const avgY = 100 - ((average / maxValue) * 90) - 5;
 
                     return (
                       <g>
@@ -2532,29 +2021,29 @@ const Branch360Dashboard = () => {
                 )}
                 
                 {/* 막대 그래프 */}
-                <div className="flex items-end justify-center gap-2 h-full relative" style={{paddingTop: '50px', paddingBottom: '10px'}}>
+                <div className="flex items-end justify-center gap-1 h-full relative" style={{paddingTop: '20px'}}>
                   {(() => {
                     // 고정된 데이터 사용 (연도와 지표별로)
                     const selectedPeriodYear = selectedPeriod.split('-')[0];
                     const monthCount = getCurrentMonth();
                     const currentMonthData = [];
-
+                    
                     // 연도별 고정 데이터
                     const yearData = {
                       '2023': [1200, 1150, 1300, 1100, 1250, 1180, 1350, 1200, 1100, 1050, 950, 800],
                       '2024': [900, 1000, 1100, 950, 1150, 1050, 1200, 1100, 1000, 850, 750, 650],
-                      '2025': [850, 920, 875, 1050, 980, 1120, 1030, 1180, 1000]
+                      '2025': [850, 920, 875, 1050, 980, 1120, 1030, 1180, 1090]
                     };
-
+                    
                     const contractData = {
                       '2023': [180, 175, 190, 165, 185, 170, 195, 180, 165, 155, 145, 130],
                       '2024': [160, 170, 180, 155, 175, 165, 185, 170, 155, 145, 135, 125],
                       '2025': [155, 168, 152, 179, 164, 186, 171, 195, 178]
                     };
-
+                    
                     const apeValues = yearData[selectedPeriodYear as keyof typeof yearData];
                     const contractValues = contractData[selectedPeriodYear as keyof typeof contractData];
-
+                    
                     for (let i = 0; i < monthCount; i++) {
                       currentMonthData.push({
                         month: `${i+1}월`,
@@ -2567,25 +2056,25 @@ const Branch360Dashboard = () => {
                         lifeContracts: Math.floor(contractValues[i] * 0.35)
                       });
                     }
-
+                    
                     const maxValue = selectedMetric === performanceType
                       ? Math.max(...currentMonthData.map(d => d.ape))
                       : Math.max(...currentMonthData.map(d => d.contracts));
-
+                    
                     return currentMonthData.map((data, idx) => {
                       const value = selectedMetric === performanceType ? data.ape : data.contracts;
-                      const barHeight = Math.min((value / maxValue) * 110, 110);
+                      const barHeight = Math.min((value / maxValue) * 160, 160);
                       const healthHeight = (barHeight * 65) / 100;
                       const lifeHeight = barHeight - healthHeight;
-
-
+                      
+                      
                       return (
                         <div key={idx} className="flex flex-col items-center relative" style={{
-                          height: '140px',
+                          height: '160px', 
                           width: monthCount <= 9 ? '35px' : '25px'
                         }}>
                           {/* 차트 영역 */}
-                          <div className="relative flex justify-center" style={{height: '110px', width: '100%'}}>
+                          <div className="relative flex justify-center" style={{height: '120px', width: '100%'}}>
                             {/* 막대 */}
                             <div
                               className="w-6 rounded-t hover:opacity-80 transition-opacity cursor-pointer absolute bottom-0 overflow-hidden"
@@ -2593,7 +2082,7 @@ const Branch360Dashboard = () => {
                               onMouseEnter={() => setHoveredMonthData({...data, idx, value})}
                             >
                               {/* 종신/정기 부분 (상단) */}
-                              <div
+                              <div 
                                 className="w-full bg-green-500"
                                 style={{height: `${lifeHeight}px`}}
                               />
@@ -2603,27 +2092,27 @@ const Branch360Dashboard = () => {
                                 style={{height: `${healthHeight}px`}}
                               />
                             </div>
-
+                            
                           </div>
-
+                          
                           {/* 월 라벨 - 숫자만 표시 */}
-                          <div className="text-xs text-gray-500 mt-3">
+                          <div className="text-xs text-gray-500 mt-2">
                             {idx + 1}
                           </div>
                           
                           {/* 툴팁 */}
                           {hoveredMonthData && hoveredMonthData.idx === idx && (
                             <div className="absolute top-2 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded px-3 py-2 whitespace-nowrap z-20 shadow-lg">
-                              <div className="font-bold mb-1">{data.month} 누계</div>
+                              <div className="font-bold mb-1">{data.month} 실적</div>
                               {selectedMetric === performanceType ? (
                                 <>
-                                  <div>{performanceType}: {Math.round(data.ape * 1000).toLocaleString()}원</div>
+                                  <div>총 {performanceType}: {Math.round(data.ape * 1000).toLocaleString()}원</div>
                                   <div className="text-blue-300">건강: {Math.round(data.healthApe * 1000).toLocaleString()}원</div>
                                   <div className="text-green-300">종신/정기: {Math.round(data.lifeApe * 1000).toLocaleString()}원</div>
                                 </>
                               ) : (
                                 <>
-                                  <div>청약: {data.contracts}건</div>
+                                  <div>총 청약: {data.contracts}건</div>
                                   <div className="text-blue-300">건강: {data.healthContracts}건</div>
                                   <div className="text-green-300">종신/정기: {data.lifeContracts}건</div>
                                 </>
@@ -2645,6 +2134,320 @@ const Branch360Dashboard = () => {
                   <div className="flex items-center gap-1">
                     <div className="w-3 h-3 bg-green-500 rounded"></div>
                     <span className="text-xs text-gray-600">종신/정기</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          {/* 가운데: 지점 특성 */}
+          <div className="space-y-4">
+            {/* 지점 특성 정보 */}
+            <div>
+              <h2 className="text-lg font-bold text-gray-900 flex items-center mb-4">
+                <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                  <Building className="w-5 h-5 text-green-600" />
+                </div>
+                지점 특성 정보
+              </h2>
+
+              <div className="bg-white rounded-lg shadow-sm border p-4 space-y-3">
+                <h3 className="text-sm font-semibold text-gray-700 mb-3">기본 정보</h3>
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center">
+                    <MapPin className="w-4 h-4 text-gray-500 mr-2" />
+                    <span className="text-sm text-gray-600">주소</span>
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">{branchProfile.address}</span>
+                </div>
+                
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center">
+                    <Phone className="w-4 h-4 text-gray-500 mr-2" />
+                    <span className="text-sm text-gray-600">연락처</span>
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">{branchProfile.phone}</span>
+                </div>
+                
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center">
+                    <Calendar className="w-4 h-4 text-gray-500 mr-2" />
+                    <span className="text-sm text-gray-600">개설일자</span>
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">{branchProfile.partnershipDate} ({branchProfile.partnershipMonths}개월 경과)</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 고객 특성 */}
+            <div>
+              <div className="bg-white rounded-lg shadow-sm border p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-semibold text-gray-700">고객 특성</h3>
+                  <div className="text-xs text-gray-500">*직전 3개월 신계약 기준</div>
+                </div>
+                <div className="space-y-4">
+                  {/* 연령대 */}
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-600 mb-1">{metricsData['average'].customerAge}</div>
+                    <div className="text-xs text-gray-500">평균 36.5세</div>
+                  </div>
+
+                  {/* 성별 분포 - 파이차트 */}
+                  <div className="border-t pt-4 flex flex-col items-center">
+                    <div className="relative w-24 h-24 mb-3">
+                      <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 32 32">
+                        <circle
+                          cx="16"
+                          cy="16"
+                          r="12"
+                          fill="none"
+                          stroke="#f472b6"
+                          strokeWidth="6"
+                          strokeDasharray="39.12 75.36"
+                          strokeDashoffset="0"
+                        />
+                        <circle
+                          cx="16"
+                          cy="16"
+                          r="12"
+                          fill="none"
+                          stroke="#60a5fa"
+                          strokeWidth="6"
+                          strokeDasharray="36.24 75.36"
+                          strokeDashoffset="-39.12"
+                        />
+                      </svg>
+                    </div>
+                    <div className="flex items-center gap-4 text-xs">
+                      <div className="flex items-center gap-1">
+                        <div className="w-3 h-3 bg-blue-400 rounded-sm"></div>
+                        <span className="text-gray-600">남성 48%</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <div className="w-3 h-3 bg-pink-400 rounded-sm"></div>
+                        <span className="text-gray-600">여성 52%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 계약 특성 */}
+            <div>
+              <div className="bg-white rounded-lg shadow-sm border p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-semibold text-gray-700">계약 특성</h3>
+                  <div className="text-xs text-gray-500">*직전 3개월 신계약 기준</div>
+                </div>
+                <div className="space-y-4">
+                  {/* 평균 월납 보험료 & 평균 납입기간 */}
+                  <div className="grid grid-cols-2 gap-4 divide-x divide-gray-200">
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-green-600 mb-1">63,406원</div>
+                      <div className="text-xs text-gray-500">평균 월납보험료</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-purple-600 mb-1">13.3년</div>
+                      <div className="text-xs text-gray-500">평균 납입기간</div>
+                    </div>
+                  </div>
+
+                  {/* 주계약/특약 비율 - 파이차트 */}
+                  <div className="border-t pt-4 flex flex-col items-center">
+                    <div className="relative w-24 h-24 mb-3">
+                      <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 32 32">
+                        <circle
+                          cx="16"
+                          cy="16"
+                          r="12"
+                          fill="none"
+                          stroke="#3b82f6"
+                          strokeWidth="6"
+                          strokeDasharray="46.76 75.36"
+                          strokeDashoffset="0"
+                        />
+                        <circle
+                          cx="16"
+                          cy="16"
+                          r="12"
+                          fill="none"
+                          stroke="#fb923c"
+                          strokeWidth="6"
+                          strokeDasharray="28.60 75.36"
+                          strokeDashoffset="-46.76"
+                        />
+                      </svg>
+                    </div>
+                    <div className="flex items-center gap-4 text-xs">
+                      <div className="flex items-center gap-1">
+                        <div className="w-3 h-3 bg-blue-500 rounded-sm"></div>
+                        <span className="text-gray-600">주계약 62%</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <div className="w-3 h-3 bg-orange-400 rounded-sm"></div>
+                        <span className="text-gray-600">특약 38%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 주력 상품 */}
+            <div className="bg-white rounded-lg shadow-sm border p-4">
+              <div className="flex items-center justify-between mb-1">
+                <h3 className="text-sm font-semibold text-gray-700">주력 상품</h3>
+                <p className="text-xs text-gray-500">*직전 3개월 평균 기준</p>
+              </div>
+
+              {/* 상품군 필터 - 토글 버튼 스타일 */}
+              <div className="flex justify-end mb-4 mt-3">
+                <div className="flex bg-gray-100 rounded-lg p-1">
+                  {['전체', '건강', '종신/정기'].map(product => (
+                    <button
+                      key={product}
+                      onClick={() => setSelectedProduct(product as '전체' | '건강' | '종신/정기')}
+                      className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+                        selectedProduct === product
+                          ? 'bg-white text-gray-900 shadow-sm'
+                          : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                    >
+                      {product}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 포트폴리오 분석 */}
+              <div className="mb-4">
+                <div className="space-y-2">
+                  {getPortfolioData().map((item, idx) => {
+                    return (
+                      <div
+                        key={idx}
+                        className="flex items-center gap-3 mb-1 group relative"
+                        onMouseEnter={() => setHoveredProduct({ ...item, idx })}
+                        onMouseLeave={() => setHoveredProduct(null)}
+                      >
+                        <span className="text-xs text-gray-700 w-28 flex-shrink-0">{item.name}</span>
+                        <div className="flex-1 bg-gray-200 rounded-full h-4 relative cursor-pointer">
+                          <div
+                            className="h-4 rounded-full transition-all hover:opacity-80"
+                            style={{ width: `${item.value}%`, backgroundColor: item.color }}
+                          />
+                          {/* 전체 평균선 */}
+                          {selectedProduct === '전체' && (
+                            <div
+                              className="absolute top-0 bottom-0 w-0.5 bg-orange-500 z-10"
+                              style={{
+                                left: `${item.name === '건강' ? '60%' : '40%'}`,
+                                boxShadow: '0 0 4px rgba(255, 165, 0, 0.5)'
+                              }}
+                              title={`전체 평균: ${item.name === '건강' ? '60%' : '40%'}`}
+                            />
+                          )}
+                        </div>
+                        <span className="text-xs font-medium text-gray-700 w-8 text-right flex-shrink-0">{item.value}%</span>
+
+                        {/* 툴팁 */}
+                        {hoveredProduct && hoveredProduct.idx === idx && (
+                          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-30 mb-2">
+                            <div>{item.name}</div>
+                            <div>금액: {item.amount.toLocaleString()}원</div>
+                            <div>건수: {item.count}건</div>
+                            <div>비중: {item.value.toFixed(1)}%</div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* 범례 - 전체 상품군 선택시에만 표시 */}
+                {selectedProduct === '전체' && (
+                  <div className="mt-3 pt-2 border-t border-gray-100">
+                    <div className="flex items-center justify-center gap-4 text-xs">
+                      <div className="flex items-center">
+                        <div className="w-4 h-0.5 bg-orange-500 mr-2"></div>
+                        <span className="text-gray-600">전체 평균 (건강 60% / 종신정기 40%)</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Top 3 상품 - 테이블 형태 */}
+              <div className="border-t pt-3">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="text-xs font-medium text-gray-700">Top 3 상품</div>
+                  <div className="text-xs text-gray-600">[단위: 천원]</div>
+                </div>
+
+                <div className="overflow-hidden">
+                  {/* 헤더 */}
+                  <div className="grid gap-2 pb-2 border-b border-gray-200 mb-3" style={{gridTemplateColumns: '45px minmax(120px, 1fr) 100px 80px'}}>
+                    <div className="text-xs font-medium text-gray-500 text-center">순위</div>
+                    <div className="text-xs font-medium text-gray-500">상품명</div>
+                    <button
+                      onClick={() => setProductSortBy(productSortBy === 'amount' ? 'count' : 'amount')}
+                      className={`text-xs font-medium hover:text-blue-600 transition-colors text-right flex items-center justify-end gap-1 ${
+                        productSortBy === 'amount' ? 'text-blue-600 font-bold' : 'text-gray-900'
+                      }`}
+                    >
+                      {performanceType}
+                      {productSortBy === 'amount' && (
+                        <ArrowDown className="w-3 h-3" />
+                      )}
+                    </button>
+                    <button
+                      onClick={() => setProductSortBy(productSortBy === 'count' ? 'amount' : 'count')}
+                      className={`text-xs font-medium hover:text-blue-600 transition-colors text-right flex items-center justify-end gap-1 ${
+                        productSortBy === 'count' ? 'text-blue-600 font-bold' : 'text-gray-900'
+                      }`}
+                    >
+                      건수
+                      {productSortBy === 'count' && (
+                        <ArrowDown className="w-3 h-3" />
+                      )}
+                    </button>
+                  </div>
+
+                  {/* 데이터 행 */}
+                  <div className="space-y-1">
+                    {getTopProducts().map((product: any, idx: number) => (
+                      <div
+                        key={product.rank}
+                        className="grid gap-2 py-2"
+                        style={{gridTemplateColumns: '45px minmax(120px, 1fr) 100px 80px'}}
+                      >
+                        <div className="flex items-center justify-center">
+                          <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
+                            idx === 0 ? 'bg-yellow-400 text-yellow-900' : idx === 1 ? 'bg-gray-300 text-gray-700' : idx === 2 ? 'bg-orange-300 text-orange-900' : 'bg-gray-200 text-gray-600'
+                          }`}>
+                            {product.rank}
+                          </div>
+                        </div>
+                        <div className="flex items-center min-w-0">
+                          <div className="text-xs text-gray-900 truncate">
+                            {product.name}
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-end">
+                          <div className={`text-xs ${
+                            productSortBy === 'amount' ? 'text-blue-600 font-bold' : 'text-gray-900'
+                          }`}>{product.amount}</div>
+                        </div>
+                        <div className="flex items-center justify-end">
+                          <div className={`text-xs ${
+                            productSortBy === 'count' ? 'text-blue-600 font-bold' : 'text-gray-900'
+                          }`}>{product.count}</div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -2729,7 +2532,6 @@ const Branch360Dashboard = () => {
                   {/* 헤더 */}
                   <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-t-lg text-xs font-medium text-gray-700 border-b border-gray-200 sticky top-0">
                     <div className="min-w-[35px] shrink-0">날짜</div>
-                    <div className="min-w-[45px] shrink-0 text-center">구분</div>
                     <div className="flex-1">활동 내용</div>
                     <div className="min-w-[70px] shrink-0">담당</div>
                   </div>
@@ -2751,554 +2553,11 @@ const Branch360Dashboard = () => {
                           <div className="min-w-[35px] shrink-0 text-gray-600 font-medium">
                             {activity.date.split('-')[1]}/{activity.date.split('-')[2]}
                           </div>
-                          <div className="min-w-[45px] shrink-0 text-center text-gray-600">
-                            {activity.category}
-                          </div>
                           <div className="flex-1 text-gray-800 truncate">{activity.content}</div>
                           <div className="min-w-[70px] shrink-0 text-gray-600">{activity.manager}</div>
                         </div>
                       ));
                     })()}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          {/* 가운데: 지점 특성 */}
-          <div className="space-y-4">
-            {/* 지점 특성 정보 */}
-            <div>
-              <h2 className="text-lg font-bold text-gray-900 flex items-center mb-4">
-                <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
-                  <Building className="w-5 h-5 text-green-600" />
-                </div>
-                지점 특성 정보
-              </h2>
-
-              <div className="bg-white rounded-lg shadow-sm border p-6 space-y-4">
-                <h3 className="text-sm font-semibold text-gray-700 mb-4">기본 정보</h3>
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center">
-                    <MapPin className="w-4 h-4 text-gray-500 mr-2" />
-                    <span className="text-sm text-gray-600">주소</span>
-                  </div>
-                  <span className="text-sm font-medium text-gray-900">{branchProfile.address}</span>
-                </div>
-
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center">
-                    <Calendar className="w-4 h-4 text-gray-500 mr-2" />
-                    <span className="text-sm text-gray-600">개설일자</span>
-                  </div>
-                  <span className="text-sm font-medium text-gray-900">{branchProfile.partnershipDate} ({branchProfile.partnershipMonths}개월 경과)</span>
-                </div>
-              </div>
-            </div>
-
-            {/* 고객 특성 */}
-            <div>
-              <div className="bg-white rounded-lg shadow-sm border p-6">
-                <div className="flex items-center justify-between mb-5">
-                  <h3 className="text-sm font-semibold text-gray-700">고객 특성</h3>
-                  <div className="text-xs text-gray-500">*직전 3개월 신계약 기준</div>
-                </div>
-                <div className="space-y-5">
-                  {/* 연령대 */}
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-blue-600 mb-2">{metricsData['average'].customerAge}</div>
-                    <div className="text-xs text-gray-500">평균 36.5세</div>
-                  </div>
-
-                  {/* 성별 분포 - 파이차트 */}
-                  <div className="border-t pt-4 flex flex-col items-center">
-                    <div className="relative w-24 h-24 mb-3">
-                      <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 32 32">
-                        <circle
-                          cx="16"
-                          cy="16"
-                          r="12"
-                          fill="none"
-                          stroke="#f472b6"
-                          strokeWidth="6"
-                          strokeDasharray="39.12 75.36"
-                          strokeDashoffset="0"
-                        />
-                        <circle
-                          cx="16"
-                          cy="16"
-                          r="12"
-                          fill="none"
-                          stroke="#60a5fa"
-                          strokeWidth="6"
-                          strokeDasharray="36.24 75.36"
-                          strokeDashoffset="-39.12"
-                        />
-                      </svg>
-                    </div>
-                    <div className="flex items-center gap-4 text-xs">
-                      <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 bg-blue-400 rounded-sm"></div>
-                        <span className="text-gray-600">남성 48%</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 bg-pink-400 rounded-sm"></div>
-                        <span className="text-gray-600">여성 52%</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 계약 특성 (통합) */}
-            <div className="bg-white rounded-lg shadow-sm border p-6">
-              {/* 헤더 */}
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-semibold text-gray-700">계약 특성</h3>
-                <p className="text-xs text-gray-500">*직전 3개월 신계약 기준</p>
-              </div>
-
-              {/* 상품군 비중 - 트리 구조 */}
-              <div className="mb-5">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="text-xs font-medium text-gray-700">상품군 비중</div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-600">기준:</span>
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => setProductRatioCriteria('amount')}
-                        className="flex items-center gap-1.5 text-xs hover:text-gray-900 transition-colors"
-                      >
-                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                          productRatioCriteria === 'amount'
-                            ? 'border-indigo-600'
-                            : 'border-gray-300'
-                        }`}>
-                          {productRatioCriteria === 'amount' && (
-                            <div className="w-2 h-2 rounded-full bg-indigo-600"></div>
-                          )}
-                        </div>
-                        <span className={productRatioCriteria === 'amount' ? 'text-gray-900 font-semibold' : 'text-gray-600'}>
-                          실적
-                        </span>
-                      </button>
-                      <button
-                        onClick={() => setProductRatioCriteria('count')}
-                        className="flex items-center gap-1.5 text-xs hover:text-gray-900 transition-colors"
-                      >
-                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                          productRatioCriteria === 'count'
-                            ? 'border-indigo-600'
-                            : 'border-gray-300'
-                        }`}>
-                          {productRatioCriteria === 'count' && (
-                            <div className="w-2 h-2 rounded-full bg-indigo-600"></div>
-                          )}
-                        </div>
-                        <span className={productRatioCriteria === 'count' ? 'text-gray-900 font-semibold' : 'text-gray-600'}>
-                          건수
-                        </span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-gray-50 rounded-lg p-3 space-y-2">
-                  {/* 전체 */}
-                  <div
-                    className={`flex items-center gap-2 py-1.5 px-2 cursor-pointer rounded transition-all relative ${
-                      selectedProduct === '전체' && selectedSubProduct === '전체' ? 'bg-indigo-50 border-2 border-indigo-300' : 'hover:bg-white border-2 border-transparent'
-                    }`}
-                    onClick={() => {
-                      setSelectedProduct('전체');
-                      setSelectedSubProduct('전체');
-                    }}
-                  >
-                    {selectedProduct === '전체' && selectedSubProduct === '전체' && (
-                      <Check className="w-4 h-4 text-indigo-600 flex-shrink-0" />
-                    )}
-                    <span className={`text-sm font-bold ${
-                      selectedProduct === '전체' && selectedSubProduct === '전체' ? 'text-indigo-700' : 'text-gray-700'
-                    }`}>전체</span>
-                  </div>
-
-                  {/* 건강 */}
-                  <div>
-                    <div
-                      className={`flex items-center gap-2 py-1.5 px-2 cursor-pointer rounded transition-all relative ${
-                        selectedProduct === '건강' && selectedSubProduct === '전체' ? 'bg-indigo-50 border-2 border-indigo-300' : 'hover:bg-white border-2 border-transparent'
-                      }`}
-                      onClick={() => {
-                        setSelectedProduct('건강');
-                        setSelectedSubProduct('전체');
-                      }}
-                      onMouseEnter={() => setHoveredProduct({ name: '건강', value: 65, amount: 580000, count: 340, idx: 'health-parent' })}
-                      onMouseLeave={() => setHoveredProduct(null)}
-                    >
-                      {selectedProduct === '건강' && selectedSubProduct === '전체' && (
-                        <Check className="w-4 h-4 text-indigo-600 flex-shrink-0" />
-                      )}
-                      <span className={`text-sm font-bold w-20 flex-shrink-0 ${
-                        selectedProduct === '건강' && selectedSubProduct === '전체' ? 'text-indigo-700' : 'text-gray-700'
-                      }`}>건강</span>
-                      <div className="flex-1 bg-gray-200 rounded-full h-3.5">
-                        <div
-                          className="h-3.5 rounded-full transition-all"
-                          style={{
-                            width: productRatioCriteria === 'amount' ? '65%' : '74%',
-                            backgroundColor: selectedProduct === '건강' && selectedSubProduct === '전체' ? '#4f46e5' : '#3b82f6'
-                          }}
-                        />
-                      </div>
-                      <span className={`text-sm font-bold w-12 text-right flex-shrink-0 ${
-                        selectedProduct === '건강' && selectedSubProduct === '전체' ? 'text-indigo-700' : 'text-gray-700'
-                      }`}>{productRatioCriteria === 'amount' ? '65%' : '74%'}</span>
-
-                      {hoveredProduct && hoveredProduct.idx === 'health-parent' && (
-                        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-30 mb-1">
-                          <div className="font-semibold">건강</div>
-                          <div>{performanceType}: {(580000).toLocaleString()}원</div>
-                          <div>건수: 35건</div>
-                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* 건강 세부 상품 */}
-                    <div className="ml-6 mt-1 space-y-1">
-                      {[
-                        { name: '치아', value: 15.0, absoluteValue: 9.8, countRatio: 15.0, color: '#dbeafe', amount: 87000, count: 69 },
-                        { name: '치매', value: 12.0, absoluteValue: 7.8, countRatio: 10.0, color: '#93c5fd', amount: 70000, count: 46 },
-                        { name: '암', value: 18.0, absoluteValue: 11.7, countRatio: 20.0, color: '#60a5fa', amount: 104000, count: 92 },
-                        { name: '새담', value: 21.0, absoluteValue: 13.7, countRatio: 19.0, color: '#3b82f6', amount: 122000, count: 87 },
-                        { name: '새담 플러스', value: 16.0, absoluteValue: 10.4, countRatio: 13.0, color: '#2563eb', amount: 93000, count: 60 },
-                        { name: '골담', value: 13.0, absoluteValue: 8.5, countRatio: 16.0, color: '#1d4ed8', amount: 76000, count: 74 },
-                        { name: '다이나믹', value: 5.0, absoluteValue: 3.3, countRatio: 7.0, color: '#1e40af', amount: 29000, count: 32 }
-                      ].map((item, idx) => {
-                        const isSelected = selectedProduct === '건강' && selectedSubProduct === item.name;
-                        const displayValue = productRatioCriteria === 'amount' ? item.absoluteValue : item.countRatio;
-                        return (
-                          <div
-                            key={idx}
-                            className={`flex items-center gap-2 py-1 px-2 cursor-pointer rounded transition-all relative ${
-                              isSelected ? 'bg-indigo-50 border-2 border-indigo-300' : 'hover:bg-white border-2 border-transparent'
-                            }`}
-                            onClick={() => {
-                              setSelectedProduct('건강');
-                              setSelectedSubProduct(item.name);
-                            }}
-                            onMouseEnter={() => setHoveredProduct({ ...item, idx: `health-${idx}` })}
-                            onMouseLeave={() => setHoveredProduct(null)}
-                          >
-                            {isSelected && (
-                              <Check className="w-3 h-3 text-indigo-600 flex-shrink-0 ml-2" />
-                            )}
-                            <span className={`text-xs w-28 flex-shrink-0 ${
-                              isSelected ? 'font-bold text-indigo-700' : 'text-gray-600'
-                            }`}>└ {item.name}</span>
-                            <div className="flex-1 max-w-md bg-gray-200 rounded-full h-2.5">
-                              <div
-                                className="h-2.5 rounded-full transition-all"
-                                style={{ width: `${displayValue}%`, backgroundColor: isSelected ? '#4f46e5' : item.color }}
-                              />
-                            </div>
-                            <span className={`text-xs w-12 text-right flex-shrink-0 ${
-                              isSelected ? 'font-bold text-indigo-700' : 'text-gray-600'
-                            }`}>{displayValue.toFixed(1)}%</span>
-
-                            {hoveredProduct && hoveredProduct.idx === `health-${idx}` && (
-                              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-30 mb-1">
-                                <div className="font-semibold">{item.name}</div>
-                                <div>{performanceType}: {item.amount.toLocaleString()}원</div>
-                                <div>건수: {item.count}건</div>
-                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* 종신/정기 */}
-                  <div>
-                    <div
-                      className={`flex items-center gap-2 py-1.5 px-2 cursor-pointer rounded transition-all relative ${
-                        selectedProduct === '종신/정기' && selectedSubProduct === '전체' ? 'bg-indigo-50 border-2 border-indigo-300' : 'hover:bg-white border-2 border-transparent'
-                      }`}
-                      onClick={() => {
-                        setSelectedProduct('종신/정기');
-                        setSelectedSubProduct('전체');
-                      }}
-                      onMouseEnter={() => setHoveredProduct({ name: '종신/정기', value: 35, amount: 312000, count: 118, idx: 'life-parent' })}
-                      onMouseLeave={() => setHoveredProduct(null)}
-                    >
-                      {selectedProduct === '종신/정기' && selectedSubProduct === '전체' && (
-                        <Check className="w-4 h-4 text-indigo-600 flex-shrink-0" />
-                      )}
-                      <span className={`text-sm font-bold w-20 flex-shrink-0 ${
-                        selectedProduct === '종신/정기' && selectedSubProduct === '전체' ? 'text-indigo-700' : 'text-gray-700'
-                      }`}>종신/정기</span>
-                      <div className="flex-1 bg-gray-200 rounded-full h-3.5">
-                        <div
-                          className="h-3.5 rounded-full transition-all"
-                          style={{
-                            width: productRatioCriteria === 'amount' ? '35%' : '26%',
-                            backgroundColor: selectedProduct === '종신/정기' && selectedSubProduct === '전체' ? '#4f46e5' : '#10b981'
-                          }}
-                        />
-                      </div>
-                      <span className={`text-sm font-bold w-12 text-right flex-shrink-0 ${
-                        selectedProduct === '종신/정기' && selectedSubProduct === '전체' ? 'text-indigo-700' : 'text-gray-700'
-                      }`}>{productRatioCriteria === 'amount' ? '35%' : '26%'}</span>
-
-                      {hoveredProduct && hoveredProduct.idx === 'life-parent' && (
-                        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-30 mb-1">
-                          <div className="font-semibold">종신/정기</div>
-                          <div>{performanceType}: {(312000).toLocaleString()}원</div>
-                          <div>건수: 19건</div>
-                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* 종신/정기 세부 상품 */}
-                    <div className="ml-6 mt-1 space-y-1">
-                      {[
-                        { name: '저해지 종신', value: 45.0, absoluteValue: 15.8, countRatio: 40.0, color: '#10b981', amount: 140000, count: 184 },
-                        { name: '무해지 종신', value: 30.0, absoluteValue: 10.5, countRatio: 35.0, color: '#34d399', amount: 94000, count: 161 },
-                        { name: '일반 종신', value: 15.0, absoluteValue: 5.3, countRatio: 15.0, color: '#6ee7b7', amount: 47000, count: 69 },
-                        { name: '정기', value: 10.0, absoluteValue: 3.5, countRatio: 10.0, color: '#a7f3d0', amount: 31000, count: 46 }
-                      ].map((item, idx) => {
-                        const isSelected = selectedProduct === '종신/정기' && selectedSubProduct === item.name;
-                        const displayValue = productRatioCriteria === 'amount' ? item.absoluteValue : item.countRatio;
-                        return (
-                          <div
-                            key={idx}
-                            className={`flex items-center gap-2 py-1 px-2 cursor-pointer rounded transition-all relative ${
-                              isSelected ? 'bg-indigo-50 border-2 border-indigo-300' : 'hover:bg-white border-2 border-transparent'
-                            }`}
-                            onClick={() => {
-                              setSelectedProduct('종신/정기');
-                              setSelectedSubProduct(item.name);
-                            }}
-                            onMouseEnter={() => setHoveredProduct({ ...item, idx: `life-${idx}` })}
-                            onMouseLeave={() => setHoveredProduct(null)}
-                          >
-                            {isSelected && (
-                              <Check className="w-3 h-3 text-indigo-600 flex-shrink-0 ml-2" />
-                            )}
-                            <span className={`text-xs w-28 flex-shrink-0 ${
-                              isSelected ? 'font-bold text-indigo-700' : 'text-gray-600'
-                            }`}>└ {item.name}</span>
-                            <div className="flex-1 max-w-md bg-gray-200 rounded-full h-2.5">
-                              <div
-                                className="h-2.5 rounded-full transition-all"
-                                style={{ width: `${displayValue}%`, backgroundColor: isSelected ? '#4f46e5' : item.color }}
-                              />
-                            </div>
-                            <span className={`text-xs w-12 text-right flex-shrink-0 ${
-                              isSelected ? 'font-bold text-indigo-700' : 'text-gray-600'
-                            }`}>{displayValue.toFixed(1)}%</span>
-
-                            {hoveredProduct && hoveredProduct.idx === `life-${idx}` && (
-                              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-30 mb-1">
-                                <div className="font-semibold">{item.name}</div>
-                                <div>{performanceType}: {item.amount.toLocaleString()}원</div>
-                                <div>건수: {item.count}건</div>
-                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-
-                {/* 현재 선택 표시 */}
-                <div className="mt-3 pt-3">
-                  <div className="text-xs text-gray-600">
-                    <span className="font-medium text-indigo-600">
-                      [{selectedProduct === '전체' && selectedSubProduct === '전체'
-                        ? '전체'
-                        : selectedSubProduct === '전체'
-                          ? selectedProduct
-                          : `${selectedProduct} > ${selectedSubProduct}`}]
-                    </span>
-                    <span className="ml-1.5">기준으로 아래 지표 확인 ↓</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* 필터 적용 결과 영역 */}
-              <div className="bg-blue-50/30 rounded-lg p-4 border border-blue-100">
-                {/* 2. 평균 월납 보험료 */}
-                <div className="py-4 border-b border-blue-100">
-                  <div className="text-center">
-                    <div className="text-xl font-bold text-green-600 mb-1">
-                      {(() => {
-                        // 필터에 따른 평균 월납보험료 계산
-                        let basePremium = 63406;
-                        if (selectedProduct === '건강') {
-                          if (selectedSubProduct === '골담') basePremium = 45000;
-                          else if (selectedSubProduct === '새담') basePremium = 52000;
-                          else if (selectedSubProduct === '치아') basePremium = 38000;
-                          else if (selectedSubProduct === '치매') basePremium = 55000;
-                          else if (selectedSubProduct === '암') basePremium = 48000;
-                          else if (selectedSubProduct === '다이나믹') basePremium = 72000;
-                          else basePremium = 58000; // 건강 전체
-                        } else if (selectedProduct === '종신/정기') {
-                          if (selectedSubProduct === '저해지') basePremium = 95000;
-                          else if (selectedSubProduct === '무해지') basePremium = 82000;
-                          else if (selectedSubProduct === '정기') basePremium = 42000;
-                          else basePremium = 72000; // 종신/정기 전체
-                        }
-                        return basePremium.toLocaleString() + '원';
-                      })()}
-                    </div>
-                    <div className="text-xs text-gray-500">평균 월납보험료</div>
-                  </div>
-                </div>
-
-                {/* 3. 주계약/특약 비율 - 파이차트 */}
-                <div className="py-4 flex flex-col items-center border-b border-blue-100">
-                  {(() => {
-                    // 필터에 따른 주계약/특약 비율 계산
-                    let mainRatio = 62;
-                    let subRatio = 38;
-
-                    if (selectedProduct === '건강') {
-                      if (selectedSubProduct === '골담') { mainRatio = 55; subRatio = 45; }
-                      else if (selectedSubProduct === '새담') { mainRatio = 60; subRatio = 40; }
-                      else if (selectedSubProduct === '치아') { mainRatio = 48; subRatio = 52; }
-                      else if (selectedSubProduct === '치매') { mainRatio = 58; subRatio = 42; }
-                      else if (selectedSubProduct === '암') { mainRatio = 52; subRatio = 48; }
-                      else if (selectedSubProduct === '다이나믹') { mainRatio = 65; subRatio = 35; }
-                      else { mainRatio = 57; subRatio = 43; } // 건강 전체
-                    } else if (selectedProduct === '종신/정기') {
-                      if (selectedSubProduct === '저해지') { mainRatio = 75; subRatio = 25; }
-                      else if (selectedSubProduct === '무해지') { mainRatio = 70; subRatio = 30; }
-                      else if (selectedSubProduct === '정기') { mainRatio = 60; subRatio = 40; }
-                      else { mainRatio = 68; subRatio = 32; } // 종신/정기 전체
-                    }
-
-                    const circumference = 2 * Math.PI * 12;
-                    const mainLength = (mainRatio / 100) * circumference;
-                    const subLength = (subRatio / 100) * circumference;
-
-                    return (
-                      <>
-                        <div className="relative w-24 h-24 mb-3">
-                          <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 32 32">
-                            <circle
-                              cx="16"
-                              cy="16"
-                              r="12"
-                              fill="none"
-                              stroke="#3b82f6"
-                              strokeWidth="6"
-                              strokeDasharray={`${mainLength} ${circumference}`}
-                              strokeDashoffset="0"
-                            />
-                            <circle
-                              cx="16"
-                              cy="16"
-                              r="12"
-                              fill="none"
-                              stroke="#fb923c"
-                              strokeWidth="6"
-                              strokeDasharray={`${subLength} ${circumference}`}
-                              strokeDashoffset={`-${mainLength}`}
-                            />
-                          </svg>
-                        </div>
-                        <div className="flex items-center gap-4 text-xs">
-                          <div className="flex items-center gap-1">
-                            <div className="w-3 h-3 bg-blue-500 rounded-sm"></div>
-                            <span className="text-gray-600">주계약 {mainRatio}%</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <div className="w-3 h-3 bg-orange-400 rounded-sm"></div>
-                            <span className="text-gray-600">특약 {subRatio}%</span>
-                          </div>
-                        </div>
-                      </>
-                    );
-                  })()}
-                </div>
-
-                {/* 4. Top 3 상품 - 테이블 형태 */}
-                <div className="pt-5">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="text-xs font-medium text-gray-700">Top 3 상품</div>
-                    <div className="text-xs text-gray-600">[단위: 천원]</div>
-                  </div>
-
-                  <div className="overflow-hidden">
-                    {/* 헤더 */}
-                    <div className="grid gap-2 pb-2 border-b border-gray-200 mb-3" style={{gridTemplateColumns: '45px minmax(120px, 1fr) 100px 80px'}}>
-                      <div className="text-xs font-medium text-gray-500 text-center">순위</div>
-                      <div className="text-xs font-medium text-gray-500">상품명</div>
-                      <button
-                        onClick={() => setProductSortBy(productSortBy === 'amount' ? 'count' : 'amount')}
-                        className={`text-xs font-medium hover:text-blue-600 transition-colors text-right flex items-center justify-end gap-1 ${
-                          productSortBy === 'amount' ? 'text-blue-600 font-bold' : 'text-gray-900'
-                        }`}
-                      >
-                        {performanceType}
-                        {productSortBy === 'amount' && (
-                          <ArrowDown className="w-3 h-3" />
-                        )}
-                      </button>
-                      <button
-                        onClick={() => setProductSortBy(productSortBy === 'count' ? 'amount' : 'count')}
-                        className={`text-xs font-medium hover:text-blue-600 transition-colors text-right flex items-center justify-end gap-1 ${
-                          productSortBy === 'count' ? 'text-blue-600 font-bold' : 'text-gray-900'
-                        }`}
-                      >
-                        건수
-                        {productSortBy === 'count' && (
-                          <ArrowDown className="w-3 h-3" />
-                        )}
-                      </button>
-                    </div>
-
-                    {/* 데이터 행 */}
-                    <div className="space-y-1">
-                      {getTopProducts().map((product: any, idx: number) => (
-                        <div
-                          key={product.rank}
-                          className="grid gap-2 py-2 relative"
-                          style={{gridTemplateColumns: '45px minmax(120px, 1fr) 100px 80px'}}
-                        >
-                          <div className="flex items-center justify-center">
-                            <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
-                              idx === 0 ? 'bg-yellow-400 text-yellow-900' : idx === 1 ? 'bg-gray-300 text-gray-700' : idx === 2 ? 'bg-orange-300 text-orange-900' : 'bg-gray-200 text-gray-600'
-                            }`}>
-                              {product.rank}
-                            </div>
-                          </div>
-                          <div className="flex items-center min-w-0">
-                            <div className="text-xs text-gray-900 truncate">
-                              {product.name}
-                            </div>
-                          </div>
-                          <div className="flex items-center justify-end">
-                            <div className={`text-xs ${
-                              productSortBy === 'amount' ? 'text-blue-600 font-bold' : 'text-gray-900'
-                            }`}>{product.amount}</div>
-                          </div>
-                          <div className="flex items-center justify-end">
-                            <div className={`text-xs ${
-                              productSortBy === 'count' ? 'text-blue-600 font-bold' : 'text-gray-900'
-                            }`}>{product.count}</div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
                   </div>
                 </div>
               </div>
@@ -3314,10 +2573,10 @@ const Branch360Dashboard = () => {
               설계사 현황
             </h2>
 
-            {/* 전체 재적 설계사 */}
-            <div className="bg-white rounded-lg shadow-sm border p-6">
-              <div className="flex items-center justify-between mb-5">
-                <h3 className="text-sm font-semibold text-gray-700">재적 설계사</h3>
+            {/* 전체 위촉 설계사 */}
+            <div className="bg-white rounded-lg shadow-sm border p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-semibold text-gray-700">위촉 설계사</h3>
                 <button
                   onClick={() => handleShowAllAgents()}
                   className="text-xs text-gray-500 hover:text-gray-700 font-medium"
@@ -3325,111 +2584,57 @@ const Branch360Dashboard = () => {
                   전체보기 {'>'}
                 </button>
               </div>
-
-              <div className="text-center mb-5">
-                <div className="text-4xl font-bold text-blue-600">{currentAgentStatus.total}<span className="text-lg text-gray-500">명</span></div>
+              
+              <div className="text-center mb-4">
+                <div className="text-3xl font-bold text-blue-600">{currentAgentStatus.total}<span className="text-base text-gray-500">명</span></div>
               </div>
-
-              <div className="grid grid-cols-2 gap-4 text-sm mb-5">
-                <div className="text-center p-4 bg-green-50 rounded-lg">
+              
+              <div className="grid grid-cols-2 gap-3 text-sm mb-4">
+                <div className="text-center p-3 bg-green-50 rounded-lg">
                   <div className="text-lg font-bold text-green-600">+{currentAgentStatus.newThisMonth}</div>
                   <div className="text-xs text-gray-600">당월 신규</div>
                 </div>
-                <div className="text-center p-4 bg-red-50 rounded-lg">
+                <div className="text-center p-3 bg-red-50 rounded-lg">
                   <div className="text-lg font-bold text-red-600">-{currentAgentStatus.resignedThisMonth}</div>
                   <div className="text-xs text-gray-600">당월 해촉</div>
                 </div>
               </div>
-
-              <div className="border-t pt-5 space-y-4">
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center">
-                      <User className="w-4 h-4 text-gray-500 mr-2" />
-                      <span className="text-sm text-gray-600">평균 연령</span>
-                    </div>
-                    <span className="text-sm font-medium">{branchProfile.designerAvgAge}세</span>
+              
+              <div className="border-t pt-4 space-y-3">
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center">
+                    <User className="w-4 h-4 text-gray-500 mr-2" />
+                    <span className="text-sm text-gray-600">평균 연령</span>
                   </div>
-                  <div className="border-t border-gray-200 pt-3">
-                    {(() => {
-                      const allData = generateAllAgentsData();
-                      const maleCount = allData.filter(a => a.gender === '남').length;
-                      const femaleCount = allData.filter(a => a.gender === '여').length;
-                      const total = allData.length;
-                      const malePercent = Math.round((maleCount / total) * 100);
-                      const femalePercent = 100 - malePercent;
-
-                      return (
-                        <div className="space-y-2">
-                          <div className="flex w-full h-2 rounded-full overflow-hidden">
-                            <div
-                              className="bg-blue-500 transition-all"
-                              style={{ width: `${malePercent}%` }}
-                            />
-                            <div
-                              className="bg-pink-400 transition-all"
-                              style={{ width: `${femalePercent}%` }}
-                            />
-                          </div>
-                          <div className="flex items-center justify-between text-xs text-gray-600">
-                            <span>남 {maleCount}명 ({malePercent}%)</span>
-                            <span>여 {femaleCount}명 ({femalePercent}%)</span>
-                          </div>
-                        </div>
-                      );
-                    })()}
-                  </div>
+                  <span className="text-sm font-medium">{branchProfile.designerAvgAge}세</span>
                 </div>
-
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <Briefcase className="w-4 h-4 text-gray-500 mr-2" />
-                      <span className="text-sm text-gray-600">평균 보험 경력</span>
-                    </div>
-                    <span className="text-sm font-medium">{formatInsuranceCareer(branchProfile.designerAvgCareer + '년')}</span>
+                
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center">
+                    <Briefcase className="w-4 h-4 text-gray-500 mr-2" />
+                    <span className="text-sm text-gray-600">평균 보험 경력</span>
                   </div>
-                  <div className="text-xs text-gray-400 mt-2">*생명보험협회 등록 기준</div>
+                  <span className="text-sm font-medium">{branchProfile.designerAvgCareer}년</span>
                 </div>
               </div>
             </div>
 
-            {/* 가동 설계사 현황 */}
-            <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h3 className="text-sm font-semibold text-gray-700 mb-5">가동 설계사</h3>
-
+            {/* 우수 설계사 현황 */}
+            <div className="bg-white rounded-lg shadow-sm border p-4">
+              <h3 className="text-sm font-semibold text-gray-700 mb-4">당월 가동 설계사</h3>
+              
               {/* 간략 현황 */}
-              <div className="flex items-center gap-4 mb-5 pb-5 border-b border-gray-200">
-                {/* 활동 */}
-                <div className="flex-1 text-center p-5 bg-gray-100 rounded-lg">
-                  <div className="text-xs text-gray-600 mb-2">당월 활동</div>
-                  <div className="text-2xl font-bold text-gray-700">38<span className="text-sm text-gray-500 ml-1">명</span></div>
-                </div>
-
-                {/* 화살표 */}
-                <div className="pt-6">
-                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </div>
-
-                {/* 가동 */}
-                <div className="flex-1 text-center p-5 bg-indigo-50 rounded-lg border-2 border-indigo-200">
-                  <div className="text-xs text-gray-600 mb-2">당월 가동</div>
-                  <div className="text-2xl font-bold text-indigo-600">{currentAgentStatus.active}<span className="text-sm text-gray-500 ml-1">명</span></div>
-                </div>
-
-                {/* 비율 */}
-                <div className="flex flex-col gap-2">
-                  <div className="text-xs whitespace-nowrap">
-                    <span className="text-gray-500">재적 대비 </span>
-                    <span className="font-semibold text-gray-700">{Math.round((currentAgentStatus.active / currentAgentStatus.total) * 100)}%</span>
-                  </div>
-                  <div className="text-xs whitespace-nowrap">
-                    <span className="text-gray-500">활동 대비 </span>
-                    <span className="font-semibold text-indigo-600">{Math.round((currentAgentStatus.active / 38) * 100)}%</span>
-                  </div>
-                </div>
+              <div className="text-center mb-4 pb-4 border-b border-gray-200">
+                <div className="text-2xl font-bold text-indigo-600">{(() => {
+                  const allData = getSortedAgents(true);
+                  const activeCount = allData.filter(agent => agent.currentMonth.premium > 0).length;
+                  return activeCount;
+                })()}<span className="text-sm text-gray-500">명</span></div>
+                <div className="text-xs text-gray-600">전체 대비 {Math.round(((() => {
+                  const allData = getSortedAgents(true);
+                  const activeCount = allData.filter(agent => agent.currentMonth.premium > 0).length;
+                  return activeCount;
+                })() / currentAgentStatus.total) * 100)}% 가동률</div>
               </div>
 
               {/* 카테고리 선택 */}
@@ -3505,17 +2710,17 @@ const Branch360Dashboard = () => {
 
                 if (selectedContinuousTab === 'all') {
                   // 전체: 가동 설계사 전체
-                  filteredActiveAgents = allData.filter(agent => agent.isActive);
+                  filteredActiveAgents = allData.filter(agent => agent.currentMonth.premium > 0);
                 } else {
                   const categoryNames = getAgentList(selectedContinuousTab);
-                  filteredActiveAgents = allData.filter(agent => categoryNames.includes(agent.name) && agent.isActive);
+                  filteredActiveAgents = allData.filter(agent => categoryNames.includes(agent.name) && agent.currentMonth.premium > 0);
                 }
 
                 // 가동 설계사 정렬
                 const activeAgents = sortTableData(filteredActiveAgents, activeTableSortBy, activeTableSortOrder);
 
                 // 미가동 설계사 (전체에서 가동이 아닌 설계사)
-                const inactiveAgents = allData.filter(agent => !agent.isActive);
+                const inactiveAgents = allData.filter(agent => agent.currentMonth.premium === 0);
 
                 return (
                   <div className="bg-white rounded-lg border border-gray-200">
@@ -3529,7 +2734,7 @@ const Branch360Dashboard = () => {
                       <table className="w-full text-xs">
                         <thead className="bg-gray-50 sticky top-0">
                           <tr>
-                            <th className="px-2 py-2 text-left font-medium text-gray-700 w-28">
+                            <th className="px-2 py-2 text-left font-medium text-gray-700 w-20">
                               <button
                                 onClick={() => handleActiveTableSort('agentCode')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors"
@@ -3542,7 +2747,7 @@ const Branch360Dashboard = () => {
                                 )}
                               </button>
                             </th>
-                            <th className="px-2 py-2 text-left font-medium text-gray-700 w-24">
+                            <th className="px-2 py-2 text-left font-medium text-gray-700">
                               <button
                                 onClick={() => handleActiveTableSort('name')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors"
@@ -3555,12 +2760,12 @@ const Branch360Dashboard = () => {
                                 )}
                               </button>
                             </th>
-                            <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap w-20">
+                            <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap">
                               <button
                                 onClick={() => handleActiveTableSort('commissionMonth')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors ml-auto"
                               >
-                                위촉월차
+                                위촉차월
                                 {activeTableSortBy === 'commissionMonth' && (
                                   <span className="text-gray-500">
                                     {activeTableSortOrder === 'desc' ? '↓' : '↑'}
@@ -3568,12 +2773,12 @@ const Branch360Dashboard = () => {
                                 )}
                               </button>
                             </th>
-                            <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap w-20">
+                            <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap">
                               <button
                                 onClick={() => handleActiveTableSort('currentMMP')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors ml-auto"
                               >
-                                당월 {performanceType}
+                                당월 MMP
                                 {activeTableSortBy === 'currentMMP' && (
                                   <span className="text-gray-500">
                                     {activeTableSortOrder === 'desc' ? '↓' : '↑'}
@@ -3581,12 +2786,12 @@ const Branch360Dashboard = () => {
                                 )}
                               </button>
                             </th>
-                            <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap w-20">
+                            <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap">
                               <button
                                 onClick={() => handleActiveTableSort('previousMMP')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors ml-auto"
                               >
-                                전월 {performanceType}
+                                전월 MMP
                                 {activeTableSortBy === 'previousMMP' && (
                                   <span className="text-gray-500">
                                     {activeTableSortOrder === 'desc' ? '↓' : '↑'}
@@ -3602,11 +2807,9 @@ const Branch360Dashboard = () => {
                               <td className="px-2 py-2 text-gray-600 font-mono text-xs">{agent.agentCode}</td>
                               <td className="px-2 py-2 font-medium text-gray-800">{agent.name}</td>
                               <td className="px-2 py-2 text-right text-gray-600 text-xs">{agent.commissionMonth.replace('개월', '')}</td>
-                              <td className="px-2 py-2 text-right font-medium text-green-600 whitespace-nowrap">
-                                {performanceType === 'MMP' ? Math.round(agent.currentMonth.premium * 10) : agent.currentMonth.premium * 10 * 12}
-                              </td>
+                              <td className="px-2 py-2 text-right font-medium text-green-600 whitespace-nowrap">{agent.currentMonth.premium}</td>
                               <td className="px-2 py-2 text-right text-gray-600 whitespace-nowrap">
-                                {agent.previousMonth.premium === 0 ? '-' : (performanceType === 'MMP' ? Math.round(agent.previousMonth.premium * 10) : agent.previousMonth.premium * 10 * 12)}
+                                {agent.previousMonth.premium === 0 ? '-' : agent.previousMonth.premium}
                               </td>
                             </tr>
                           )) : (
@@ -3625,7 +2828,6 @@ const Branch360Dashboard = () => {
               <div className="mt-4 pt-3 border-t border-gray-200">
                 <button
                   onClick={() => {
-                    setModalPerformanceType(performanceType);
                     setShowActiveAgentsModal(true);
                   }}
                   className="w-full text-center text-xs text-blue-600 hover:text-blue-800 font-medium py-2 transition-colors"
@@ -3635,29 +2837,29 @@ const Branch360Dashboard = () => {
               </div>
             </div>
 
-            {/* 미가동 설계사 */}
+            {/* 당월 미가동 설계사 */}
             <div className="bg-white rounded-lg shadow-sm border p-4">
-              <h3 className="text-sm font-semibold text-gray-700 mb-4">미가동 설계사</h3>
+              <h3 className="text-sm font-semibold text-gray-700 mb-4">당월 미가동 설계사</h3>
 
               {/* 간략 현황 */}
               <div className="text-center mb-4 pb-4 border-b border-gray-200">
                 <div className="text-2xl font-bold text-red-600">{(() => {
                   const allData = getSortedAgents(true);
-                  const inactiveCount = allData.filter(agent => !agent.isActive).length;
+                  const inactiveCount = allData.filter(agent => agent.currentMonth.premium === 0).length;
                   return inactiveCount;
                 })()}<span className="text-sm text-gray-500">명</span></div>
-                <div className="text-xs text-gray-600">재적 대비 {Math.round(((() => {
+                <div className="text-xs text-gray-600">전체 대비 {Math.round(((() => {
                   const allData = getSortedAgents(true);
-                  const inactiveCount = allData.filter(agent => !agent.isActive).length;
+                  const inactiveCount = allData.filter(agent => agent.currentMonth.premium === 0).length;
                   return inactiveCount;
-                })() / currentAgentStatus.total) * 100)}%</div>
+                })() / currentAgentStatus.total) * 100)}% 미가동률</div>
               </div>
 
               {/* 미가동 설계사 리스트 */}
               {(() => {
                 const allData = getSortedAgents(true);
                 const inactiveAgents = sortTableData(
-                  allData.filter(agent => !agent.isActive),
+                  allData.filter(agent => agent.currentMonth.premium === 0),
                   inactiveTableSortBy,
                   inactiveTableSortOrder
                 );
@@ -3674,7 +2876,7 @@ const Branch360Dashboard = () => {
                       <table className="w-full text-xs">
                         <thead className="bg-gray-50 sticky top-0">
                           <tr>
-                            <th className="px-2 py-2 text-left font-medium text-gray-700 w-28">
+                            <th className="px-2 py-2 text-left font-medium text-gray-700 w-20">
                               <button
                                 onClick={() => handleInactiveTableSort('agentCode')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors"
@@ -3687,7 +2889,7 @@ const Branch360Dashboard = () => {
                                 )}
                               </button>
                             </th>
-                            <th className="px-2 py-2 text-left font-medium text-gray-700 w-24">
+                            <th className="px-2 py-2 text-left font-medium text-gray-700">
                               <button
                                 onClick={() => handleInactiveTableSort('name')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors"
@@ -3700,12 +2902,12 @@ const Branch360Dashboard = () => {
                                 )}
                               </button>
                             </th>
-                            <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap w-20">
+                            <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap">
                               <button
                                 onClick={() => handleInactiveTableSort('commissionMonth')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors ml-auto"
                               >
-                                위촉월차
+                                위촉차월
                                 {inactiveTableSortBy === 'commissionMonth' && (
                                   <span className="text-gray-500">
                                     {inactiveTableSortOrder === 'desc' ? '↓' : '↑'}
@@ -3713,25 +2915,12 @@ const Branch360Dashboard = () => {
                                 )}
                               </button>
                             </th>
-                            <th className="px-2 py-2 text-center font-medium text-gray-700 whitespace-nowrap w-20">
-                              <button
-                                onClick={() => handleInactiveTableSort('가입설계건수')}
-                                className="flex items-center gap-1 hover:text-gray-900 transition-colors mx-auto"
-                              >
-                                당월 설계건수
-                                {inactiveTableSortBy === '가입설계건수' && (
-                                  <span className="text-gray-500">
-                                    {inactiveTableSortOrder === 'desc' ? '↓' : '↑'}
-                                  </span>
-                                )}
-                              </button>
-                            </th>
-                            <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap w-20">
+                            <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap">
                               <button
                                 onClick={() => handleInactiveTableSort('currentMMP')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors ml-auto"
                               >
-                                당월 {performanceType}
+                                당월 MMP
                                 {inactiveTableSortBy === 'currentMMP' && (
                                   <span className="text-gray-500">
                                     {inactiveTableSortOrder === 'desc' ? '↓' : '↑'}
@@ -3739,12 +2928,12 @@ const Branch360Dashboard = () => {
                                 )}
                               </button>
                             </th>
-                            <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap w-20">
+                            <th className="px-2 py-2 text-right font-medium text-gray-700 whitespace-nowrap">
                               <button
                                 onClick={() => handleInactiveTableSort('previousMMP')}
                                 className="flex items-center gap-1 hover:text-gray-900 transition-colors ml-auto"
                               >
-                                전월 {performanceType}
+                                전월 MMP
                                 {inactiveTableSortBy === 'previousMMP' && (
                                   <span className="text-gray-500">
                                     {inactiveTableSortOrder === 'desc' ? '↓' : '↑'}
@@ -3760,17 +2949,14 @@ const Branch360Dashboard = () => {
                               <td className="px-2 py-2 text-gray-600 font-mono text-xs">{agent.agentCode}</td>
                               <td className="px-2 py-2 font-medium text-gray-800">{agent.name}</td>
                               <td className="px-2 py-2 text-right text-gray-600 text-xs">{agent.commissionMonth.replace('개월', '')}</td>
-                              <td className="px-2 py-2 text-center text-gray-900 font-medium">
-                                {agent.previousMonth.premium > 0 ? Math.floor(Math.random() * 9) + 1 : 0}
-                              </td>
                               <td className="px-2 py-2 text-right text-gray-400">-</td>
                               <td className="px-2 py-2 text-right text-gray-600 whitespace-nowrap">
-                                {agent.previousMonth.premium === 0 ? '-' : (performanceType === 'MMP' ? Math.round(agent.previousMonth.premium * 10 / 12) : agent.previousMonth.premium * 10)}
+                                {agent.previousMonth.premium === 0 ? '-' : agent.previousMonth.premium}
                               </td>
                             </tr>
                           )) : (
                             <tr>
-                              <td colSpan={6} className="px-4 py-6 text-center text-gray-500 text-sm">미가동 설계사가 없습니다</td>
+                              <td colSpan={5} className="px-4 py-6 text-center text-gray-500 text-sm">미가동 설계사가 없습니다</td>
                             </tr>
                           )}
                         </tbody>
@@ -3784,7 +2970,6 @@ const Branch360Dashboard = () => {
               <div className="mt-4 pt-3 border-t border-gray-200">
                 <button
                   onClick={() => {
-                    setModalPerformanceType(performanceType);
                     setShowInactiveAgentsModal(true);
                   }}
                   className="w-full text-center text-xs text-red-600 hover:text-red-800 font-medium py-2 transition-colors"
@@ -4300,8 +3485,8 @@ const Branch360Dashboard = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowAllAgentsModal(false)}>
           <div className="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">재적 설계사</h3>
-              <button
+              <h3 className="text-lg font-semibold text-gray-900">위촉 설계사</h3>
+              <button 
                 onClick={() => setShowAllAgentsModal(false)}
                 className="text-gray-500 hover:text-gray-700 text-xl"
               >
@@ -4309,39 +3494,10 @@ const Branch360Dashboard = () => {
               </button>
             </div>
 
-            {/* APE/MMP 토글 */}
-            <div className="mb-2 flex items-center gap-4">
-              <span className="text-sm text-gray-700">실적 기준:</span>
-              <div className="flex items-center gap-4">
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="radio"
-                    name="modalPerformanceTypeAll"
-                    value="APE"
-                    checked={modalPerformanceType === 'APE'}
-                    onChange={(e) => setModalPerformanceType(e.target.value as 'APE' | 'MMP')}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
-                  />
-                  <span className="ml-2 text-sm text-gray-700">APE</span>
-                </label>
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="radio"
-                    name="modalPerformanceTypeAll"
-                    value="MMP"
-                    checked={modalPerformanceType === 'MMP'}
-                    onChange={(e) => setModalPerformanceType(e.target.value as 'APE' | 'MMP')}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
-                  />
-                  <span className="ml-2 text-sm text-gray-700">MMP</span>
-                </label>
-              </div>
-            </div>
-
             <div className="flex-1 overflow-y-auto">
               {/* 단위 표시 */}
               <div className="flex justify-end mb-2">
-                <span className="text-xs text-gray-500">[단위: 원]</span>
+                <span className="text-xs text-gray-500">[단위: 천원]</span>
               </div>
 
               {/* 테이블 헤더 */}
@@ -4410,7 +3566,7 @@ const Branch360Dashboard = () => {
                     }}
                     className="text-left hover:text-blue-600 transition-colors"
                   >
-                    위촉월차 {agentSortBy === 'commissionMonth' && (agentSortOrder === 'desc' ? '↓' : '↑')}
+                    위촉차월 {agentSortBy === 'commissionMonth' && (agentSortOrder === 'desc' ? '↓' : '↑')}
                   </button>
                   <button
                     onClick={() => {
@@ -4423,7 +3579,7 @@ const Branch360Dashboard = () => {
                     }}
                     className="text-left hover:text-blue-600 transition-colors"
                   >
-                    당월{modalPerformanceType} {agentSortBy === 'currentActive' && (agentSortOrder === 'desc' ? '↓' : '↑')}
+                    당월MMP {agentSortBy === 'currentActive' && (agentSortOrder === 'desc' ? '↓' : '↑')}
                   </button>
                   <button
                     onClick={() => {
@@ -4436,7 +3592,7 @@ const Branch360Dashboard = () => {
                     }}
                     className="text-left hover:text-blue-600 transition-colors"
                   >
-                    전월{modalPerformanceType} {agentSortBy === 'previousActive' && (agentSortOrder === 'desc' ? '↓' : '↑')}
+                    전월MMP {agentSortBy === 'previousActive' && (agentSortOrder === 'desc' ? '↓' : '↑')}
                   </button>
                 </div>
               </div>
@@ -4466,20 +3622,12 @@ const Branch360Dashboard = () => {
                     </div>
                     <div className="flex items-center justify-center">
                       <span className="text-xs text-gray-600">
-                        {agent.isActive && agent.currentMonth.premium > 0
-                          ? (modalPerformanceType === 'MMP'
-                            ? (agent.currentMonth.premium * 10000).toLocaleString()
-                            : (agent.currentMonth.premium * 10000 * 12).toLocaleString())
-                          : '-'}
+                        {agent.isActive && agent.currentMonth.premium > 0 ? agent.currentMonth.premium : '-'}
                       </span>
                     </div>
                     <div className="flex items-center justify-center">
                       <span className="text-xs text-gray-600">
-                        {agent.previousMonth.premium > 0
-                          ? (modalPerformanceType === 'MMP'
-                            ? (agent.previousMonth.premium * 10000).toLocaleString()
-                            : (agent.previousMonth.premium * 10000 * 12).toLocaleString())
-                          : '-'}
+                        {agent.previousMonth.premium > 0 ? agent.previousMonth.premium : '-'}
                       </span>
                     </div>
                     </div>
@@ -4501,54 +3649,22 @@ const Branch360Dashboard = () => {
           <div className="bg-white rounded-lg p-6 max-w-full w-full mx-4 max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">가동 설계사</h3>
-              <button
-                onClick={() => setShowActiveAgentsModal(false)}
-                className="text-gray-500 hover:text-gray-700 text-xl"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* APE/MMP 토글 */}
-            <div className="mb-2 flex items-center gap-4">
-              <span className="text-sm text-gray-700">실적 기준:</span>
               <div className="flex items-center gap-4">
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="radio"
-                    name="modalPerformanceType"
-                    value="APE"
-                    checked={modalPerformanceType === 'APE'}
-                    onChange={(e) => setModalPerformanceType(e.target.value as 'APE' | 'MMP')}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
-                  />
-                  <span className="ml-2 text-sm text-gray-700">APE</span>
-                </label>
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="radio"
-                    name="modalPerformanceType"
-                    value="MMP"
-                    checked={modalPerformanceType === 'MMP'}
-                    onChange={(e) => setModalPerformanceType(e.target.value as 'APE' | 'MMP')}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
-                  />
-                  <span className="ml-2 text-sm text-gray-700">MMP</span>
-                </label>
+                <span className="text-xs text-gray-500">[단위: 천원]</span>
+                <button
+                  onClick={() => setShowActiveAgentsModal(false)}
+                  className="text-gray-500 hover:text-gray-700 text-xl"
+                >
+                  ✕
+                </button>
               </div>
             </div>
 
             <div className="flex-1 overflow-auto">
-              <div className="mb-2 text-right">
-                <span className="text-xs text-gray-500">[단위: 원, 건]</span>
-              </div>
               <table className="w-full text-xs border-collapse">
                 <thead className="bg-gray-50 sticky top-0">
                   {/* First row: Group headers */}
                   <tr>
-                    <th rowSpan={2} className="px-2 py-3 text-center font-semibold text-gray-700 border-b whitespace-nowrap min-w-[50px]">
-                      번호
-                    </th>
                     <th rowSpan={2} className="px-2 py-3 text-left font-semibold text-gray-700 border-b whitespace-nowrap min-w-[100px]">
                       <button
                         onClick={() => {
@@ -4594,7 +3710,7 @@ const Branch360Dashboard = () => {
                         보험경력 {activeSortBy === 'tenure' && (activeSortOrder === 'desc' ? '↓' : '↑')}
                       </button>
                     </th>
-                    <th rowSpan={2} className="px-2 py-3 text-center font-semibold text-gray-700 border-b whitespace-nowrap min-w-[60px]">
+                    <th rowSpan={2} className="px-2 py-3 text-center font-semibold text-gray-700 border-b border-r-2 border-gray-300 whitespace-nowrap min-w-[60px]">
                       <button
                         onClick={() => {
                           if (activeSortBy === 'commissionMonth') {
@@ -4606,26 +3722,11 @@ const Branch360Dashboard = () => {
                         }}
                         className="text-center hover:text-blue-600 transition-colors w-full"
                       >
-                        위촉월차 {activeSortBy === 'commissionMonth' && (activeSortOrder === 'desc' ? '↓' : '↑')}
-                      </button>
-                    </th>
-                    <th rowSpan={2} className="px-2 py-3 text-center font-semibold text-gray-700 border-b border-r-2 border-gray-300 whitespace-nowrap min-w-[100px]">
-                      <button
-                        onClick={() => {
-                          if (activeSortBy === '가입설계건수') {
-                            setActiveSortOrder(activeSortOrder === 'desc' ? 'asc' : 'desc');
-                          } else {
-                            setActiveSortBy('가입설계건수');
-                            setActiveSortOrder('desc');
-                          }
-                        }}
-                        className="text-center hover:text-blue-600 transition-colors w-full"
-                      >
-                        당월 설계건수 {activeSortBy === '가입설계건수' && (activeSortOrder === 'desc' ? '↓' : '↑')}
+                        위촉차월 {activeSortBy === 'commissionMonth' && (activeSortOrder === 'desc' ? '↓' : '↑')}
                       </button>
                     </th>
                     <th colSpan={6} className="px-2 py-2 text-center font-bold text-gray-800 border-b border-l-2 border-gray-300 bg-gray-100">
-                      {modalPerformanceType}
+                      MMP
                     </th>
                     <th colSpan={6} className="px-2 py-2 text-center font-bold text-gray-800 border-b border-l-2 border-gray-300 bg-gray-100">
                       청약건수
@@ -4824,39 +3925,20 @@ const Branch360Dashboard = () => {
                     const generateMonthlyData = (agent) => {
                       const baseValue = agent.currentMonth.premium;
                       const baseContracts = agent.currentMonth.contracts;
-                      const continuousMonths = agent.continuousMonths || 0;
 
-                      // continuousMonths에 따라 M1~M5 설정
-                      let m1Mmp = 0, m2Mmp = 0, m3Mmp = 0, m4Mmp = 0, m5Mmp = 0;
-                      let m1Contracts = 0, m2Contracts = 0, m3Contracts = 0, m4Contracts = 0, m5Contracts = 0;
+                      // 각 월의 청약건수 먼저 계산
+                      const m1Contracts = Math.max(0, baseContracts + Math.floor(Math.random() * 7) - 3);
+                      const m2Contracts = Math.max(0, baseContracts + Math.floor(Math.random() * 5) - 2);
+                      const m3Contracts = Math.max(0, baseContracts + Math.floor(Math.random() * 7) - 3);
+                      const m4Contracts = Math.max(0, baseContracts + Math.floor(Math.random() * 5) - 2);
+                      const m5Contracts = Math.max(0, baseContracts + Math.floor(Math.random() * 7) - 3);
 
-                      if (continuousMonths >= 6) {
-                        // 6개월 연속: M1~M5 모두 실적 있음
-                        m1Contracts = Math.max(1, baseContracts + Math.floor(Math.random() * 7) - 3);
-                        m2Contracts = Math.max(1, baseContracts + Math.floor(Math.random() * 5) - 2);
-                        m3Contracts = Math.max(1, baseContracts + Math.floor(Math.random() * 7) - 3);
-                        m4Contracts = Math.max(1, baseContracts + Math.floor(Math.random() * 5) - 2);
-                        m5Contracts = Math.max(1, baseContracts + Math.floor(Math.random() * 7) - 3);
-                        m1Mmp = Math.max(30, Math.round(baseValue * (0.85 + Math.random() * 0.3)));
-                        m2Mmp = Math.max(30, Math.round(baseValue * (0.8 + Math.random() * 0.4)));
-                        m3Mmp = Math.max(30, Math.round(baseValue * (0.85 + Math.random() * 0.3)));
-                        m4Mmp = Math.max(30, Math.round(baseValue * (0.9 + Math.random() * 0.2)));
-                        m5Mmp = Math.max(30, Math.round(baseValue * (0.8 + Math.random() * 0.4)));
-                      } else if (continuousMonths >= 3) {
-                        // 3개월 연속: M1~M2만 실적 있음
-                        m1Contracts = Math.max(1, baseContracts + Math.floor(Math.random() * 7) - 3);
-                        m2Contracts = Math.max(1, baseContracts + Math.floor(Math.random() * 5) - 2);
-                        m1Mmp = Math.max(30, Math.round(baseValue * (0.85 + Math.random() * 0.3)));
-                        m2Mmp = Math.max(30, Math.round(baseValue * (0.8 + Math.random() * 0.4)));
-                      } else if (continuousMonths >= 2) {
-                        // 2개월 연속: M1만 실적 있음
-                        m1Contracts = Math.max(1, baseContracts + Math.floor(Math.random() * 7) - 3);
-                        m1Mmp = Math.max(30, Math.round(baseValue * (0.85 + Math.random() * 0.3)));
-                      }
-                      // continuousMonths === 1 또는 0: 신규가동, M1~M5 모두 0
-
-                      // 가입설계건수: 당월 청약건수(M0건)의 약 5배 (4~6배 범위로 랜덤)
-                      const designProposalCount = Math.round(baseContracts * (4 + Math.random() * 2));
+                      // 청약이 있으면 MMP도 있어야 함, 청약이 없으면 MMP도 0
+                      const m1Mmp = m1Contracts > 0 ? Math.max(30, Math.round(baseValue * (0.85 + Math.random() * 0.3))) : 0;
+                      const m2Mmp = m2Contracts > 0 ? Math.max(30, Math.round(baseValue * (0.8 + Math.random() * 0.4))) : 0;
+                      const m3Mmp = m3Contracts > 0 ? Math.max(30, Math.round(baseValue * (0.85 + Math.random() * 0.3))) : 0;
+                      const m4Mmp = m4Contracts > 0 ? Math.max(30, Math.round(baseValue * (0.9 + Math.random() * 0.2))) : 0;
+                      const m5Mmp = m5Contracts > 0 ? Math.max(30, Math.round(baseValue * (0.8 + Math.random() * 0.4))) : 0;
 
                       return {
                         M0: baseValue,
@@ -4871,23 +3953,11 @@ const Branch360Dashboard = () => {
                         'M3건': m3Contracts,
                         'M4건': m4Contracts,
                         'M5건': m5Contracts,
-                        '가입설계건수': designProposalCount,
                       };
                     };
 
-                    // 0을 '-'로 표시하는 함수 (원 단위로 변환)
-                    const formatValue = (value) => {
-                      if (value === 0) return '-';
-                      // value는 MMP 기준 만원 단위
-                      if (modalPerformanceType === 'MMP') {
-                        return Math.round(value * 10000).toLocaleString(); // MMP 만원 → 원
-                      } else {
-                        return Math.round(value * 10000 * 12).toLocaleString(); // MMP 만원 → APE 원
-                      }
-                    };
-
-                    // 청약건수용 포맷 함수
-                    const formatCount = (value) => value === 0 ? '-' : value;
+                    // 0을 '-'로 표시하는 함수
+                    const formatValue = (value) => value === 0 ? '-' : value;
 
                     // 정렬 함수
                     const getSortedActiveAgents = () => {
@@ -4912,10 +3982,6 @@ const Branch360Dashboard = () => {
                           case 'commissionMonth':
                             aValue = parseInt(a.commissionMonth);
                             bValue = parseInt(b.commissionMonth);
-                            break;
-                          case '가입설계건수':
-                            aValue = aMonthly['가입설계건수'];
-                            bValue = bMonthly['가입설계건수'];
                             break;
                           case 'M0':
                             aValue = aMonthly.M0;
@@ -4985,24 +4051,22 @@ const Branch360Dashboard = () => {
                           key={idx}
                           className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
                         >
-                          <td className="px-2 py-3 text-center text-gray-600">{idx + 1}</td>
                           <td className="px-2 py-3 font-mono text-gray-600">{agent.agentCode}</td>
                           <td className="px-2 py-3 font-medium text-gray-900">{agent.name}</td>
-                          <td className="px-2 py-3 text-gray-600">{formatInsuranceCareer(agent.insuranceCareer)}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{agent.commissionMonth}</td>
-                          <td className="px-2 py-3 text-center text-gray-900 font-medium border-r-2 border-gray-200">{monthlyData['가입설계건수']}</td>
+                          <td className="px-2 py-3 text-gray-600">{agent.insuranceCareer}</td>
+                          <td className="px-2 py-3 text-center text-gray-600 border-r-2 border-gray-200">{agent.commissionMonth}</td>
                           <td className="px-2 py-3 text-center text-gray-900 font-medium">{formatValue(monthlyData.M0)}</td>
                           <td className="px-2 py-3 text-center text-gray-600">{formatValue(monthlyData.M1)}</td>
                           <td className="px-2 py-3 text-center text-gray-600">{formatValue(monthlyData.M2)}</td>
                           <td className="px-2 py-3 text-center text-gray-600">{formatValue(monthlyData.M3)}</td>
                           <td className="px-2 py-3 text-center text-gray-600">{formatValue(monthlyData.M4)}</td>
                           <td className="px-2 py-3 text-center text-gray-600 border-r-2 border-gray-200">{formatValue(monthlyData.M5)}</td>
-                          <td className="px-2 py-3 text-center text-gray-900 font-medium">{formatCount(monthlyData['M0건'])}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{formatCount(monthlyData['M1건'])}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{formatCount(monthlyData['M2건'])}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{formatCount(monthlyData['M3건'])}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{formatCount(monthlyData['M4건'])}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{formatCount(monthlyData['M5건'])}</td>
+                          <td className="px-2 py-3 text-center text-gray-900 font-medium">{formatValue(monthlyData['M0건'])}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatValue(monthlyData['M1건'])}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatValue(monthlyData['M2건'])}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatValue(monthlyData['M3건'])}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatValue(monthlyData['M4건'])}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatValue(monthlyData['M5건'])}</td>
                         </tr>
                       );
                     });
@@ -5024,54 +4088,22 @@ const Branch360Dashboard = () => {
           <div className="bg-white rounded-lg p-6 max-w-full w-full mx-4 max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">미가동 설계사</h3>
-              <button
-                onClick={() => setShowInactiveAgentsModal(false)}
-                className="text-gray-500 hover:text-gray-700 text-xl"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* APE/MMP 토글 */}
-            <div className="mb-2 flex items-center gap-4">
-              <span className="text-sm text-gray-700">실적 기준:</span>
               <div className="flex items-center gap-4">
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="radio"
-                    name="modalPerformanceTypeInactive"
-                    value="APE"
-                    checked={modalPerformanceType === 'APE'}
-                    onChange={(e) => setModalPerformanceType(e.target.value as 'APE' | 'MMP')}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
-                  />
-                  <span className="ml-2 text-sm text-gray-700">APE</span>
-                </label>
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="radio"
-                    name="modalPerformanceTypeInactive"
-                    value="MMP"
-                    checked={modalPerformanceType === 'MMP'}
-                    onChange={(e) => setModalPerformanceType(e.target.value as 'APE' | 'MMP')}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
-                  />
-                  <span className="ml-2 text-sm text-gray-700">MMP</span>
-                </label>
+                <span className="text-xs text-gray-500">[단위: 천원]</span>
+                <button
+                  onClick={() => setShowInactiveAgentsModal(false)}
+                  className="text-gray-500 hover:text-gray-700 text-xl"
+                >
+                  ✕
+                </button>
               </div>
             </div>
 
             <div className="flex-1 overflow-auto">
-              <div className="mb-2 text-right">
-                <span className="text-xs text-gray-500">[단위: 원, 건]</span>
-              </div>
               <table className="w-full text-xs border-collapse">
                 <thead className="bg-gray-50 sticky top-0">
                   {/* First row: Group headers */}
                   <tr>
-                    <th rowSpan={2} className="px-2 py-3 text-center font-semibold text-gray-700 border-b whitespace-nowrap min-w-[50px]">
-                      번호
-                    </th>
                     <th rowSpan={2} className="px-2 py-3 text-left font-semibold text-gray-700 border-b whitespace-nowrap min-w-[100px]">
                       <button
                         onClick={() => {
@@ -5117,7 +4149,7 @@ const Branch360Dashboard = () => {
                         보험경력 {inactiveSortBy === 'tenure' && (inactiveSortOrder === 'desc' ? '↓' : '↑')}
                       </button>
                     </th>
-                    <th rowSpan={2} className="px-2 py-3 text-center font-semibold text-gray-700 border-b whitespace-nowrap min-w-[60px]">
+                    <th rowSpan={2} className="px-2 py-3 text-center font-semibold text-gray-700 border-b border-r-2 border-gray-300 whitespace-nowrap min-w-[60px]">
                       <button
                         onClick={() => {
                           if (inactiveSortBy === 'commissionMonth') {
@@ -5129,26 +4161,11 @@ const Branch360Dashboard = () => {
                         }}
                         className="text-center hover:text-blue-600 transition-colors w-full"
                       >
-                        위촉월차 {inactiveSortBy === 'commissionMonth' && (inactiveSortOrder === 'desc' ? '↓' : '↑')}
-                      </button>
-                    </th>
-                    <th rowSpan={2} className="px-2 py-3 text-center font-semibold text-gray-700 border-b border-r-2 border-gray-300 whitespace-nowrap min-w-[100px]">
-                      <button
-                        onClick={() => {
-                          if (inactiveSortBy === '가입설계건수') {
-                            setInactiveSortOrder(inactiveSortOrder === 'desc' ? 'asc' : 'desc');
-                          } else {
-                            setInactiveSortBy('가입설계건수');
-                            setInactiveSortOrder('desc');
-                          }
-                        }}
-                        className="text-center hover:text-blue-600 transition-colors w-full"
-                      >
-                        당월 설계건수 {inactiveSortBy === '가입설계건수' && (inactiveSortOrder === 'desc' ? '↓' : '↑')}
+                        위촉차월 {inactiveSortBy === 'commissionMonth' && (inactiveSortOrder === 'desc' ? '↓' : '↑')}
                       </button>
                     </th>
                     <th colSpan={6} className="px-2 py-2 text-center font-bold text-gray-800 border-b border-l-2 border-gray-300 bg-gray-100">
-                      {modalPerformanceType}
+                      MMP
                     </th>
                     <th colSpan={6} className="px-2 py-2 text-center font-bold text-gray-800 border-b border-l-2 border-gray-300 bg-gray-100">
                       청약건수
@@ -5341,7 +4358,7 @@ const Branch360Dashboard = () => {
                 <tbody>
                   {(() => {
                     // 미가동 설계사 필터링
-                    const inactiveAgents = allAgentsData.filter(agent => !agent.isActive);
+                    const inactiveAgents = allAgentsData.filter(agent => agent.currentMonth.premium === 0);
 
                     // M0-M5 데이터 생성 함수 (미가동 설계사용 - 전월 또는 과거 데이터 기반)
                     const generateInactiveMonthlyData = (agent) => {
@@ -5364,9 +4381,6 @@ const Branch360Dashboard = () => {
                       const m4Mmp = m4Contracts > 0 ? Math.max(20, Math.round(baseValue * (0.1 + Math.random() * 0.7))) : 0;
                       const m5Mmp = m5Contracts > 0 ? Math.max(20, Math.round(baseValue * (0.3 + Math.random() * 0.4))) : 0;
 
-                      // 가입설계건수: M1에 실적이 있으면 1~9 사이, 없으면 0
-                      const designProposalCount = m1Mmp > 0 ? Math.floor(Math.random() * 9) + 1 : 0;
-
                       return {
                         M0: 0, // 당월은 미가동이므로 0
                         M1: m1Mmp,
@@ -5380,34 +4394,18 @@ const Branch360Dashboard = () => {
                         'M3건': m3Contracts,
                         'M4건': m4Contracts,
                         'M5건': m5Contracts,
-                        '가입설계건수': designProposalCount,
                       };
                     };
 
-                    // 0을 '-'로 표시하는 함수 (원 단위로 변환)
-                    const formatInactiveValue = (value) => {
-                      if (value === 0) return '-';
-                      // value는 MMP 기준 만원 단위
-                      if (modalPerformanceType === 'MMP') {
-                        return Math.round(value * 10000).toLocaleString(); // MMP 만원 → 원
-                      } else {
-                        return Math.round(value * 10000 * 12).toLocaleString(); // MMP 만원 → APE 원
-                      }
-                    };
-
-                    // 청약건수용 포맷 함수
-                    const formatInactiveCount = (value) => value === 0 ? '-' : value;
-
-                    // 각 agent의 monthly 데이터를 미리 생성 (캐싱)
-                    const agentsWithMonthlyData = inactiveAgents.map(agent => ({
-                      ...agent,
-                      monthlyData: generateInactiveMonthlyData(agent)
-                    }));
+                    // 0을 '-'로 표시하는 함수
+                    const formatInactiveValue = (value) => value === 0 ? '-' : value;
 
                     // 정렬 함수
                     const getSortedInactiveAgents = () => {
-                      const sorted = [...agentsWithMonthlyData].sort((a, b) => {
+                      const sorted = [...inactiveAgents].sort((a, b) => {
                         let aValue, bValue;
+                        const aMonthly = generateInactiveMonthlyData(a);
+                        const bMonthly = generateInactiveMonthlyData(b);
 
                         switch (inactiveSortBy) {
                           case 'code':
@@ -5426,58 +4424,53 @@ const Branch360Dashboard = () => {
                             aValue = parseInt(a.commissionMonth);
                             bValue = parseInt(b.commissionMonth);
                             break;
-                          case '가입설계건수':
-                            // 미가동 설계사의 가입설계건수: M1 > 0이면 10 미만, 아니면 0
-                            aValue = a.monthlyData['가입설계건수'];
-                            bValue = b.monthlyData['가입설계건수'];
-                            break;
                           case 'M0':
-                            aValue = a.monthlyData.M0;
-                            bValue = b.monthlyData.M0;
+                            aValue = aMonthly.M0;
+                            bValue = bMonthly.M0;
                             break;
                           case 'M1':
-                            aValue = a.monthlyData.M1;
-                            bValue = b.monthlyData.M1;
+                            aValue = aMonthly.M1;
+                            bValue = bMonthly.M1;
                             break;
                           case 'M2':
-                            aValue = a.monthlyData.M2;
-                            bValue = b.monthlyData.M2;
+                            aValue = aMonthly.M2;
+                            bValue = bMonthly.M2;
                             break;
                           case 'M3':
-                            aValue = a.monthlyData.M3;
-                            bValue = b.monthlyData.M3;
+                            aValue = aMonthly.M3;
+                            bValue = bMonthly.M3;
                             break;
                           case 'M4':
-                            aValue = a.monthlyData.M4;
-                            bValue = b.monthlyData.M4;
+                            aValue = aMonthly.M4;
+                            bValue = bMonthly.M4;
                             break;
                           case 'M5':
-                            aValue = a.monthlyData.M5;
-                            bValue = b.monthlyData.M5;
+                            aValue = aMonthly.M5;
+                            bValue = bMonthly.M5;
                             break;
                           case 'M0건':
-                            aValue = a.monthlyData['M0건'];
-                            bValue = b.monthlyData['M0건'];
+                            aValue = aMonthly['M0건'];
+                            bValue = bMonthly['M0건'];
                             break;
                           case 'M1건':
-                            aValue = a.monthlyData['M1건'];
-                            bValue = b.monthlyData['M1건'];
+                            aValue = aMonthly['M1건'];
+                            bValue = bMonthly['M1건'];
                             break;
                           case 'M2건':
-                            aValue = a.monthlyData['M2건'];
-                            bValue = b.monthlyData['M2건'];
+                            aValue = aMonthly['M2건'];
+                            bValue = bMonthly['M2건'];
                             break;
                           case 'M3건':
-                            aValue = a.monthlyData['M3건'];
-                            bValue = b.monthlyData['M3건'];
+                            aValue = aMonthly['M3건'];
+                            bValue = bMonthly['M3건'];
                             break;
                           case 'M4건':
-                            aValue = a.monthlyData['M4건'];
-                            bValue = b.monthlyData['M4건'];
+                            aValue = aMonthly['M4건'];
+                            bValue = bMonthly['M4건'];
                             break;
                           case 'M5건':
-                            aValue = a.monthlyData['M5건'];
-                            bValue = b.monthlyData['M5건'];
+                            aValue = aMonthly['M5건'];
+                            bValue = bMonthly['M5건'];
                             break;
                           default:
                             aValue = parseFloat(a.insuranceCareer);
@@ -5493,32 +4486,28 @@ const Branch360Dashboard = () => {
                     };
 
                     return getSortedInactiveAgents().map((agent, idx) => {
-                      const monthlyData = agent.monthlyData;
+                      const monthlyData = generateInactiveMonthlyData(agent);
                       return (
                         <tr
                           key={idx}
                           className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
                         >
-                          <td className="px-2 py-3 text-center text-gray-600">{idx + 1}</td>
                           <td className="px-2 py-3 font-mono text-gray-600">{agent.agentCode}</td>
                           <td className="px-2 py-3 font-medium text-gray-900">{agent.name}</td>
-                          <td className="px-2 py-3 text-gray-600">{formatInsuranceCareer(agent.insuranceCareer)}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{agent.commissionMonth}</td>
-                          <td className="px-2 py-3 text-center text-gray-900 font-medium border-r-2 border-gray-200">
-                            {monthlyData['가입설계건수']}
-                          </td>
+                          <td className="px-2 py-3 text-gray-600">{agent.insuranceCareer}</td>
+                          <td className="px-2 py-3 text-center text-gray-600 border-r-2 border-gray-200">{agent.commissionMonth}</td>
                           <td className="px-2 py-3 text-center text-red-600 font-medium">{formatInactiveValue(monthlyData.M0)}</td>
                           <td className="px-2 py-3 text-center text-gray-600">{formatInactiveValue(monthlyData.M1)}</td>
                           <td className="px-2 py-3 text-center text-gray-600">{formatInactiveValue(monthlyData.M2)}</td>
                           <td className="px-2 py-3 text-center text-gray-600">{formatInactiveValue(monthlyData.M3)}</td>
                           <td className="px-2 py-3 text-center text-gray-600">{formatInactiveValue(monthlyData.M4)}</td>
                           <td className="px-2 py-3 text-center text-gray-600 border-r-2 border-gray-200">{formatInactiveValue(monthlyData.M5)}</td>
-                          <td className="px-2 py-3 text-center text-red-600 font-medium">{formatInactiveCount(monthlyData['M0건'])}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{formatInactiveCount(monthlyData['M1건'])}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{formatInactiveCount(monthlyData['M2건'])}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{formatInactiveCount(monthlyData['M3건'])}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{formatInactiveCount(monthlyData['M4건'])}</td>
-                          <td className="px-2 py-3 text-center text-gray-600">{formatInactiveCount(monthlyData['M5건'])}</td>
+                          <td className="px-2 py-3 text-center text-red-600 font-medium">{formatInactiveValue(monthlyData['M0건'])}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatInactiveValue(monthlyData['M1건'])}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatInactiveValue(monthlyData['M2건'])}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatInactiveValue(monthlyData['M3건'])}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatInactiveValue(monthlyData['M4건'])}</td>
+                          <td className="px-2 py-3 text-center text-gray-600">{formatInactiveValue(monthlyData['M5건'])}</td>
                         </tr>
                       );
                     });
@@ -5528,7 +4517,7 @@ const Branch360Dashboard = () => {
             </div>
 
             <div className="mt-4 pt-4 border-t text-center">
-              <span className="text-sm text-gray-500">총 {allAgentsData.filter(agent => !agent.isActive).length}명 미가동 설계사</span>
+              <span className="text-sm text-gray-500">총 {allAgentsData.filter(agent => agent.currentMonth.premium === 0).length}명 미가동 설계사</span>
             </div>
           </div>
         </div>
